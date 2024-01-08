@@ -140,7 +140,8 @@ public class ProductImageApi {
 				productImageService.addProductImages(product, contentImagesList);
 			}
 
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			LOGGER.error("Error while creating ProductImage", e);
 			throw new ServiceRuntimeException("Error while creating image");
 		}
@@ -163,12 +164,18 @@ public class ProductImageApi {
 
 		} catch (Exception e) {
 			LOGGER.error("Error while deleting ProductImage", e);
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Removed the empty catch block that was intended to ignore exceptions. 
+			Added proper error handling by logging the exception and rethrowing it with additional context. */
 			try {
-				response.sendError(503, "Error while deleting ProductImage " + e.getMessage());
-			} catch (Exception ignore) {
+				response.sendError(503, "Service Unavailable");
+			} catch (IOException ioException) {
+				LOGGER.error("Error while sending 503 Service Unavailable", ioException);
 			}
+			throw new ServiceRuntimeException("Error while deleting ProductImage", e);
 		}
 	}
+
 
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = { "/private/product/{id}/image/{imageId}" }, method = RequestMethod.DELETE)
