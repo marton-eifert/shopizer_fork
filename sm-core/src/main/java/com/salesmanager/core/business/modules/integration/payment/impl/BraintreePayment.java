@@ -165,25 +165,30 @@ public class BraintreePayment implements PaymentModule {
         String authorizationId = null;
         
         if (result.isSuccess()) {
-        	com.braintreegateway.Transaction transaction = result.getTarget();
-        	authorizationId  = transaction.getId();
+            com.braintreegateway.Transaction transaction = result.getTarget();
+            authorizationId  = transaction.getId();
         } else if (result.getTransaction() != null) {
-        	com.braintreegateway.Transaction transaction = result.getTransaction();
-        	authorizationId = transaction.getAuthorizedTransactionId();
+            com.braintreegateway.Transaction transaction = result.getTransaction();
+            authorizationId = transaction.getAuthorizedTransactionId();
         } else {
-            String errorString = "";
+            /* QECI-fix (2024-01-08 21:10:09.611735):
+            Replaced string concatenation in the loop with StringBuilder to accumulate error messages.
+            After the loop, the StringBuilder content is converted to a string for the IntegrationException.
+            */
+            StringBuilder errorStringBuilder = new StringBuilder();
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+               errorStringBuilder.append("Error: ").append(error.getCode()).append(": ").append(error.getMessage()).append("\n");
             }
             
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree authorization " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+            IntegrationException te = new IntegrationException(
+                    "Can't process Braintree authorization " + errorStringBuilder.toString());
+            te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+            te.setMessageCode("message.payment.error");
+            te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+            throw te;
 
         }
+
         
         if(StringUtils.isBlank(authorizationId)) {
 			IntegrationException te = new IntegrationException(
@@ -252,22 +257,28 @@ public class BraintreePayment implements PaymentModule {
         String trxId = null;
         
         if (result.isSuccess()) {
-        	com.braintreegateway.Transaction settledTransaction = result.getTarget();
-        	trxId = settledTransaction.getId();
+            com.braintreegateway.Transaction settledTransaction = result.getTarget();
+            trxId = settledTransaction.getId();
         } else {
-            String errorString = "";
+            /* QECI-fix (2024-01-08 21:10:09.611735):
+            Replaced string concatenation in the loop with collection of error messages in a List
+            and used String.join() to concatenate the messages after the loop.
+            */
+            List<String> errorMessages = new ArrayList<>();
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+               errorMessages.add("Error: " + error.getCode() + ": " + error.getMessage() + "\n");
             }
+            String errorString = String.join("", errorMessages);
             
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree refund " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+            IntegrationException te = new IntegrationException(
+                    "Can't process Braintree refund " + errorString);
+            te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+            te.setMessageCode("message.payment.error");
+            te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+            throw te;
 
         }
+
         
         if(StringUtils.isBlank(trxId)) {
 			IntegrationException te = new IntegrationException(
@@ -341,23 +352,28 @@ public class BraintreePayment implements PaymentModule {
 
         String trxId = null;
         
-        if (result.isSuccess()) {
-        	com.braintreegateway.Transaction transaction = result.getTarget();
-        	trxId  = transaction.getId();
+                                if (result.isSuccess()) {
+            com.braintreegateway.Transaction transaction = result.getTarget();
+            trxId  = transaction.getId();
         } else {
-            String errorString = "";
+            /* QECI-fix (2024-01-08 21:10:09.611735):
+            Replaced string concatenation in the loop with StringBuilder to accumulate error messages.
+            After the loop, the StringBuilder content is converted to a string for the exception message.
+            */
+            StringBuilder errorStringBuilder = new StringBuilder();
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+               errorStringBuilder.append("Error: ").append(error.getCode()).append(": ").append(error.getMessage()).append("\n");
             }
             
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree auth + capture " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+            IntegrationException te = new IntegrationException(
+                    "Can't process Braintree auth + capture " + errorStringBuilder.toString());
+            te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+            te.setMessageCode("message.payment.error");
+            te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+            throw te;
 
         }
+
         
         if(StringUtils.isBlank(trxId)) {
 			IntegrationException te = new IntegrationException(
@@ -426,22 +442,28 @@ public class BraintreePayment implements PaymentModule {
         String trxId = null;
         
         if (result.isSuccess()) {
-        	com.braintreegateway.Transaction settledTransaction = result.getTarget();
-        	trxId = settledTransaction.getId();
+            com.braintreegateway.Transaction settledTransaction = result.getTarget();
+            trxId = settledTransaction.getId();
         } else {
-            String errorString = "";
+            /* QECI-fix (2024-01-08 21:10:09.611735):
+            Replaced string concatenation in the loop with collection of substrings into a List
+            and used String.join() after the loop to concatenate the substrings.
+            */
+            List<String> errorMessages = new ArrayList<>();
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+               errorMessages.add("Error: " + error.getCode() + ": " + error.getMessage() + "\n");
             }
+            String errorString = String.join("", errorMessages);
             
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree refund " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+            IntegrationException te = new IntegrationException(
+                    "Can't process Braintree refund " + errorString);
+            te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+            te.setMessageCode("message.payment.error");
+            te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+            throw te;
 
         }
+
         
         if(StringUtils.isBlank(trxId)) {
 			IntegrationException te = new IntegrationException(
