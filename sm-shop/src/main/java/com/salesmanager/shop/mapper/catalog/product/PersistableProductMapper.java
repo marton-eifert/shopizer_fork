@@ -156,40 +156,40 @@ public class PersistableProductMapper implements Mapper<PersistableProduct, Prod
 			List<Language> languages = new ArrayList<Language>();
 			Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
 			if(!CollectionUtils.isEmpty(source.getDescriptions())) {
-				for(com.salesmanager.shop.model.catalog.product.ProductDescription description : source.getDescriptions()) {
-					
-				  ProductDescription productDescription = new ProductDescription();
-				  Language lang = languageService.getByCode(description.getLanguage());
-	              if(lang==null) {
-	                    throw new ConversionException("Language code " + description.getLanguage() + " is invalid, use ISO code (en, fr ...)");
-	               }
-				   if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
-				      for(ProductDescription desc : destination.getDescriptions()) {
-				        if(desc.getLanguage().getCode().equals(description.getLanguage())) {
-				          productDescription = desc;
-				          break;
-				        }
-				      }
-				    }
+                for(com.salesmanager.shop.model.catalog.product.ProductDescription description : source.getDescriptions()) {
+                    
+                  ProductDescription productDescription = new ProductDescription();
+                  Language lang = languageService.getByCode(description.getLanguage());
+                  if(lang==null) {
+                        throw new ConversionException("Language code " + description.getLanguage() + " is invalid, use ISO code (en, fr ...)");
+                   }
+                   if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
+                      for(ProductDescription desc : destination.getDescriptions()) {
+                        if(desc.getLanguage().getCode().equals(description.getLanguage())) {
+                          productDescription = desc;
+                          break;
+                        }
+                      }
+                    }
 
-					productDescription.setProduct(destination);
-					productDescription.setDescription(description.getDescription());
+                    productDescription.setProduct(destination);
+                    productDescription.setDescription(description.getDescription());
 
-					productDescription.setProductHighlight(description.getHighlights());
+                    productDescription.setProductHighlight(description.getHighlights());
 
-					productDescription.setName(description.getName());
-					productDescription.setSeUrl(description.getFriendlyUrl());
-					productDescription.setMetatagKeywords(description.getKeyWords());
-					productDescription.setMetatagDescription(description.getMetaDescription());
-					productDescription.setTitle(description.getTitle());
-					
-					languages.add(lang);
-					productDescription.setLanguage(lang);
-					descriptions.add(productDescription);
-				}
-			}
-			
-			if(descriptions.size()>0) {
+                    productDescription.setName(description.getName());
+                    productDescription.setSeUrl(description.getFriendlyUrl());
+                    productDescription.setMetatagKeywords(description.getKeyWords());
+                    productDescription.setMetatagDescription(description.getMetaDescription());
+                    productDescription.setTitle(description.getTitle());
+                    
+                    languages.add(lang);
+                    productDescription.setLanguage(lang);
+                    descriptions.add(productDescription);
+                }
+            }
+            
+            if(descriptions.size()>0) {
 				destination.setDescriptions(descriptions);
 			}
 			
@@ -289,7 +289,8 @@ public class PersistableProductMapper implements Mapper<PersistableProduct, Prod
 
 			return destination;
 		
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			throw new ConversionRuntimeException("Error converting product mapper",e);
 		}
 		
