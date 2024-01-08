@@ -72,42 +72,42 @@ public class UserServicesImpl implements WebUserServices{
 		
 		try {
 
-			user = userService.getByUserName(userName);
+            user = userService.getByUserName(userName);
 
-			if(user==null) {
-				return null;
-			}
+            if(user==null) {
+                return null;
+            }
 
-			GrantedAuthority role = new SimpleGrantedAuthority(ROLE_PREFIX + Constants.PERMISSION_AUTHENTICATED);//required to login
-			authorities.add(role);
-	
-			List<Integer> groupsId = new ArrayList<Integer>();
-			List<Group> groups = user.getGroups();
-			for(Group group : groups) {
-				
-				
-				groupsId.add(group.getId());
-				
-			}
-			
-	
-	    	
-	    	List<Permission> permissions = permissionService.getPermissions(groupsId);
-	    	for(Permission permission : permissions) {
-	    		GrantedAuthority auth = new SimpleGrantedAuthority(ROLE_PREFIX + permission.getPermissionName());
-	    		authorities.add(auth);
-	    	}
-    	
-		} catch (Exception e) {
-			LOGGER.error("Exception while querrying user",e);
-			throw new SecurityDataAccessException("Exception while querrying user",e);
-		}
-		
-		
-		
-	
-		
-		User secUser = new User(userName, user.getAdminPassword(), user.isActive(), true,
+            GrantedAuthority role = new SimpleGrantedAuthority(ROLE_PREFIX + Constants.PERMISSION_AUTHENTICATED);//required to login
+            authorities.add(role);
+    
+            List<Integer> groupsId = new ArrayList<Integer>();
+            List<Group> groups = user.getGroups();
+            for(Group group : groups) {
+                
+                
+                groupsId.add(group.getId());
+                
+            }
+            
+    
+            
+            List<Permission> permissions = permissionService.getPermissions(groupsId);
+            for(Permission permission : permissions) {
+                GrantedAuthority auth = new SimpleGrantedAuthority(ROLE_PREFIX + permission.getPermissionName());
+                authorities.add(auth);
+            }
+        
+        } catch (Exception e) {
+            LOGGER.error("Exception while querrying user",e);
+            throw new SecurityDataAccessException("Exception while querrying user",e);
+        }
+        
+        
+        
+    
+        
+        User secUser = new User(userName, user.getAdminPassword(), user.isActive(), true,
 				true, true, authorities);
 		return secUser;
 	}
