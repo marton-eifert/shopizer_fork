@@ -105,7 +105,8 @@ public class LanguageUtils {
           }
         }
       }
-    } else {
+    }
+else {
 
 
       Locale localeFromContext = LocaleContextHolder.getLocale();// should be browser locale
