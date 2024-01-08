@@ -411,13 +411,20 @@ public class BeanStreamPayment implements PaymentModule {
 			
 			
 		} catch(Exception e) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Added logging to the catch block to properly handle the exception and avoid an empty catch block, 
+			which is a waste of resources and can lead to a lack of code robustness.
+			*/
+			Logger.error("Error while processing BeanStream transaction", e);
 			if(e instanceof IntegrationException) {
 				throw (IntegrationException)e;
 			}
 			
 			throw new IntegrationException("Error while processing BeanStream transaction",e);
 
-		} finally {
+		}
+
+finally {
 			if (is != null) {
 				try {
 					is.close();
@@ -639,11 +646,17 @@ public class BeanStreamPayment implements PaymentModule {
 			if (conn != null) {
 				try {
 					conn.disconnect();
-				} catch (Exception ignore) {}
+				} catch (Exception ignore) {
+					/* QECI-fix (2024-01-08 21:10:09.611735):
+					Added logging to the catch block to handle the exception instead of ignoring it.
+					This improves the robustness of the code and ensures that silent failures are avoided. */
+					ignore.printStackTrace(); // Log the ignored exception
+				}
 			}
 		}
 
 	}
+
 	
 	
 	
