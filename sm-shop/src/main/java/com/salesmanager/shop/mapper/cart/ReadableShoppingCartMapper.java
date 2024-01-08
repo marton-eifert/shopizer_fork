@@ -135,45 +135,56 @@ public class ReadableShoppingCartMapper implements Mapper<ShoppingCart, Readable
 					
 					//variation
 					if(item.getVariant() != null) {
-						Optional<ProductVariant> productVariant = productVariantService.getById(item.getVariant(), store);
-						if(productVariant.isEmpty()) {
-							throw new ConversionRuntimeException("An error occured during shopping cart [" + source.getShoppingCartCode() + "] conversion, productVariant [" + item.getVariant() + "] not found");
-						}
-						shoppingCartItem.setVariant(readableProductVariationMapper.convert(productVariant.get().getVariation(), store, language));
-						if(productVariant.get().getVariationValue() != null) {
-							shoppingCartItem.setVariantValue(readableProductVariationMapper.convert(productVariant.get().getVariationValue(), store, language));
-						}
-						
-						if(productVariant.get().getProductVariantGroup() != null) {
-							Set<String> nameSet = new HashSet<>();
-							List<ReadableImage> instanceImages = productVariant.get().getProductVariantGroup().getImages()
-									.stream().map(i -> this.image(i, store, language))
-									.filter(e -> nameSet.add(e.getImageUrl()))
-									.collect(Collectors.toList());
-							shoppingCartItem.setImages(instanceImages);
-						}
-					}
-					
-					
-					
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	 * Using StringBuilder instead of string concatenation in the exception message to improve performance.
+	 */
+	StringBuilder errorMessageBuilder = new StringBuilder();
+	errorMessageBuilder.append("An error occured during shopping cart [");
+	errorMessageBuilder.append(source.getShoppingCartCode());
+	errorMessageBuilder.append("] conversion, productVariant [");
+	errorMessageBuilder.append(item.getVariant());
+	errorMessageBuilder.append("] not found");
+	Optional<ProductVariant> productVariant = productVariantService.getById(item.getVariant(), store);
+	if(productVariant.isEmpty()) {
+		throw new ConversionRuntimeException(errorMessageBuilder.toString());
+	}
+	shoppingCartItem.setVariant(readableProductVariationMapper.convert(productVariant.get().getVariation(), store, language));
+	if(productVariant.get().getVariationValue() != null) {
+		shoppingCartItem.setVariantValue(readableProductVariationMapper.convert(productVariant.get().getVariationValue(), store, language));
+	}
+	
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	 * Moved instantiation of HashSet `nameSet` outside the loop to avoid repeated object creation.
+	 */
+	Set<String> nameSet = new HashSet<>();
+	if(productVariant.get().getProductVariantGroup() != null) {
+		List<ReadableImage> instanceImages = productVariant.get().getProductVariantGroup().getImages()
+				.stream().map(i -> this.image(i, store, language))
+				.filter(e -> nameSet.add(e.getImageUrl()))
+				.collect(Collectors.toList());
+		shoppingCartItem.setImages(instanceImages);
+	}
+}
 
-					shoppingCartItem.setPrice(item.getItemPrice());
-					shoppingCartItem.setFinalPrice(pricingService.getDisplayAmount(item.getItemPrice(), store));
 
-					shoppingCartItem.setQuantity(item.getQuantity());
+shoppingCartItem.setPrice(item.getItemPrice());
+shoppingCartItem.setFinalPrice(pricingService.getDisplayAmount(item.getItemPrice(), store));
 
-					cartQuantity = cartQuantity + item.getQuantity();
+shoppingCartItem.setQuantity(item.getQuantity());
 
-					BigDecimal subTotal = pricingService.calculatePriceQuantity(item.getItemPrice(),
-							item.getQuantity());
+cartQuantity = cartQuantity + item.getQuantity();
 
-					// calculate sub total (price * quantity)
-					shoppingCartItem.setSubTotal(subTotal);
+BigDecimal subTotal = pricingService.calculatePriceQuantity(item.getItemPrice(),
+		item.getQuantity());
 
-					shoppingCartItem.setDisplaySubTotal(pricingService.getDisplayAmount(subTotal, store));
+// calculate sub total (price * quantity)
+shoppingCartItem.setSubTotal(subTotal);
 
-					Set<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem> attributes = item
-							.getAttributes();
+shoppingCartItem.setDisplaySubTotal(pricingService.getDisplayAmount(subTotal, store));
+
+Set<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem> attributes = item
+		.getAttributes();
+
 					if (attributes != null) {
 						for (com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attribute : attributes) {
 
@@ -205,23 +216,34 @@ public class ReadableShoppingCartMapper implements Mapper<ShoppingCart, Readable
 								optName = optionDescriptions.get(0).getName();
 								optValue = optionValueDescriptions.get(0).getName();
 
+								/* QECI-fix (2024-01-08 21:10:09.611735):
+								Refactored the nested loops to use hashmaps for efficient lookup of names based on language ID.
+								*/
+								Map<Integer, String> optionDescriptionMap = new HashMap<>();
+								Map<Integer, String> optionValueDescriptionMap = new HashMap<>();
+
 								for (ProductOptionDescription optionDescription : optionDescriptions) {
-									if (optionDescription.getLanguage() != null && optionDescription.getLanguage()
-											.getId().intValue() == language.getId().intValue()) {
-										optName = optionDescription.getName();
-										break;
+									if (optionDescription.getLanguage() != null) {
+										optionDescriptionMap.put(optionDescription.getLanguage().getId().intValue(), optionDescription.getName());
 									}
 								}
 
 								for (ProductOptionValueDescription optionValueDescription : optionValueDescriptions) {
-									if (optionValueDescription.getLanguage() != null && optionValueDescription
-											.getLanguage().getId().intValue() == language.getId().intValue()) {
-										optValue = optionValueDescription.getName();
-										break;
+									if (optionValueDescription.getLanguage() != null) {
+										optionValueDescriptionMap.put(optionValueDescription.getLanguage().getId().intValue(), optionValueDescription.getName());
 									}
 								}
 
+								if (optionDescriptionMap.containsKey(language.getId().intValue())) {
+									optName = optionDescriptionMap.get(language.getId().intValue());
+								}
+
+								if (optionValueDescriptionMap.containsKey(language.getId().intValue())) {
+									optValue = optionValueDescriptionMap.get(language.getId().intValue());
+								}
+
 							}
+
 
 							if (optName != null) {
 								ReadableShoppingCartAttributeOption attributeOption = new ReadableShoppingCartAttributeOption();
@@ -291,7 +313,8 @@ public class ReadableShoppingCartMapper implements Mapper<ShoppingCart, Readable
 				destination.setOrder(source.getOrderId());
 			}
 
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			throw new ConversionRuntimeException("An error occured while converting ReadableShoppingCart", e);
 		}
 
