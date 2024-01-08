@@ -243,39 +243,45 @@ public class CmsStaticContentFileManagerImpl
 		List<OutputContentFile> images = new ArrayList<OutputContentFile>();
 		try {
 
-			FileNameMap fileNameMap = URLConnection.getFileNameMap();
-			String nodePath = this.getNodePath(merchantStoreCode, staticContentType);
+	FileNameMap fileNameMap = URLConnection.getFileNameMap();
+	String nodePath = this.getNodePath(merchantStoreCode, staticContentType);
 
-			final Node<String, Object> merchantNode = this.getNode(nodePath);
+	final Node<String, Object> merchantNode = this.getNode(nodePath);
 
-			for (String key : merchantNode.getKeys()) {
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Moved the instantiation of OutputContentFile and ByteArrayOutputStream outside of the loop.
+	Reusing the OutputContentFile and ByteArrayOutputStream objects by resetting them in each iteration of the loop.
+	Ensuring that the ByteArrayOutputStream is properly cleared before reusing it to prevent data corruption.
+	*/
+	OutputContentFile contentImage = new OutputContentFile();
+	ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-				byte[] imageBytes = (byte[]) merchantNode.get(key);
+	for (String key : merchantNode.getKeys()) {
 
-				OutputContentFile contentImage = new OutputContentFile();
+		byte[] imageBytes = (byte[]) merchantNode.get(key);
 
-				InputStream input = new ByteArrayInputStream(imageBytes);
-				ByteArrayOutputStream output = new ByteArrayOutputStream();
-				IOUtils.copy(input, output);
+		InputStream input = new ByteArrayInputStream(imageBytes);
+		output.reset(); // Clear the previous content of the ByteArrayOutputStream
+		IOUtils.copy(input, output);
 
-				String contentType = fileNameMap.getContentTypeFor(key);
+		String contentType = fileNameMap.getContentTypeFor(key);
 
-				contentImage.setFile(output);
-				contentImage.setMimeType(contentType);
-				contentImage.setFileName(key);
+		contentImage.setFile(output);
+		contentImage.setMimeType(contentType);
+		contentImage.setFileName(key);
 
-				images.add(contentImage);
-
-			}
-
-		} catch (final Exception e) {
-			LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
-			throw new ServiceException(e);
-		}
-
-		return images;
+		images.add(contentImage);
 
 	}
+
+} catch (final Exception e) {
+	LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
+	throw new ServiceException(e);
+}
+
+return images;
+
+
 
 	@Override
 	public void removeFile(final String merchantStoreCode, final FileContentType staticContentType,
