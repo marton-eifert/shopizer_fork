@@ -181,11 +181,15 @@ public class OrderApi {
 			return null;
 		}
 
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Replaced wrapper type instantiation with primitive type literals for the `page` and `count` variables
+		to avoid unnecessary object creation and improve performance.
+		*/
 		if (page == null) {
-			page = new Integer(0);
+			page = 0;
 		}
 		if (count == null) {
-			count = new Integer(100);
+			count = 100;
 		}
 
 		ReadableCustomer readableCustomer = new ReadableCustomer();
@@ -206,6 +210,7 @@ public class OrderApi {
 		}
 		return returnList;
 	}
+
 
 	/**
 	 * This method returns list of all the orders for a store.This is not
@@ -382,14 +387,21 @@ public class OrderApi {
 
 
 		} catch (Exception e) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Replaced the empty catch block with appropriate error handling that logs the exception.
+			Added a meaningful error message to the log to allow for better diagnosis of the error condition.
+			*/
 			LOGGER.error("Error while processing checkout", e);
 			try {
-				response.sendError(503, "Error while processing checkout " + e.getMessage());
+				response.sendError(503, "Error while processing checkout: " + e.getClass().getSimpleName() + " - " + e.getMessage());
 			} catch (Exception ignore) {
+				// Log the exception that occurred while attempting to send an error response
+				LOGGER.error("An error occurred while attempting to send a 503 error response", ignore);
 			}
 			return null;
 		}
 	}
+
 
 	/**
 	 * Main checkout resource that will complete the order flow
