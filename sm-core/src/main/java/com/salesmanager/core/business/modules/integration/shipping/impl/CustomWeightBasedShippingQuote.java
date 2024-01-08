@@ -149,7 +149,8 @@ public class CustomWeightBasedShippingQuote implements ShippingQuoteModule {
 			
 			return null;
 		
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			throw new IntegrationException(e);
 		}
 
