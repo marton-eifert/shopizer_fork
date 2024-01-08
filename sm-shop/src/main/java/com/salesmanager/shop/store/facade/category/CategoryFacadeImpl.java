@@ -421,46 +421,46 @@ public class CategoryFacadeImpl implements CategoryFacade {
 				List<com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue> values = rawFacet.get(option.getCode());
 
 				ReadableProductVariant productVariant = new ReadableProductVariant();
-				Optional<ProductOptionDescription>  optionDescription = option.getDescriptions().stream().filter(o -> o.getLanguage().getId() == language.getId()).findFirst();
-				if(optionDescription.isPresent()) {
-					productVariant.setName(optionDescription.get().getName());
-					productVariant.setId(optionDescription.get().getId());
-					productVariant.setCode(optionDescription.get().getProductOption().getCode());
-					List<ReadableProductVariantValue> optionValues = new ArrayList<ReadableProductVariantValue>();
-					for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue value : values) {
-						ReadableProductVariantValue v = new ReadableProductVariantValue();
-						v.setCode(value.getCode());
-						v.setName(value.getName());
-						v.setDescription(value.getName());
-						v.setOption(option.getId());
-						v.setValue(value.getId());
-						v.setOrder(option.getProductOptionSortOrder());
-						optionValues.add(v);
-					}
-					
-				    Comparator<ReadableProductVariantValue> orderComparator
-				      = Comparator.comparingInt(ReadableProductVariantValue::getOrder);
-				    
-				    //Arrays.sort(employees, employeeSalaryComparator);
-					
-				    List<ReadableProductVariantValue> readableValues = optionValues.stream()
-				    			.sorted(orderComparator)
-				    	    	.collect(Collectors.toList());
-				    	        
+                Optional<ProductOptionDescription>  optionDescription = option.getDescriptions().stream().filter(o -> o.getLanguage().getId() == language.getId()).findFirst();
+                if(optionDescription.isPresent()) {
+                    productVariant.setName(optionDescription.get().getName());
+                    productVariant.setId(optionDescription.get().getId());
+                    productVariant.setCode(optionDescription.get().getProductOption().getCode());
+                    List<ReadableProductVariantValue> optionValues = new ArrayList<ReadableProductVariantValue>();
+                    for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue value : values) {
+                        ReadableProductVariantValue v = new ReadableProductVariantValue();
+                        v.setCode(value.getCode());
+                        v.setName(value.getName());
+                        v.setDescription(value.getName());
+                        v.setOption(option.getId());
+                        v.setValue(value.getId());
+                        v.setOrder(option.getProductOptionSortOrder());
+                        optionValues.add(v);
+                    }
+                    
+                    Comparator<ReadableProductVariantValue> orderComparator
+                      = Comparator.comparingInt(ReadableProductVariantValue::getOrder);
+                    
+                    //Arrays.sort(employees, employeeSalaryComparator);
+                    
+                    List<ReadableProductVariantValue> readableValues = optionValues.stream()
+                                .sorted(orderComparator)
+                                .collect(Collectors.toList());
+                                
 
-					
-					//sort by name
-					// remove duplicates
-					readableValues = optionValues.stream().distinct().collect(Collectors.toList());
-					readableValues.sort(Comparator.comparing(ReadableProductVariantValue::getName));
-					
-					productVariant.setOptions(readableValues);
-					variants.add(productVariant);
-				}
-			}
+                    
+                    //sort by name
+                    // remove duplicates
+                    readableValues = optionValues.stream().distinct().collect(Collectors.toList());
+                    readableValues.sort(Comparator.comparing(ReadableProductVariantValue::getName));
+                    
+                    productVariant.setOptions(readableValues);
+                    variants.add(productVariant);
+                }
+            }
 
 
-			return variants;
+            return variants;
 		} catch (Exception e) {
 			throw new ServiceRuntimeException("An error occured while retrieving ProductAttributes", e);
 		}
