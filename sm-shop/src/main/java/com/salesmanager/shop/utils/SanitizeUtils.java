@@ -42,22 +42,22 @@ public class SanitizeUtils {
     
     public static String getSafeString(String value) {
 
-		try {
+        try {
 
-			if(policy == null) {
-				throw new ServiceRuntimeException("Error in " + SanitizeUtils.class.getName() + " html sanitize utils is null");		}
+            if(policy == null) {
+                throw new ServiceRuntimeException("Error in " + SanitizeUtils.class.getName() + " html sanitize utils is null");        }
 
-	        AntiSamy as = new AntiSamy();
-	        CleanResults cr = as.scan(value, policy);
-	        
-	        return cr.getCleanHTML();
-	        
-		} catch (Exception e) {
-			throw new ServiceRuntimeException(e);
-		}
+            AntiSamy as = new AntiSamy();
+            CleanResults cr = as.scan(value, policy);
+            
+            return cr.getCleanHTML();
+            
+        } catch (Exception e) {
+            throw new ServiceRuntimeException(e);
+        }
 
 
-    	
+        
     }
     
     
