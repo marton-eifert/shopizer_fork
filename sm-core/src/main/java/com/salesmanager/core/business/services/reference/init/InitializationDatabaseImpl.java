@@ -229,46 +229,51 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("CONTENT"))
 		  
-		  .addGroup("CUSTOMER", GroupType.CUSTOMER)
-		  .addPermission(permissionKeys.get("AUTH"))
-		  .addPermission(permissionKeys.get("AUTH_CUSTOMER"));
-		  
-		  for(Group g : groupBuilder.build()) {
-			  groupService.create(g);
-		  }
+		                          .addGroup("CUSTOMER", GroupType.CUSTOMER)
+          .addPermission(permissionKeys.get("AUTH"))
+          .addPermission(permissionKeys.get("AUTH_CUSTOMER"));
+          
+          for(Group g : groupBuilder.build()) {
+              groupService.create(g);
+          }
 
-		
-	}
-	
+        
+    }
+    
 
 
-	private void createCurrencies() throws ServiceException {
-		LOGGER.info(String.format("%s : Populating Currencies ", name));
+    private void createCurrencies() throws ServiceException {
+        LOGGER.info(String.format("%s : Populating Currencies ", name));
 
-		for (String code : SchemaConstant.CURRENCY_MAP.keySet()) {
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+        Moved the instantiation of the Currency object outside the loop to avoid creating a new instance
+        on each iteration. Instead, we reuse the same object by resetting its properties inside the loop.
+        */
+        Currency currency = new Currency();
+        for (String code : SchemaConstant.CURRENCY_MAP.keySet()) {
   
             try {
-            	java.util.Currency c = java.util.Currency.getInstance(code);
-            	
-            	if(c==null) {
-            		LOGGER.info(String.format("%s : Populating Currencies : no currency for code : %s", name, code));
-            	}
-            	
-            		//check if it exist
-            		
-	            	Currency currency = new Currency();
-	            	currency.setName(c.getCurrencyCode());
-	            	currency.setCurrency(c);
-	            	currencyService.create(currency);
+                java.util.Currency c = java.util.Currency.getInstance(code);
+                
+                if(c==null) {
+                    LOGGER.info(String.format("%s : Populating Currencies : no currency for code : %s", name, code));
+                } else {
+                    //check if it exist
+                    
+                    currency.setName(c.getCurrencyCode());
+                    currency.setCurrency(c);
+                    currencyService.create(currency);
+                }
 
             //System.out.println(l.getCountry() + "   " + c.getSymbol() + "  " + c.getSymbol(l));
             } catch (IllegalArgumentException e) {
-            	LOGGER.info(String.format("%s : Populating Currencies : no currency for code : %s", name, code));
+                LOGGER.info(String.format("%s : Populating Currencies : no currency for code : %s", name, code));
             }
         }  
-	}
+    }
 
-	private void createCountries() throws ServiceException {
+
+    private void createCountries() throws ServiceException {
 		LOGGER.info(String.format("%s : Populating Countries ", name));
 		List<Language> languages = languageService.list();
 		for(String code : SchemaConstant.COUNTRY_ISO_CODE) {
@@ -336,45 +341,45 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 
 	
 	private void addZonesToDb(Map<String,Zone> zonesMap) throws RuntimeException {
-		
-		try {
-		
-	        for (Map.Entry<String, Zone> entry : zonesMap.entrySet()) {
-	    	    String key = entry.getKey();
-	    	    Zone value = entry.getValue();
-
-	    	    if(value.getDescriptions()==null) {
-	    	    	LOGGER.warn("This zone " + key + " has no descriptions");
-	    	    	continue;
-	    	    }
-	    	    
-	    	    List<ZoneDescription> zoneDescriptions = value.getDescriptions();
-	    	    value.setDescriptons(null);
-	
-	    	    zoneService.create(value);
-	    	    
-	    	    for(ZoneDescription description : zoneDescriptions) {
-	    	    	description.setZone(value);
-	    	    	zoneService.addDescription(value, description);
-	    	    }
-	        }
         
-		}catch(Exception e) {
-			LOGGER.error("An error occured while loading zones",e);
-			
-		}
-		
-	}
-	
-	private void createLanguages() throws ServiceException {
-		LOGGER.info(String.format("%s : Populating Languages ", name));
-		for(String code : SchemaConstant.LANGUAGE_ISO_CODE) {
-			Language language = new Language(code);
-			languageService.create(language);
-		}
-	}
-	
-	private void createMerchant() throws ServiceException {
+        try {
+        
+            for (Map.Entry<String, Zone> entry : zonesMap.entrySet()) {
+                String key = entry.getKey();
+                Zone value = entry.getValue();
+
+                if(value.getDescriptions()==null) {
+                    LOGGER.warn("This zone " + key + " has no descriptions");
+                    continue;
+                }
+                
+                List<ZoneDescription> zoneDescriptions = value.getDescriptions();
+                value.setDescriptons(null);
+    
+                zoneService.create(value);
+                
+                for(ZoneDescription description : zoneDescriptions) {
+                    description.setZone(value);
+                    zoneService.addDescription(value, description);
+                }
+            }
+        
+        }catch(Exception e) {
+            LOGGER.error("An error occured while loading zones",e);
+            
+        }
+        
+    }
+    
+    private void createLanguages() throws ServiceException {
+        LOGGER.info(String.format("%s : Populating Languages ", name));
+        for(String code : SchemaConstant.LANGUAGE_ISO_CODE) {
+            Language language = new Language(code);
+            languageService.create(language);
+        }
+    }
+    
+    private void createMerchant() throws ServiceException {
 		LOGGER.info(String.format("%s : Creating merchant ", name));
 		
 		Date date = new Date(System.currentTimeMillis());
