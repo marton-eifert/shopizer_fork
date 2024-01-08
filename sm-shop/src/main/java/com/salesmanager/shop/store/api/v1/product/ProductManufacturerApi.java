@@ -67,56 +67,67 @@ public class ProductManufacturerApi {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/private/manufacturer", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	@ResponseBody
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	public PersistableManufacturer create(@Valid @RequestBody PersistableManufacturer manufacturer,
-			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language, HttpServletResponse response) {
+@ResponseStatus(HttpStatus.CREATED)
+@ResponseBody
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+		@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+public PersistableManufacturer create(@Valid @RequestBody PersistableManufacturer manufacturer,
+		@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language, HttpServletResponse response) {
 
+	try {
+		manufacturerFacade.saveOrUpdateManufacturer(manufacturer, merchantStore, language);
+
+		return manufacturer;
+
+	} catch (Exception e) {
+		LOGGER.error("Error while creating manufacturer", e);
 		try {
-			manufacturerFacade.saveOrUpdateManufacturer(manufacturer, merchantStore, language);
-
-			return manufacturer;
-
-		} catch (Exception e) {
-			LOGGER.error("Error while creating manufacturer", e);
-			try {
-				response.sendError(503, "Error while creating manufacturer " + e.getMessage());
-			} catch (Exception ignore) {
-			}
-
-			return null;
-		}
-	}
-
-	@RequestMapping(value = "/manufacturer/{id}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	public ReadableManufacturer get(@PathVariable Long id, @ApiIgnore MerchantStore merchantStore,
-			@ApiIgnore Language language, HttpServletResponse response) {
-
-		try {
-			ReadableManufacturer manufacturer = manufacturerFacade.getManufacturer(id, merchantStore, language);
-
-			if (manufacturer == null) {
-				response.sendError(404, "No Manufacturer found for ID : " + id);
-			}
-
-			return manufacturer;
-
-		} catch (Exception e) {
-			LOGGER.error("Error while getting manufacturer", e);
-			try {
-				response.sendError(503, "Error while getting manufacturer " + e.getMessage());
-			} catch (Exception ignore) {
-			}
+			response.sendError(503, "Error while creating manufacturer " + e.getMessage());
+		} catch (Exception ignore) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Added logging for the ignored exception to improve error handling and resource management.
+			*/
+			LOGGER.warn("Exception occurred while sending error response", ignore);
 		}
 
 		return null;
 	}
+}
+
+
+	@RequestMapping(value = "/manufacturer/{id}", method = RequestMethod.GET)
+@ResponseStatus(HttpStatus.OK)
+@ResponseBody
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+		@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+public ReadableManufacturer get(@PathVariable Long id, @ApiIgnore MerchantStore merchantStore,
+		@ApiIgnore Language language, HttpServletResponse response) {
+
+	try {
+		ReadableManufacturer manufacturer = manufacturerFacade.getManufacturer(id, merchantStore, language);
+
+		if (manufacturer == null) {
+			response.sendError(404, "No Manufacturer found for ID : " + id);
+		}
+
+		return manufacturer;
+
+	} catch (Exception e) {
+		LOGGER.error("Error while getting manufacturer", e);
+		try {
+			response.sendError(503, "Error while getting manufacturer " + e.getMessage());
+		} catch (Exception ignore) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Added logging for the ignored exception to improve error handling and resource management.
+			This ensures that even if the secondary error handling fails, we have a record of the incident.
+			*/
+			LOGGER.error("Secondary error handling failed", ignore);
+		}
+	}
+
+	return null;
+}
+
 
 	
 	@RequestMapping(value = "/private/manufacturers", method = RequestMethod.GET)
@@ -167,51 +178,62 @@ public class ProductManufacturerApi {
 	}
 
 	@RequestMapping(value = "/private/manufacturer/{id}", method = RequestMethod.PUT)
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	public void update(@PathVariable Long id,
-			@Valid @RequestBody PersistableManufacturer manufacturer, @ApiIgnore MerchantStore merchantStore,
-			@ApiIgnore Language language, HttpServletRequest request, HttpServletResponse response) {
+@ResponseStatus(HttpStatus.OK)
+@ResponseBody
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+		@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+public void update(@PathVariable Long id,
+		@Valid @RequestBody PersistableManufacturer manufacturer, @ApiIgnore MerchantStore merchantStore,
+		@ApiIgnore Language language, HttpServletRequest request, HttpServletResponse response) {
 
+	try {
+		manufacturer.setId(id);
+		manufacturerFacade.saveOrUpdateManufacturer(manufacturer, merchantStore, language);
+	} catch (Exception e) {
+		LOGGER.error("Error while creating manufacturer", e);
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Replaced the empty catch block with specific error handling that logs the exception and sends a meaningful error response to the client.
+		*/
 		try {
-			manufacturer.setId(id);
-			manufacturerFacade.saveOrUpdateManufacturer(manufacturer, merchantStore, language);
-		} catch (Exception e) {
-			LOGGER.error("Error while creating manufacturer", e);
-			try {
-				response.sendError(503, "Error while creating manufacturer " + e.getMessage());
-			} catch (Exception ignore) {
-			}
+			response.sendError(503, "Service Unavailable: Error while creating manufacturer - " + e.getMessage());
+		} catch (IOException ioException) {
+			LOGGER.error("Error sending the error response", ioException);
 		}
 	}
+}
+
 
 	@RequestMapping(value = "/private/manufacturer/{id}", method = RequestMethod.DELETE)
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	public void delete(@PathVariable Long id, @ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language,
-			HttpServletResponse response) {
+@ResponseStatus(HttpStatus.OK)
+@ResponseBody
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+		@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+public void delete(@PathVariable Long id, @ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language,
+		HttpServletResponse response) {
 
+	try {
+		Manufacturer manufacturer = manufacturerService.getById(id);
+
+		if (manufacturer != null) {
+			manufacturerFacade.deleteManufacturer(manufacturer, merchantStore, language);
+		} else {
+			response.sendError(404, "No Manufacturer found for ID : " + id);
+		}
+
+	} catch (Exception e) {
+		LOGGER.error("Error while deleting manufacturer id " + id, e);
 		try {
-			Manufacturer manufacturer = manufacturerService.getById(id);
-
-			if (manufacturer != null) {
-				manufacturerFacade.deleteManufacturer(manufacturer, merchantStore, language);
-			} else {
-				response.sendError(404, "No Manufacturer found for ID : " + id);
-			}
-
-		} catch (Exception e) {
-			LOGGER.error("Error while deleting manufacturer id " + id, e);
-			try {
-				response.sendError(503, "Error while deleting manufacturer id " + id + " - " + e.getMessage());
-			} catch (Exception ignore) {
-			}
+			response.sendError(503, "Error while deleting manufacturer id " + id + " - " + e.getMessage());
+		} catch (Exception ignore) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Removed the empty catch block and replaced it with a catch block that logs the ignored exception.
+			This ensures that all exceptions are accounted for and aids in debugging, while also adhering to green coding standards by avoiding wasteful catch blocks.
+			*/
+			LOGGER.error("An error occurred while attempting to handle another error for manufacturer id " + id, ignore);
 		}
 	}
+}
+
 
 	@RequestMapping(value = "/category/{id}/manufacturer", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
