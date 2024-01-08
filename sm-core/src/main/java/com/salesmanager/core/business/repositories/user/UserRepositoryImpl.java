@@ -74,16 +74,16 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
       q = RepositoryHelper.paginateQuery(q, count, entityList, criteria);
       
 /*      if(criteria.isLegacyPagination()) {
-	      if (criteria.getMaxCount() > 0) {
-	        q.setFirstResult(criteria.getStartIndex());
-	        if (criteria.getMaxCount() < count.intValue()) {
-	          q.setMaxResults(criteria.getMaxCount());
-	        } else {
-	          q.setMaxResults(count.intValue());
-	        }
-	      }
+          if (criteria.getMaxCount() > 0) {
+            q.setFirstResult(criteria.getStartIndex());
+            if (criteria.getMaxCount() < count.intValue()) {
+              q.setMaxResults(criteria.getMaxCount());
+            } else {
+              q.setMaxResults(count.intValue());
+            }
+          }
       } else {
-    	  
+          
       }*/
 
       List<User> users = q.getResultList();
@@ -93,7 +93,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
 
 
-    } catch (javax.persistence.NoResultException ers) {
+    }
+catch (javax.persistence.NoResultException ers) {
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
       throw new ServiceException(e);
