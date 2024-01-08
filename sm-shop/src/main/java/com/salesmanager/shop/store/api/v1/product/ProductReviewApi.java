@@ -94,11 +94,16 @@ public class ProductReviewApi {
       try {
         response.sendError(503, "Error while saving product review" + e.getMessage());
       } catch (Exception ignore) {
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+           Added logging for the ignored exception to improve error handling and resource management.
+        */
+        LOGGER.error("An exception was ignored", ignore);
       }
 
       return null;
     }
   }
+
 
   @RequestMapping(value = "/product/{id}/reviews", method = RequestMethod.GET)
   @ResponseStatus(HttpStatus.OK)
@@ -123,7 +128,7 @@ public class ProductReviewApi {
       }
 
       List<ReadableProductReview> reviews =
-    		  productCommonFacade.getProductReviews(product, merchantStore, language);
+              productCommonFacade.getProductReviews(product, merchantStore, language);
 
       return reviews;
 
@@ -232,9 +237,14 @@ public class ProductReviewApi {
       try {
         response.sendError(503, "Error while deleting product review" + e.getMessage());
       } catch (Exception ignore) {
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+         * Added logging for the ignored exception to improve error handling and resource management.
+         */
+        LOGGER.error("An error occurred while attempting to send a 503 error response", ignore);
       }
 
       return;
     }
   }
 }
+
