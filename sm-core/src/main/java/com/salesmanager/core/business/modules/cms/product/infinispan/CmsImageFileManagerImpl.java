@@ -175,40 +175,45 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
     try {
 
 
-      FileNameMap fileNameMap = URLConnection.getFileNameMap();
-      StringBuilder nodePath = new StringBuilder();
-      nodePath.append(product.getMerchantStore().getCode());
+  FileNameMap fileNameMap = URLConnection.getFileNameMap();
+  StringBuilder nodePath = new StringBuilder();
+  nodePath.append(product.getMerchantStore().getCode());
 
-      Node<String, Object> merchantNode = this.getNode(nodePath.toString());
+  Node<String, Object> merchantNode = this.getNode(nodePath.toString());
 
-      if (merchantNode == null) {
-        return null;
-      }
+  if (merchantNode == null) {
+    return null;
+  }
+
+  /* QECI-fix (2024-01-08 21:10:09.611735):
+  Move the instantiation of OutputContentFile and ByteArrayOutputStream outside of the loop.
+  Reuse the OutputContentFile and ByteArrayOutputStream objects by resetting them in each iteration of the loop.
+  Ensure that the ByteArrayOutputStream is cleared before being reused to prevent data corruption.
+  */
+  OutputContentFile contentImage = new OutputContentFile();
+  ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+  for (String key : merchantNode.getKeys()) {
+
+    byte[] imageBytes = (byte[]) merchantNode.get(key);
+
+    InputStream input = new ByteArrayInputStream(imageBytes);
+    output.reset();
+    IOUtils.copy(input, output);
+
+    String contentType = fileNameMap.getContentTypeFor(key);
+
+    contentImage.setFile(output.toByteArray());
+    contentImage.setMimeType(contentType);
+    contentImage.setFileName(key);
+
+    images.add(contentImage);
+
+  }
 
 
-      for (String key : merchantNode.getKeys()) {
+}
 
-        byte[] imageBytes = (byte[]) merchantNode.get(key);
-
-        OutputContentFile contentImage = new OutputContentFile();
-
-        InputStream input = new ByteArrayInputStream(imageBytes);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        IOUtils.copy(input, output);
-
-        String contentType = fileNameMap.getContentTypeFor(key);
-
-        contentImage.setFile(output);
-        contentImage.setMimeType(contentType);
-        contentImage.setFileName(key);
-
-        images.add(contentImage);
-
-
-      }
-
-
-    }
 
     catch (Exception e) {
       throw new ServiceException(e);
@@ -356,7 +361,8 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
 
 
 
-    } catch (Exception e) {
+    }
+catch (Exception e) {
       throw new ServiceException(e);
     } finally {
 
@@ -420,7 +426,8 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
 
     } catch (Exception e) {
       throw new ServiceException(e);
-    } finally {
+    }
+finally {
       if (input != null) {
         try {
           input.close();
