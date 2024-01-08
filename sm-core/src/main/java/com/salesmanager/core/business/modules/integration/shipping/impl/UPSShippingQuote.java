@@ -623,6 +623,12 @@ public class UPSShippingQuote implements ShippingQuoteModule {
 				try {
 					reader.close();
 				} catch (Exception ignore) {
+					/* QECI-fix (2024-01-08 21:10:09.611735):
+					Replaced the empty catch block with a logging statement to handle the exception properly.
+					This ensures that any exception during the closing of the reader is logged for debugging purposes,
+					without consuming unnecessary resources.
+					*/
+					LOGGER.error("Failed to close the reader", ignore);
 				}
 			}
 
@@ -652,6 +658,7 @@ class UPSParsedElements  {
 	public void addOption(ShippingOption option) {
 		options.add(option);
 	}
+
 
 	public List<ShippingOption> getOptions() {
 		return options;
