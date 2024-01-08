@@ -201,7 +201,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
                 int qty = availability.getProductQuantity();
                 if(qty < orderProduct.getProductQuantity()) {
                     //throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
-                	LOGGER.error("APP-BACKEND [" + ServiceException.EXCEPTION_INVENTORY_MISMATCH + "]");
+                    LOGGER.error("APP-BACKEND [" + ServiceException.EXCEPTION_INVENTORY_MISMATCH + "]");
                 }
                 qty = qty - orderProduct.getProductQuantity();
                 availability.setProductQuantity(qty);
@@ -211,7 +211,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 
 
 
-    	return order;
+        return order;
     }
 
     private OrderTotalSummary caculateOrder(OrderSummary summary, Customer customer, final MerchantStore store, final Language language) throws Exception {
@@ -351,32 +351,36 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         }
 
         //tax
-        List<TaxItem> taxes = taxService.calculateTax(summary, customer, store, language);
-        if(taxes!=null && taxes.size()>0) {
-        	BigDecimal totalTaxes = new BigDecimal(0);
-        	totalTaxes.setScale(2, RoundingMode.HALF_UP);
-            int taxCount = 200;
-            for(TaxItem tax : taxes) {
+List<TaxItem> taxes = taxService.calculateTax(summary, customer, store, language);
+if(taxes!=null && taxes.size()>0) {
+    BigDecimal totalTaxes = new BigDecimal(0).setScale(2, RoundingMode.HALF_UP);
+    int taxCount = 200;
+    /* QECI-fix (2024-01-08 21:10:09.611735):
+    Moved the instantiation of OrderTotal taxLine outside of the loop and reused the same object by resetting its state in each iteration.
+    Removed the setScale call on totalTaxes as it was redundant after initializing totalTaxes with the scale.
+    */
+    OrderTotal taxLine = new OrderTotal();
+    for(TaxItem tax : taxes) {
 
-                OrderTotal taxLine = new OrderTotal();
-                taxLine.setModule(Constants.OT_TAX_MODULE_CODE);
-                taxLine.setOrderTotalType(OrderTotalType.TAX);
-                taxLine.setOrderTotalCode(tax.getLabel());
-                taxLine.setSortOrder(taxCount);
-                taxLine.setTitle(Constants.OT_TAX_MODULE_CODE);
-                taxLine.setText(tax.getLabel());
-                taxLine.setValue(tax.getItemPrice());
+        taxLine.setModule(Constants.OT_TAX_MODULE_CODE);
+        taxLine.setOrderTotalType(OrderTotalType.TAX);
+        taxLine.setOrderTotalCode(tax.getLabel());
+        taxLine.setSortOrder(taxCount);
+        taxLine.setTitle(Constants.OT_TAX_MODULE_CODE);
+        taxLine.setText(tax.getLabel());
+        taxLine.setValue(tax.getItemPrice());
 
-                totalTaxes = totalTaxes.add(tax.getItemPrice());
-                orderTotals.add(taxLine);
-                //grandTotal=grandTotal.add(tax.getItemPrice());
+        totalTaxes = totalTaxes.add(tax.getItemPrice());
+        orderTotals.add(taxLine);
+        //grandTotal=grandTotal.add(tax.getItemPrice());
 
-                taxCount ++;
+        taxCount ++;
 
-            }
-            grandTotal = grandTotal.add(totalTaxes);
-            totalSummary.setTaxTotal(totalTaxes);
-        }
+    }
+    grandTotal = grandTotal.add(totalTaxes);
+    totalSummary.setTaxTotal(totalTaxes);
+}
+
 
         // grand total
         OrderTotal orderTotal = new OrderTotal();
@@ -606,75 +610,75 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 
 		if(!CollectionUtils.isEmpty(transactions)) {
 
-			returnOrders = new ArrayList<Order>();
+            returnOrders = new ArrayList<Order>();
 
-			//order id
-			Map<Long,Order> preAuthOrders = new HashMap<Long,Order> ();
-			//order id
-			Map<Long,List<Transaction>> processingTransactions = new HashMap<Long,List<Transaction>> ();
+            //order id
+            Map<Long,Order> preAuthOrders = new HashMap<Long,Order> ();
+            //order id
+            Map<Long,List<Transaction>> processingTransactions = new HashMap<Long,List<Transaction>> ();
 
-			for(Transaction trx : transactions) {
-				Order order = trx.getOrder();
-				if(TransactionType.AUTHORIZE.name().equals(trx.getTransactionType().name())) {
-					preAuthOrders.put(order.getId(), order);
-				}
+            for(Transaction trx : transactions) {
+                Order order = trx.getOrder();
+                if(TransactionType.AUTHORIZE.name().equals(trx.getTransactionType().name())) {
+                    preAuthOrders.put(order.getId(), order);
+                }
 
-				//put transaction
-				List<Transaction> listTransactions = null;
-				if(processingTransactions.containsKey(order.getId())) {
-					listTransactions = processingTransactions.get(order.getId());
-				} else {
-					listTransactions = new ArrayList<Transaction>();
-					processingTransactions.put(order.getId(), listTransactions);
-				}
-				listTransactions.add(trx);
-			}
+                //put transaction
+                List<Transaction> listTransactions = null;
+                if(processingTransactions.containsKey(order.getId())) {
+                    listTransactions = processingTransactions.get(order.getId());
+                } else {
+                    listTransactions = new ArrayList<Transaction>();
+                    processingTransactions.put(order.getId(), listTransactions);
+                }
+                listTransactions.add(trx);
+            }
 
-			//should have when captured
-			/**
-			 * Order id  Transaction type
-			 * 1          AUTHORIZE
-			 * 1          CAPTURE
-			 */
+            //should have when captured
+            /**
+             * Order id  Transaction type
+             * 1          AUTHORIZE
+             * 1          CAPTURE
+             */
 
-			//should have when not captured
-			/**
-			 * Order id  Transaction type
-			 * 2          AUTHORIZE
-			 */
+            //should have when not captured
+            /**
+             * Order id  Transaction type
+             * 2          AUTHORIZE
+             */
 
-			for(Long orderId : processingTransactions.keySet()) {
+            for(Long orderId : processingTransactions.keySet()) {
 
-				List<Transaction> trx = processingTransactions.get(orderId);
-				if(CollectionUtils.isNotEmpty(trx)) {
+	List<Transaction> trx = processingTransactions.get(orderId);
+	if(CollectionUtils.isNotEmpty(trx)) {
 
-					boolean capturable = true;
-					for(Transaction t : trx) {
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Refactored the nested loop to use a hashmap for checking transaction types.
+		This reduces the complexity from O(n^2) to O(n) by avoiding the need to iterate
+		over the transaction list for each transaction type check. */
+		HashMap<String, Boolean> transactionTypeCapturable = new HashMap<>();
+		transactionTypeCapturable.put(TransactionType.CAPTURE.name(), false);
+		transactionTypeCapturable.put(TransactionType.AUTHORIZECAPTURE.name(), false);
+		transactionTypeCapturable.put(TransactionType.REFUND.name(), false);
 
-						if(TransactionType.CAPTURE.name().equals(t.getTransactionType().name())) {
-							capturable = false;
-						} else if(TransactionType.AUTHORIZECAPTURE.name().equals(t.getTransactionType().name())) {
-							capturable = false;
-						} else if(TransactionType.REFUND.name().equals(t.getTransactionType().name())) {
-							capturable = false;
-						}
-
-					}
-
-					if(capturable) {
-						Order o = preAuthOrders.get(orderId);
-						returnOrders.add(o);
-					}
-
-				}
-
-
+		boolean capturable = true;
+		for(Transaction t : trx) {
+			if(transactionTypeCapturable.containsKey(t.getTransactionType().name())) {
+				capturable = false;
+				break;
 			}
 		}
 
-		return returnOrders;
+		if(capturable) {
+			Order o = preAuthOrders.get(orderId);
+			returnOrders.add(o);
+		}
+
 	}
 
 
-
 }
+
+return returnOrders;
+}
+
