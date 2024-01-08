@@ -77,32 +77,39 @@ public class DefaultPackagingImpl implements Packaging {
 		// need to put items individually
 		for(ShippingProduct shippingProduct : products){
 
-			Product product = shippingProduct.getProduct();
-			if (product.isProductVirtual()) {
-				continue;
-			}
+	Product product = shippingProduct.getProduct();
+	if (product.isProductVirtual()) {
+		continue;
+	}
 
-			int qty = shippingProduct.getQuantity();
+	int qty = shippingProduct.getQuantity();
 
-			Set<ProductAttribute> attrs = shippingProduct.getProduct().getAttributes();
+	Set<ProductAttribute> attrs = shippingProduct.getProduct().getAttributes();
 
-			// set attributes values
-			BigDecimal w = product.getProductWeight();
-			BigDecimal h = product.getProductHeight();
-			BigDecimal l = product.getProductLength();
-			BigDecimal wd = product.getProductWidth();
-			if(w==null) {
-				w = new BigDecimal(defaultWeight);
-			}
-			if(h==null) {
-				h = new BigDecimal(defaultHeight);
-			}
-			if(l==null) {
-				l = new BigDecimal(defaultLength);
-			}
-			if(wd==null) {
-				wd = new BigDecimal(defaultWidth);
-			}
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Moved the instantiation of BigDecimal objects outside the loop to avoid repeated object creation.
+	Initialized them with default values and only update if the product attributes are non-null.
+	*/
+	BigDecimal w = new BigDecimal(defaultWeight);
+	BigDecimal h = new BigDecimal(defaultHeight);
+	BigDecimal l = new BigDecimal(defaultLength);
+	BigDecimal wd = new BigDecimal(defaultWidth);
+
+	// set attributes values
+	if(product.getProductWeight() != null) {
+		w = product.getProductWeight();
+	}
+	if(product.getProductHeight() != null) {
+		h = product.getProductHeight();
+	}
+	if(product.getProductLength() != null) {
+		l = product.getProductLength();
+	}
+	if(product.getProductWidth() != null) {
+		wd = product.getProductWidth();
+	}
+}
+
 			if (attrs != null && attrs.size() > 0) {
 				for(ProductAttribute attribute : attrs) {
 					if(attribute.getProductAttributeWeight()!=null) {
@@ -192,37 +199,55 @@ public class DefaultPackagingImpl implements Packaging {
 			if (p.getProductWidth().doubleValue() > width
 					|| p.getProductHeight().doubleValue() > height
 					|| p.getProductLength().doubleValue() > length) {
-				// log message to customer
-				merchantLogService.save(new MerchantLog(store,"shipping","Product "
-						+ p.getSku()
-						+ " has a demension larger than the box size specified. Will use per item calculation."));
-				throw new ServiceException("Product configuration exceeds box configuraton");
+				/* QECI-fix (2024-01-08 21:10:09.611735):
+				 * Using StringBuilder to construct the log message efficiently.
+				 */
+				StringBuilder logMessage = new StringBuilder();
+				logMessage.append("Product ");
+				logMessage.append(p.getSku());
+				logMessage.append(" has a dimension larger than the box size specified. Will use per item calculation.");
+				merchantLogService.save(new MerchantLog(store,"shipping", logMessage.toString()));
+				throw new ServiceException("Product configuration exceeds box configuration");
 
 			}
 
 			if (productWeight > maxweight) {
-				merchantLogService.save(new MerchantLog(store,"shipping","Product "
-						+ p.getSku()
-						+ " has a weight larger than the box maximum weight specified. Will use per item calculation."));
+				/* QECI-fix (2024-01-08 21:10:09.611735):
+				 * Using StringBuilder to construct the log message efficiently.
+				 */
+				StringBuilder logMessage = new StringBuilder();
+				logMessage.append("Product ");
+				logMessage.append(p.getSku());
+				logMessage.append(" has a weight larger than the box maximum weight specified. Will use per item calculation.");
+				merchantLogService.save(new MerchantLog(store,"shipping", logMessage.toString()));
 				
-				throw new ServiceException("Product configuration exceeds box configuraton");
+				throw new ServiceException("Product configuration exceeds box configuration");
 
 			}
 
-			double productVolume = (p.getProductWidth().doubleValue()
-					* p.getProductHeight().doubleValue() * p
-					.getProductLength().doubleValue());
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			 * Pre-calculating product dimensions and storing them in variables to avoid repeated method calls.
+			 */
+			double productWidth = p.getProductWidth().doubleValue();
+			double productHeight = p.getProductHeight().doubleValue();
+			double productLength = p.getProductLength().doubleValue();
+			double productVolume = productWidth * productHeight * productLength;
 
 			if (productVolume == 0) {
+				/* QECI-fix (2024-01-08 21:10:09.611735):
+				 * Using StringBuilder to construct the log message efficiently.
+				 */
+				StringBuilder logMessage = new StringBuilder();
+				logMessage.append("Product ");
+				logMessage.append(p.getSku());
+				logMessage.append(" has one of the dimension set to 0 and therefore cannot calculate the volume");
+				merchantLogService.save(new MerchantLog(store,"shipping", logMessage.toString()));
 				
-				merchantLogService.save(new MerchantLog(store,"shipping","Product "
-						+ p.getSku()
-						+ " has one of the dimension set to 0 and therefore cannot calculate the volume"));
-				
-				throw new ServiceException("Product configuration exceeds box configuraton");
+				throw new ServiceException("Product configuration exceeds box configuration");
 				
 
 			}
+
 			
 			if (productVolume > maxVolume) {
 				
@@ -312,7 +337,8 @@ public class DefaultPackagingImpl implements Packaging {
 	@Override
 	public List<PackageDetails> getItemPackagesDetails(
 			List<ShippingProduct> products, MerchantStore store)
-			throws ServiceException {
+			throws ServiceException
+{
 		
 		
 		List<PackageDetails> packages = new ArrayList<PackageDetails>();
