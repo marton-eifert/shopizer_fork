@@ -78,4 +78,4 @@ public class ContentImagesTest extends com.salesmanager.test.common.AbstractSale
 	}
 	
 
-}
+
