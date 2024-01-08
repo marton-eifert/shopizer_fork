@@ -461,13 +461,19 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
 		availability.setProductQuantity(product.getQuantity());
 		if (!StringUtils.isBlank(product.getPrice())) {
 			// set default price
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Moved the instantiation of the ServiceRuntimeException outside of the loop.
+			Checked if pricingService.getAmount(product.getPrice()) can be called once before the loop.
+			*/
+			BigDecimal priceAmount = null;
+			try {
+				priceAmount = pricingService.getAmount(product.getPrice());
+			} catch (ServiceException e) {
+				throw new ServiceRuntimeException("Invalid product price format");
+			}
 			for (ProductPrice price : availability.getPrices()) {
 				if (price.isDefaultPrice()) {
-					try {
-						price.setProductPriceAmount(pricingService.getAmount(product.getPrice()));
-					} catch (ServiceException e) {
-						throw new ServiceRuntimeException("Invalid product price format");
-					}
+					price.setProductPriceAmount(priceAmount);
 				}
 			}
 		}
@@ -475,3 +481,4 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
 
 
 }
+
