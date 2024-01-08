@@ -48,9 +48,12 @@ public class CustomerOptionSet extends SalesManagerEntity<Long, CustomerOptionSe
 	private CustomerOptionValue customerOptionValue = null;
 	
 
-
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Changed the instantiation of Integer using the wrapper class to a literal initialization to improve performance and reduce object creation overhead.
+	*/
 	@Column(name="SORT_ORDER")
-	private Integer sortOrder = new Integer(0);
+	private Integer sortOrder = 0;
+
 	
 
 
