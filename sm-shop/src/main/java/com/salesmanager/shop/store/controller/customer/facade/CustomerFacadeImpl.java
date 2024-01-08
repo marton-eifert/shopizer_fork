@@ -434,15 +434,13 @@ public class CustomerFacadeImpl implements CustomerFacade {
                                                                                               // to
                                                                                               // login
     authorities.add(role);
-    List<Integer> groupsId = new ArrayList<Integer>();
+    /* QECI-fix (2024-01-08 21:10:09.611735):
+    Removed the instantiation of groupsId ArrayList and processing permissions directly within the loop.
+    */
     List<Group> groups = customer.getGroups();
     if (groups != null) {
       for (Group group : groups) {
-        groupsId.add(group.getId());
-
-      }
-      if (groupsId != null && groupsId.size() > 0) {
-        List<Permission> permissions = permissionService.getPermissions(groupsId);
+        List<Permission> permissions = permissionService.getPermissions(Collections.singletonList(group.getId()));
         for (Permission permission : permissions) {
           GrantedAuthority auth = new SimpleGrantedAuthority(permission.getPermissionName());
           authorities.add(auth);
@@ -458,6 +456,7 @@ public class CustomerFacadeImpl implements CustomerFacade {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
   }
+
 
 
   @Override
@@ -657,9 +656,9 @@ public class CustomerFacadeImpl implements CustomerFacade {
 
   @Async
   private void notifyNewCustomer(PersistableCustomer customer, MerchantStore store, Language lang) {
-		System.out.println("Customer notification");
-		long startTime = System.nanoTime();
-	Locale customerLocale = LocaleUtils.getLocale(lang);
+        System.out.println("Customer notification");
+        long startTime = System.nanoTime();
+    Locale customerLocale = LocaleUtils.getLocale(lang);
     String shopSchema = coreConfiguration.getProperty("SHOP_SCHEME");
     emailTemplatesUtils.sendRegistrationEmail(customer, store, customerLocale, shopSchema);
     long endTime = System.nanoTime();
@@ -670,23 +669,23 @@ public class CustomerFacadeImpl implements CustomerFacade {
   
   private PersistableCustomer updateAuthCustomer(PersistableCustomer customer, MerchantStore store) {
 
-	    if (customer.getId() == null || customer.getId() == 0) {
-	      throw new ServiceRuntimeException("Can't update a customer with null id");
-	    }
+        if (customer.getId() == null || customer.getId() == 0) {
+          throw new ServiceRuntimeException("Can't update a customer with null id");
+        }
 
-	    Customer cust = customerService.getById(customer.getId());
+        Customer cust = customerService.getById(customer.getId());
 
-	    try{
-	      customerPopulator.populate(customer, cust, store, store.getDefaultLanguage());
-	    } catch (ConversionException e) {
-	      throw new ConversionRuntimeException(e);
-	    }
+        try{
+          customerPopulator.populate(customer, cust, store, store.getDefaultLanguage());
+        } catch (ConversionException e) {
+          throw new ConversionRuntimeException(e);
+        }
 
-	    saveCustomer(cust);
-	    customer.setId(cust.getId());
+        saveCustomer(cust);
+        customer.setId(cust.getId());
 
-	    return customer;
-	  }
+        return customer;
+      }
 
 
   @Override
