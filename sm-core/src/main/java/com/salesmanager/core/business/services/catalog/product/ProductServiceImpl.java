@@ -280,27 +280,33 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 
 		try {
 
-			if (images != null && images.size() > 0) {
-				for (ProductImage image : images) {
-					if (image.getImage() != null && (image.getId() == null || image.getId() == 0L)) {
-						image.setProduct(product);
+	if (images != null && images.size() > 0) {
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Moved the instantiation of ImageContentFile cmsContentImage outside of the loop.
+		Resetting the properties of cmsContentImage at each iteration instead of creating a new object.
+		*/
+		ImageContentFile cmsContentImage = new ImageContentFile();
+		cmsContentImage.setFileContentType(FileContentType.PRODUCT);
 
-						InputStream inputStream = image.getImage();
-						ImageContentFile cmsContentImage = new ImageContentFile();
-						cmsContentImage.setFileName(image.getProductImage());
-						cmsContentImage.setFile(inputStream);
-						cmsContentImage.setFileContentType(FileContentType.PRODUCT);
+		for (ProductImage image : images) {
+			if (image.getImage() != null && (image.getId() == null || image.getId() == 0L)) {
+				image.setProduct(product);
 
-						productImageService.addProductImage(product, image, cmsContentImage);
-						newImageIds.add(image.getId());
-					} else {
-						if (image.getId() != null) {
-							productImageService.save(image);
-							newImageIds.add(image.getId());
-						}
-					}
+				InputStream inputStream = image.getImage();
+				cmsContentImage.setFileName(image.getProductImage());
+				cmsContentImage.setFile(inputStream);
+
+				productImageService.addProductImage(product, image, cmsContentImage);
+				newImageIds.add(image.getId());
+			} else {
+				if (image.getId() != null) {
+					productImageService.save(image);
+					newImageIds.add(image.getId());
 				}
 			}
+		}
+	}
+
 
 			// cleanup old and new images
 			if (originalProductImages != null) {
@@ -327,7 +333,8 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 			
 
 
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			LOGGER.error("Cannot save images " + e.getMessage());
 		}
 		
