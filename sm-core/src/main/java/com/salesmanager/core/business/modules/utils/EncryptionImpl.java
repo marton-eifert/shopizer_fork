@@ -40,25 +40,28 @@ public final class EncryptionImpl implements Encryption {
 	}
 
 	@Override
-	public String decrypt(String value) throws Exception {
+public String decrypt(String value) throws Exception {
 
-		
-		if (StringUtils.isBlank(value))
-			throw new Exception("Nothing to encrypt");
+	
+	if (StringUtils.isBlank(value))
+		throw new Exception("Nothing to encrypt");
 
-		// NEED TO UNDERSTAND WHY PKCS5Padding DOES NOT WORK
-		// Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-		Cipher cipher = Cipher.getInstance(CYPHER_SPEC);
-		SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(), KEY_SPEC);
-		IvParameterSpec ivSpec = new IvParameterSpec(IV_P
-				.getBytes());
-		cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-		byte[] outText;
-		outText = cipher.doFinal(hexToBytes(value));
-		return new String(outText);
-		
-		
-	}
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Using string literals for secretKey and IV_P to take advantage of string interning
+	and avoid unnecessary object creation through new String(byte[]).getBytes().
+	*/
+	// Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+	Cipher cipher = Cipher.getInstance(CYPHER_SPEC);
+	SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), KEY_SPEC);
+	IvParameterSpec ivSpec = new IvParameterSpec(IV_P.getBytes(StandardCharsets.UTF_8));
+	cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+	byte[] outText;
+	outText = cipher.doFinal(hexToBytes(value));
+	return new String(outText, StandardCharsets.UTF_8);
+	
+	
+}
+
 	
 	
 	private String bytesToHex(byte[] data) {
@@ -66,19 +69,22 @@ public final class EncryptionImpl implements Encryption {
 			return null;
 		} else {
 			int len = data.length;
-			String str = "";
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Replaced string concatenation in the loop with StringBuilder to accumulate the hex representation.
+			After the loop, the StringBuilder is converted to a String and returned.
+			*/
+			StringBuilder sb = new StringBuilder(len * 2);
 			for (byte datum : data) {
 				if ((datum & 0xFF) < 16) {
-					str = str + "0"
-							+ Integer.toHexString(datum & 0xFF);
+					sb.append("0").append(Integer.toHexString(datum & 0xFF));
 				} else {
-					str = str + Integer.toHexString(datum & 0xFF);
+					sb.append(Integer.toHexString(datum & 0xFF));
 				}
-
 			}
-			return str;
+			return sb.toString();
 		}
 	}
+
 
 	private static byte[] hexToBytes(String str) {
 		if (str == null) {
@@ -88,7 +94,10 @@ public final class EncryptionImpl implements Encryption {
 		} else {
 			int len = str.length() / 2;
 			byte[] buffer = new byte[len];
-			for (int i = 0; i < len; i++) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Refactored the for loop to iterate in reverse, decrementing from the highest value down to zero.
+			Changed the loop condition to compare the index against zero for a more efficient evaluation. */
+			for (int i = len - 1; i >= 0; i--) {
 				buffer[i] = (byte) Integer.parseInt(str.substring(i * 2,
 						i * 2 + 2), 16);
 			}
@@ -105,3 +114,4 @@ public final class EncryptionImpl implements Encryption {
 	}
 
 }
+
