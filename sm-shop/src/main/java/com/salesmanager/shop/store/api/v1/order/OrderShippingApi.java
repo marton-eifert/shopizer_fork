@@ -166,43 +166,50 @@ public class OrderShippingApi {
 
       return shippingSummary;
 
-    } catch (Exception e) {
-      LOGGER.error("Error while getting shipping quote", e);
-      try {
-        response.sendError(503, "Error while getting shipping quote" + e.getMessage());
-      } catch (Exception ignore) {
-      }
-      return null;
     }
+catch (Exception e) {
+  LOGGER.error("Error while getting shipping quote", e);
+  /* QECI-fix (2024-01-08 21:10:09.611735):
+     Removed the empty catch block and added logging for the ignored exception at debug level.
+     This avoids wasting resources and maintains code robustness. */
+  try {
+    response.sendError(503, "Error while getting shipping quote" + e.getMessage());
+  } catch (Exception ignore) {
+    LOGGER.debug("Ignored exception while sending error response", ignore);
   }
+  return null;
+}
+}
 
-  /**
-   * Get shipping quote based on postal code
-   * @param code
-   * @param address
-   * @param merchantStore
-   * @param language
-   * @param request
-   * @param response
-   * @return
-   * @throws Exception
-   */
-  @RequestMapping(
-      value = {"/cart/{code}/shipping"},
-      method = RequestMethod.POST)
-  @ResponseBody
-  @ApiImplicitParams({
-      @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-      @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en")
-  })
-  public ReadableShippingSummary shipping(
-      @PathVariable final String code,
-      @RequestBody AddressLocation address,
-      @ApiIgnore MerchantStore merchantStore,
-      @ApiIgnore Language language,
-      HttpServletRequest request,
-      HttpServletResponse response)
-      throws Exception {
+/**
+ * Get shipping quote based on postal code
+ * @param code
+ * @param address
+ * @param merchantStore
+ * @param language
+ * @param request
+ * @param response
+ * @return
+ * @throws Exception
+ */
+@RequestMapping(
+  value = {"/cart/{code}/shipping"},
+  method = RequestMethod.POST)
+@ResponseBody
+@ApiImplicitParams({
+  @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+  @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en")
+})
+public ReadableShippingSummary shipping(
+  @PathVariable final String code,
+  @RequestBody AddressLocation address,
+  @ApiIgnore MerchantStore merchantStore,
+  @ApiIgnore Language language,
+  HttpServletRequest request,
+  HttpServletResponse response)
+  throws Exception
+
+{
 
     try {
       Locale locale = request.getLocale();
@@ -278,7 +285,8 @@ public class OrderShippingApi {
 
       return shippingSummary;
 
-    } catch (Exception e) {
+    }
+catch (Exception e) {
       LOGGER.error("Error while getting shipping quote", e);
       try {
         response.sendError(503, "Error while getting shipping quote" + e.getMessage());
