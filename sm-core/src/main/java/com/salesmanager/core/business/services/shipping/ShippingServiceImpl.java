@@ -656,40 +656,43 @@ public class ShippingServiceImpl implements ShippingService {
 			}
 			
 			/** set final delivery address **/
-			shippingQuote.setDeliveryAddress(delivery);
-			
-			shippingQuote.setShippingOptions(shippingOptions);
-			
-			/** post processors **/
-			//invoke pre processors
-			if(!CollectionUtils.isEmpty(shippingModulePostProcessors)) {
-				for(ShippingQuotePrePostProcessModule postProcessor : shippingModulePostProcessors) {
-					//get module info
-					
-					//get module configuration
-					IntegrationConfiguration integrationConfiguration = modules.get(postProcessor.getModuleCode());
-					
-					IntegrationModule postProcessModule = null;
-					for(IntegrationModule mod : shippingMethods) {
-						if(mod.getCode().equals(postProcessor.getModuleCode())){
-							postProcessModule = mod;
-							break;
-						}
-					}
-					
-					IntegrationModule module = postProcessModule;
-					if(integrationConfiguration != null) {
-						postProcessor.prePostProcessShippingQuotes(shippingQuote, packages, orderTotal, delivery, shippingOrigin, store, integrationConfiguration, module, shippingConfiguration, shippingMethods, locale);
-					}
-				}
-			}
-			String ipAddress = null;
-	    	UserContext context = UserContext.getCurrentInstance();
-	    	if(context != null) {
-	    		ipAddress = context.getIpAddress();
-	    	}
-			
-			if(shippingQuote!=null && CollectionUtils.isNotEmpty(shippingQuote.getShippingOptions())) {
+shippingQuote.setDeliveryAddress(delivery);
+
+shippingQuote.setShippingOptions(shippingOptions);
+
+/** post processors **/
+//invoke pre processors
+if(!CollectionUtils.isEmpty(shippingModulePostProcessors)) {
+    /* QECI-fix (2024-01-08 21:10:09.611735):
+    Refactored the nested loop that searches for the matching IntegrationModule by using a hashmap.
+    This reduces the complexity from O(n^2) to O(n) by pre-populating the hashmap with modules keyed by their code.
+    */
+    HashMap<String, IntegrationModule> moduleMap = new HashMap<>();
+    for(IntegrationModule mod : shippingMethods) {
+        moduleMap.put(mod.getCode(), mod);
+    }
+    
+    for(ShippingQuotePrePostProcessModule postProcessor : shippingModulePostProcessors) {
+        //get module info
+        
+        //get module configuration
+        IntegrationConfiguration integrationConfiguration = modules.get(postProcessor.getModuleCode());
+        
+        IntegrationModule module = moduleMap.get(postProcessor.getModuleCode());
+        
+        if(integrationConfiguration != null && module != null) {
+            postProcessor.prePostProcessShippingQuotes(shippingQuote, packages, orderTotal, delivery, shippingOrigin, store, integrationConfiguration, module, shippingConfiguration, shippingMethods, locale);
+        }
+    }
+}
+String ipAddress = null;
+UserContext context = UserContext.getCurrentInstance();
+if(context != null) {
+    ipAddress = context.getIpAddress();
+}
+
+            
+            if(shippingQuote!=null && CollectionUtils.isNotEmpty(shippingQuote.getShippingOptions())) {
 				//save SHIPPING OPTIONS
 				List<ShippingOption> finalShippingOptions = shippingQuote.getShippingOptions();
 				for(ShippingOption option : finalShippingOptions) {
