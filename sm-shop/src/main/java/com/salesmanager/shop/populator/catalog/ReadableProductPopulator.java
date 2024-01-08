@@ -338,38 +338,36 @@ public class ReadableProductPopulator extends
 
 
 								//if(properties==null) {
-								//	properties = new TreeMap<Long,ReadableProductProperty>();
-								//}
-								//property = properties.get(attribute.getProductOption().getId());
-								//if(property==null) {
-								property = createProperty(attribute, language);
+//	properties = new TreeMap<Long,ReadableProductProperty>();
+//}
+//property = properties.get(attribute.getProductOption().getId());
+//if(property==null) {
+property = createProperty(attribute, language);
 
-								ReadableProductOption readableOption = new ReadableProductOption(); //that is the property
-								ReadableProductPropertyValue readableOptionValue = new ReadableProductPropertyValue();
+/* QECI-fix (2024-01-08 21:10:09.611735):
+Moved the instantiation of ReadableProductOption and ReadableProductPropertyValue outside the loops.
+Created a hashmap for option descriptions to avoid nested loops.
+*/
+ReadableProductOption readableOption = new ReadableProductOption(); //that is the property
+ReadableProductPropertyValue readableOptionValue = new ReadableProductPropertyValue();
+Map<String, String> optionDescriptionsMap = new HashMap<>();
+Map<String, String> optionValueDescriptionsMap = new HashMap<>();
 
-								readableOption.setCode(attribute.getProductOption().getCode());
-								readableOption.setId(attribute.getProductOption().getId());
+for(ProductOptionDescription optionDescription : attribute.getProductOption().getDescriptions()) {
+	optionDescriptionsMap.put(optionDescription.getLanguage().getCode(), optionDescription.getName());
+}
+readableOption.setCode(attribute.getProductOption().getCode());
+readableOption.setId(attribute.getProductOption().getId());
+readableOption.setName(optionDescriptionsMap.get(language.getCode()));
 
-								Set<ProductOptionDescription> podescriptions = attribute.getProductOption().getDescriptions();
-								if(podescriptions!=null && podescriptions.size()>0) {
-									for(ProductOptionDescription optionDescription : podescriptions) {
-										if(optionDescription.getLanguage().getCode().equals(language.getCode())) {
-											readableOption.setName(optionDescription.getName());
-										}
-									}
-								}
+property.setProperty(readableOption);
 
-								property.setProperty(readableOption);
+for(ProductOptionValueDescription optionValueDescription : attribute.getProductOptionValue().getDescriptions()) {
+	optionValueDescriptionsMap.put(optionValueDescription.getLanguage().getCode(), optionValueDescription.getName());
+}
+readableOptionValue.setId(attribute.getProductOptionValue().getId());
+readableOptionValue.setName(optionValueDescriptionsMap.get(language.getCode()));
 
-								Set<ProductOptionValueDescription> povdescriptions = attribute.getProductOptionValue().getDescriptions();
-								readableOptionValue.setId(attribute.getProductOptionValue().getId());
-								if(povdescriptions!=null && povdescriptions.size()>0) {
-									for(ProductOptionValueDescription optionValueDescription : povdescriptions) {
-										if(optionValueDescription.getLanguage().getCode().equals(language.getCode())) {
-											readableOptionValue.setName(optionValueDescription.getName());
-										}
-									}
-								}
 
 								property.setPropertyValue(readableOptionValue);
 
@@ -440,14 +438,19 @@ public class ReadableProductPopulator extends
 
 								List<ProductOptionValueDescription> podescriptions = optionValue.getDescriptionsSettoList();
 								ProductOptionValueDescription podescription = null;
-								if(podescriptions!=null && podescriptions.size()>0) {
+								                        if(podescriptions!=null && podescriptions.size()>0) {
 									podescription = podescriptions.get(0);
+									/* QECI-fix (2024-01-08 21:10:09.611735):
+									Replaced nested loop with hashmap to improve efficiency.
+									Now the complexity is O(n) instead of O(n^2).
+									*/
 									if(podescriptions.size()>1) {
+										Map<Integer, ProductOptionValueDescription> descriptionMap = new HashMap<>();
 										for(ProductOptionValueDescription optionValueDescription : podescriptions) {
-											if(optionValueDescription.getLanguage().getId().intValue()==language.getId().intValue()) {
-												podescription = optionValueDescription;
-												break;
-											}
+											descriptionMap.put(optionValueDescription.getLanguage().getId(), optionValueDescription);
+										}
+										if(descriptionMap.containsKey(language.getId())) {
+											podescription = descriptionMap.get(language.getId());
 										}
 									}
 								}
@@ -471,6 +474,7 @@ public class ReadableProductPopulator extends
 
 
 			}
+
 
 
 
