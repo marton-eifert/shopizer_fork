@@ -248,7 +248,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		Query q = this.em.createQuery(hql);
 
 		q.setParameter("lid", regionList);
-		q.setParameter("dt", new Date());
+		                        q.setParameter("dt", new Date());
 		q.setParameter("seUrl", seUrl);
 
 		Product p = null;
@@ -261,7 +261,10 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			// p = (Product)q.getSingleResult();
 			p = products.get(0);
 		} catch (javax.persistence.NoResultException ignore) {
-
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Added logging to the catch block to handle the NoResultException and prevent resource wastage.
+			*/
+			LOGGER.error("No results found for query", ignore);
 		}
 
 		return p;
@@ -282,6 +285,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
 		List regionList = new ArrayList();
 		regionList.add("*");
+
 		regionList.add(locale.getCountry());
 
 		StringBuilder qs = new StringBuilder();
@@ -921,36 +925,36 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		}
 
 		if (!StringUtils.isBlank(criteria.getCode())) {
-			q.setParameter("sku",
-					new StringBuilder().append("%").append(criteria.getCode().toLowerCase()).append("%").toString());
-		}
+            q.setParameter("sku",
+                    new StringBuilder().append("%").append(criteria.getCode().toLowerCase()).append("%").toString());
+        }
 
-		/**/
-		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
-			int cnt = 0;
-			for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
-				q.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
-				q.setParameter("val" + cnt + attributeCriteria.getAttributeCode(),
-						"%" + attributeCriteria.getAttributeValue() + "%");
-				cnt++;
-			}
-		}
+        /**/
+        if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+                && !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+            int cnt = 0;
+            for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
+                q.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
+                q.setParameter("val" + cnt + attributeCriteria.getAttributeCode(),
+                        "%" + attributeCriteria.getAttributeValue() + "%");
+                cnt++;
+            }
+        }
 
-		// RENTAL
-		/**
-		if (!StringUtils.isBlank(criteria.getStatus())) {
-			q.setParameter("status", criteria.getStatus());
-		}
-		**/
+        // RENTAL
+        /**
+        if (!StringUtils.isBlank(criteria.getStatus())) {
+            q.setParameter("status", criteria.getStatus());
+        }
+        **/
 
-		/**
-		if (criteria.getOwnerId() != null) {
-			q.setParameter("ownerid", criteria.getOwnerId());
-		}
-	    **/
+        /**
+        if (criteria.getOwnerId() != null) {
+            q.setParameter("ownerid", criteria.getOwnerId());
+        }
+        **/
 
-		if (!StringUtils.isBlank(criteria.getProductName())) {
+        if (!StringUtils.isBlank(criteria.getProductName())) {
 			q.setParameter("nm", new StringBuilder().append("%").append(criteria.getProductName().toLowerCase())
 					.append("%").toString());
 		}
