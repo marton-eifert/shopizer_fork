@@ -50,34 +50,34 @@ public class CacheUtils {
 	}
 	
 	public List<String> getCacheKeys(MerchantStore store) throws Exception {
-		
-		  net.sf.ehcache.Cache cacheImpl = (net.sf.ehcache.Cache) cache.getNativeCache();
-		  List<String> returnKeys = new ArrayList<String>();
-		  for (Object key: cacheImpl.getKeys()) {
-		    
-			  
-				try {
-					String sKey = (String)key;
-					
-					// a key should be <storeId>_<rest of the key>
-					int delimiterPosition = sKey.indexOf(KEY_DELIMITER);
-					
-					if(delimiterPosition>0 && Character.isDigit(sKey.charAt(0))) {
-					
-						String keyRemaining = sKey.substring(delimiterPosition+1);
-						returnKeys.add(keyRemaining);
-					
-					}
+        
+          net.sf.ehcache.Cache cacheImpl = (net.sf.ehcache.Cache) cache.getNativeCache();
+          List<String> returnKeys = new ArrayList<String>();
+          for (Object key: cacheImpl.getKeys()) {
+            
+              
+                try {
+                    String sKey = (String)key;
+                    
+                    // a key should be <storeId>_<rest of the key>
+                    int delimiterPosition = sKey.indexOf(KEY_DELIMITER);
+                    
+                    if(delimiterPosition>0 && Character.isDigit(sKey.charAt(0))) {
+                    
+                        String keyRemaining = sKey.substring(delimiterPosition+1);
+                        returnKeys.add(keyRemaining);
+                    
+                    }
 
-				} catch (Exception e) {
-					LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
-				}  
-		  }
+                } catch (Exception e) {
+                    LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
+                }  
+          }
 
-		return returnKeys;
-	}
-	
-	public void shutDownCache() throws Exception {
+        return returnKeys;
+    }
+    
+    public void shutDownCache() throws Exception {
 		
 	}
 	
@@ -87,6 +87,7 @@ public class CacheUtils {
 	
 	public void removeAllFromCache(MerchantStore store) throws Exception {
 		  net.sf.ehcache.Cache cacheImpl = (net.sf.ehcache.Cache) cache.getNativeCache();
+		  StringBuilder errorLogBuilder = new StringBuilder();
 		  for (Object key: cacheImpl.getKeys()) {
 				try {
 					String sKey = (String)key;
@@ -95,18 +96,22 @@ public class CacheUtils {
 					int delimiterPosition = sKey.indexOf(KEY_DELIMITER);
 					
 					if(delimiterPosition>0 && Character.isDigit(sKey.charAt(0))) {
-					
-
 						cache.evict(key);
-					
 					}
 
 				} catch (Exception e) {
-					LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
+					/* QECI-fix (2024-01-08 21:10:09.611735):
+					Replaced string concatenation in the exception handling within the loop with a StringBuilder to accumulate the error message.
+					*/
+					errorLogBuilder.append("key ").append(key).append(" cannot be converted to a String or parsed\n");
 				}  
+		  }
+		  if (errorLogBuilder.length() > 0) {
+			  LOGGER.equals(errorLogBuilder.toString());
 		  }
 	}
 	
 
 
 }
+
