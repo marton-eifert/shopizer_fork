@@ -493,38 +493,40 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 	}
 	
 	private void settings(SearchConfiguration config, String language) throws Exception{
-		Validate.notEmpty(language, "Configuration requires language");
-		String settings = resourceAsText(loadSearchConfig(SETTINGS + "_DEFAULT.json"));
-		//specific settings
-		if(language.equals("en")) {
-			settings = resourceAsText(loadSearchConfig(SETTINGS+ "_" + language +".json"));
-		}
-		
-		config.getSettings().put(language, settings);
+        Validate.notEmpty(language, "Configuration requires language");
+        String settings = resourceAsText(loadSearchConfig(SETTINGS + "_DEFAULT.json"));
+        //specific settings
+        if(language.equals("en")) {
+            settings = resourceAsText(loadSearchConfig(SETTINGS+ "_" + language +".json"));
+        }
+        
+        config.getSettings().put(language, settings);
 
-	}
-	
-	private void mappings(SearchConfiguration config, String language) throws Exception {
-		Validate.notEmpty(language, "Configuration requires language");
+    }
+    
+    private void mappings(SearchConfiguration config, String language) throws Exception {
+        Validate.notEmpty(language, "Configuration requires language");
 
-		config.getProductMappings().put(language, resourceAsText(loadSearchConfig(PRODUCT_MAPPING_DEFAULT)));
-		config.getKeywordsMappings().put(language,KEYWORDS_MAPPING_DEFAULT);
-			
-	}
+        config.getProductMappings().put(language, resourceAsText(loadSearchConfig(PRODUCT_MAPPING_DEFAULT)));
+        config.getKeywordsMappings().put(language,KEYWORDS_MAPPING_DEFAULT);
+            
+    }
 
-	
-	private String resourceAsText(Resource resource) throws Exception {
-		InputStream mappingstream = resource.getInputStream();
-		
-	    return new BufferedReader(
-	    	      new InputStreamReader(mappingstream, StandardCharsets.UTF_8))
-	    	        .lines()
-	    	        .collect(Collectors.joining("\n"));
-	}
-	
-	private Resource loadSearchConfig(String file) {
-	    return resourceLoader.getResource(
-	      "classpath:" + file);
-	}
+    
+    private String resourceAsText(Resource resource) throws Exception {
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+        Using try-with-resources to ensure that the InputStream is closed after use to prevent resource leaks.
+        */
+        try (InputStream mappingstream = resource.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(mappingstream, StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
+    }
+    
+    private Resource loadSearchConfig(String file) {
+        return resourceLoader.getResource(
+          "classpath:" + file);
+    }
 
 }
+
