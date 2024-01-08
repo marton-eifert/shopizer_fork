@@ -118,31 +118,36 @@ public class ProductApi {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = { "/private/product/{id}", "/auth/product/{id}" }, method = RequestMethod.PUT)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	@ApiOperation(httpMethod = "PUT", value = "Update product", notes = "", produces = "application/json", response = PersistableProduct.class)
-	public void update(@PathVariable Long id,
-			@Valid @RequestBody PersistableProduct product, @ApiIgnore MerchantStore merchantStore,
-			HttpServletRequest request, HttpServletResponse response) {
+@RequestMapping(value = { "/private/product/{id}", "/auth/product/{id}" }, method = RequestMethod.PUT)
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+		@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+@ApiOperation(httpMethod = "PUT", value = "Update product", notes = "", produces = "application/json", response = PersistableProduct.class)
+public void update(@PathVariable Long id,
+		@Valid @RequestBody PersistableProduct product, @ApiIgnore MerchantStore merchantStore,
+		HttpServletRequest request, HttpServletResponse response) {
 
-		try {
-			// Make sure we have consistency in this request
-			if (!id.equals(product.getId())) {
-				response.sendError(400, "Error url id does not match object id");
-			}
-
-			productCommonFacade.saveProduct(merchantStore, product,
-					merchantStore.getDefaultLanguage());
-		} catch (Exception e) {
-			LOGGER.error("Error while updating product", e);
-			try {
-				response.sendError(503, "Error while updating product " + e.getMessage());
-			} catch (Exception ignore) {
-			}
-
+	try {
+		// Make sure we have consistency in this request
+		if (!id.equals(product.getId())) {
+			response.sendError(400, "Error url id does not match object id");
 		}
+
+		productCommonFacade.saveProduct(merchantStore, product,
+				merchantStore.getDefaultLanguage());
+	} catch (Exception e) {
+		LOGGER.error("Error while updating product", e);
+		try {
+			response.sendError(503, "Error while updating product " + e.getMessage());
+		} catch (Exception ignore) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Removed empty catch block and added logging to handle the exception properly.
+			This avoids wasting resources and increases code robustness. */
+			LOGGER.error("Error sending error response", ignore);
+		}
+
 	}
+}
+
 
 	/** updates price quantity **/
 	@ResponseStatus(HttpStatus.OK)
