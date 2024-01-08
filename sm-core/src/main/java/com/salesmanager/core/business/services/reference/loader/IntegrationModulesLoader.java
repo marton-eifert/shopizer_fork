@@ -123,42 +123,42 @@ public class IntegrationModulesLoader {
 	    		Map<String,ModuleConfig> moduleConfigs = new HashMap<String,ModuleConfig>();
 	        	int count=0;
 	    		for(Object oo : confs) {
-	        		
-	        		Map values = (Map)oo;
-	        		
-	        		String env = (String)values.get("env");
-	        		
-	        		ModuleConfig config = new ModuleConfig();
-	        		config.setScheme((String)values.get("scheme"));
-	        		config.setHost((String)values.get("host"));
-	        		config.setPort((String)values.get("port"));
-	        		config.setUri((String)values.get("uri"));
-	        		config.setEnv((String)values.get("env"));
-	        		if(values.get("config1") !=null) {
-	        			config.setConfig1((String)values.get("config1"));
-	        		}
-	        		if(values.get("config2") !=null) {
-	        			config.setConfig2((String)values.get("config2"));
-	        		}
-	        		
-	        		String jsonConfigString = mapper.writeValueAsString(config);
-	        		configString.append(jsonConfigString);
-	        		
-	        		moduleConfigs.put(env, config);
-	        		
-	        		if(count<(confs.size()-1)) {
-	        			configString.append(",");
-	        		}
-	        		count++;
-	        		
-	        		
-	        	}
-	        	configString.append("]");
-	        	module.setConfiguration(configString.toString());
-	        	module.setModuleConfigs(moduleConfigs);
-	    	}
-	    	
-	    	List<String> regions = (List<String>)object.get("regions");
+                    
+                    Map values = (Map)oo;
+                    
+                    String env = (String)values.get("env");
+                    
+                    ModuleConfig config = new ModuleConfig();
+                    config.setScheme((String)values.get("scheme"));
+                    config.setHost((String)values.get("host"));
+                    config.setPort((String)values.get("port"));
+                    config.setUri((String)values.get("uri"));
+                    config.setEnv((String)values.get("env"));
+                    if(values.get("config1") !=null) {
+                        config.setConfig1((String)values.get("config1"));
+                    }
+                    if(values.get("config2") !=null) {
+                        config.setConfig2((String)values.get("config2"));
+                    }
+                    
+                    String jsonConfigString = mapper.writeValueAsString(config);
+                    configString.append(jsonConfigString);
+                    
+                    moduleConfigs.put(env, config);
+                    
+                    if(count<(confs.size()-1)) {
+                        configString.append(",");
+                    }
+                    count++;
+                    
+                    
+                }
+                configString.append("]");
+                module.setConfiguration(configString.toString());
+                module.setModuleConfigs(moduleConfigs);
+            }
+            
+            List<String> regions = (List<String>)object.get("regions");
 	    	if(regions!=null) {
 	    		
 	
