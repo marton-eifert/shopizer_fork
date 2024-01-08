@@ -190,7 +190,7 @@ public class PersistableInventoryMapper implements Mapper<PersistableInventory, 
 				destination.setPrices(new HashSet<ProductPrice>(prices));
 			}
 
-			return destination;
+			                        return destination;
 			
 		} catch (ResourceNotFoundException rne) {
 			throw new ConversionRuntimeException(rne.getErrorCode(), rne.getErrorMessage(), rne);
@@ -207,14 +207,19 @@ public class PersistableInventoryMapper implements Mapper<PersistableInventory, 
 			return Collections.emptySet();
 		}
 		Set<ProductPriceDescription> descs = new HashSet<ProductPriceDescription>();
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Refactored the nested loop to use a hashmap for storing existing descriptions to improve lookup time from O(n^2) to O(n).
+		*/
+		Map<Long, ProductPriceDescription> existingDescriptionsMap = new HashMap<>();
+		if (CollectionUtils.isNotEmpty(price.getDescriptions())) {
+			for (ProductPriceDescription d : price.getDescriptions()) {
+				existingDescriptionsMap.put(d.getId(), d);
+			}
+		}
 		for (com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc : descriptions) {
-			ProductPriceDescription description = null;
-			if (CollectionUtils.isNotEmpty(price.getDescriptions())) {
-				for (ProductPriceDescription d : price.getDescriptions()) {
-					if (isPositive(desc.getId()) && desc.getId().equals(d.getId())) {
-						desc.setId(d.getId());
-					}
-				}
+			ProductPriceDescription description = existingDescriptionsMap.getOrDefault(desc.getId(), new ProductPriceDescription());
+			if (isPositive(desc.getId()) && description.getId() != null) {
+				desc.setId(description.getId());
 			}
 			description = getDescription(desc);
 			description.setProductPrice(price);
@@ -222,6 +227,7 @@ public class PersistableInventoryMapper implements Mapper<PersistableInventory, 
 		}
 		return descs;
 	}
+
 
 	private String getRegion(PersistableInventory source) {
 		return Optional.ofNullable(source.getRegion()).filter(StringUtils::isNotBlank).orElse(Constants.ALL_REGIONS);
