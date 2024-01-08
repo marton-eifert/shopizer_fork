@@ -114,16 +114,18 @@ public class ReadableInventoryMapper implements Mapper<ProductAvailability, Read
 		return readableMerchantStorePopulator.populate(store, new ReadableMerchantStore(), store, language);
 	}
 
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Move the instantiation of ReadableProductPricePopulator outside of the loop to avoid repeated object creation.
+	*/
 	private List<ReadableProductPrice> prices(ProductAvailability source, MerchantStore store, Language language)
 			throws ConversionException {
 
-		ReadableProductPricePopulator populator = null;
+		ReadableProductPricePopulator populator = new ReadableProductPricePopulator();
+		populator.setPricingService(pricingService);
 		List<ReadableProductPrice> prices = new ArrayList<ReadableProductPrice>();
 
 		for (ProductPrice price : source.getPrices()) {
 
-			populator = new ReadableProductPricePopulator();
-			populator.setPricingService(pricingService);
 			ReadableProductPrice p = populator.populate(price, new ReadableProductPrice(), store, language);
 			prices.add(p);
 
@@ -132,3 +134,4 @@ public class ReadableInventoryMapper implements Mapper<ProductAvailability, Read
 	}
 
 }
+
