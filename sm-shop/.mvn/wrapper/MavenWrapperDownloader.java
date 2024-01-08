@@ -58,22 +58,17 @@ public class MavenWrapperDownloader {
         File mavenWrapperPropertyFile = new File(baseDirectory, MAVEN_WRAPPER_PROPERTIES_PATH);
         String url = DEFAULT_DOWNLOAD_URL;
         if(mavenWrapperPropertyFile.exists()) {
-            FileInputStream mavenWrapperPropertyFileInputStream = null;
-            try {
-                mavenWrapperPropertyFileInputStream = new FileInputStream(mavenWrapperPropertyFile);
+            /* QECI-fix (2024-01-08 21:10:09.611735):
+            Replaced the try-finally block with a try-with-resources statement to ensure that the FileInputStream is closed properly.
+            Also, replaced the empty catch block with a catch block that logs the IOException using a simple print statement for demonstration purposes.
+            */
+            try (FileInputStream mavenWrapperPropertyFileInputStream = new FileInputStream(mavenWrapperPropertyFile)) {
                 Properties mavenWrapperProperties = new Properties();
                 mavenWrapperProperties.load(mavenWrapperPropertyFileInputStream);
                 url = mavenWrapperProperties.getProperty(PROPERTY_NAME_WRAPPER_URL, url);
             } catch (IOException e) {
                 System.out.println("- ERROR loading '" + MAVEN_WRAPPER_PROPERTIES_PATH + "'");
-            } finally {
-                try {
-                    if(mavenWrapperPropertyFileInputStream != null) {
-                        mavenWrapperPropertyFileInputStream.close();
-                    }
-                } catch (IOException e) {
-                    // Ignore ...
-                }
+                e.printStackTrace();
             }
         }
         System.out.println("- Downloading from: : " + url);
@@ -96,6 +91,7 @@ public class MavenWrapperDownloader {
             System.exit(1);
         }
     }
+
 
     private static void downloadFileFromURL(String urlString, File destination) throws Exception {
         URL website = new URL(urlString);
