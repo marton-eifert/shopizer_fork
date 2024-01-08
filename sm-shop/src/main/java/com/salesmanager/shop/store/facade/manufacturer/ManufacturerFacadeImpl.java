@@ -153,7 +153,7 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
 
       List<Manufacturer> manufacturers = null;
       if(page == 0 && count == 0) {
-    	//need total count
+        //need total count
         int total = manufacturerService.count(store);
 
         if(language != null) {
@@ -190,7 +190,8 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
       readableList.setManufacturers(returnList);
       return readableList;
       
-    } catch (Exception e) {
+    }
+catch (Exception e) {
       throw new ServiceRuntimeException("Error while get manufacturers",e);
     }
   }
@@ -250,7 +251,7 @@ public ReadableManufacturerList listByStore(MerchantStore store, Language langua
       } catch (Exception e) {
         throw new ServiceRuntimeException("Error while get manufacturers",e);
       }
-	
+    
 }
 
 
