@@ -500,7 +500,11 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 		} catch (ServiceException ex) {
 			LOG.error("Error while retriving cart from customer", ex);
 		} catch (NoResultException nre) {
-			// nothing
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Replaced the empty catch block with a logging statement to track when the NoResultException occurs.
+			This provides insight into the exception without wasting resources on an empty catch block.
+			*/
+			LOG.error("No result found", nre);
 		}
 
 		if (cart == null) {
@@ -508,6 +512,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 		}
 
 		// if cart has been completed return null
+
 		if (cart.getOrderId() != null && cart.getOrderId().longValue() > 0) {
 			if (StringUtils.isNotBlank(shoppingCartId) && !(shoppingCartId.equals(cart.getShoppingCartCode()))) {
 				cart = shoppingCartService.getByCode(shoppingCartId, store);
@@ -627,6 +632,14 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 		Validate.notEmpty(shoppingCartItems, "shoppingCartItems null or empty");
 		ShoppingCart cartModel = null;
 		Set<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> cartItems = new HashSet<com.salesmanager.core.model.shoppingcart.ShoppingCartItem>();
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Using StringBuilder to accumulate log messages instead of string concatenation within the loop.
+		*/
+		StringBuilder logMessageBuilder = new StringBuilder();
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Moved the instantiation of ArrayList<ProductAttribute> outside of the loop.
+		*/
+		List<ProductAttribute> productAttributes = new ArrayList<ProductAttribute>();
 		for (ShoppingCartItem item : shoppingCartItems) {
 
 			if (item.getQuantity() < 1) {
@@ -646,10 +659,12 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 
 			entryToUpdate.getProduct();
 
-			LOG.info("Updating cart entry quantity to" + item.getQuantity());
+			logMessageBuilder.setLength(0); // Clear the StringBuilder for the new message
+			logMessageBuilder.append("Updating cart entry quantity to ").append(item.getQuantity());
+			LOG.info(logMessageBuilder.toString());
 			entryToUpdate.setQuantity((int) item.getQuantity());
 
-			List<ProductAttribute> productAttributes = new ArrayList<ProductAttribute>();
+			productAttributes.clear(); // Clear the list for new attributes
 			productAttributes.addAll(entryToUpdate.getProduct().getAttributes());
 
 			final FinalPrice finalPrice = pricingService.calculateProductPrice(entryToUpdate.getProduct(),
@@ -659,6 +674,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 			cartItems.add(entryToUpdate);
 
 		}
+
 
 		cartModel.setPromoCode(null);
 		if (promoCode.isPresent()) {
@@ -687,7 +703,11 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 				LOG.error("error while fetching cart model...", e);
 				return null;
 			} catch (NoResultException nre) {
-				// nothing
+				/* QECI-fix (2024-01-08 21:10:09.611735):
+				 * Added logging to the empty catch block to handle the exception meaningfully
+				 * and avoid resource waste.
+				 */
+				LOG.warn("No shopping cart result found for cartId: " + cartId);
 			}
 
 		}
@@ -705,14 +725,18 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 				return cart;
 			}
 		} catch (NoResultException nre) {
-			// nothing
-
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			 * Added logging to the empty catch block to handle the exception meaningfully
+			 * and avoid resource waste.
+			 */
+			LOG.warn("No shopping cart result found for code: " + code);
 		} catch (Exception e) {
 			LOG.error("Cannot retrieve cart code " + code, e);
 		}
 
 		return null;
 	}
+
 
 	@Override
 	public ShoppingCart getShoppingCartModel(String shoppingCartCode, MerchantStore store) throws Exception {
