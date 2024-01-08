@@ -50,7 +50,10 @@ public class BeanUtils
         BeanInfo beanInfo = Introspector.getBeanInfo( beanClass );
         PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
         PropertyDescriptor propertyDescriptor = null;
-        for ( int i = 0; i < propertyDescriptors.length; i++ )
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+        Refactored the for-loop to iterate in reverse, starting from the last index and decrementing to zero.
+        Changed the loop condition to compare the loop index against zero for a more efficient comparison. */
+        for ( int i = propertyDescriptors.length - 1; i >= 0; i-- )
         {
             PropertyDescriptor currentPropertyDescriptor = propertyDescriptors[i];
             if ( currentPropertyDescriptor.getName().equals( propertyname ) )
@@ -63,3 +66,4 @@ public class BeanUtils
     }
     
 }
+
