@@ -77,7 +77,7 @@ public class CustomShippingQuoteRules implements ShippingQuoteModule {
 
 		Double distance = null;
 		
-		if(quote!=null) {
+		                        if(quote!=null) {
 			//look if distance has been calculated
 			if(quote.getQuoteInformations()!=null) {
 				if(quote.getQuoteInformations().containsKey(Constants.DISTANCE_KEY)) {
@@ -91,6 +91,11 @@ public class CustomShippingQuoteRules implements ShippingQuoteModule {
 		Double weight = 0D;
 		Double size = null;
 		//calculate weight
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Moved the instantiation of the sizeList ArrayList outside of the loop to avoid creating a new object in each iteration.
+		Reuse the sizeList by clearing its contents at the beginning of each loop iteration instead of creating a new list.
+		*/
+		List<Double> sizeList = new ArrayList<Double>();
 		for(PackageDetails pack : packages) {
 			weight = weight + pack.getShippingWeight();
 			Double tmpVolume = pack.getShippingHeight() * pack.getShippingLength() * pack.getShippingWidth();
@@ -98,7 +103,7 @@ public class CustomShippingQuoteRules implements ShippingQuoteModule {
 				volume = tmpVolume;
 			} 
 			//largest size
-			List<Double> sizeList = new ArrayList<Double>();
+			sizeList.clear();
 			sizeList.add(pack.getShippingHeight());
 			sizeList.add(pack.getShippingWidth());
 			sizeList.add(pack.getShippingLength());
@@ -115,6 +120,7 @@ public class CustomShippingQuoteRules implements ShippingQuoteModule {
 		inputParameters.setCountry(delivery.getCountry().getIsoCode());
 		inputParameters.setProvince("*");
 		inputParameters.setModuleName(module.getCode());
+
 		
 		if(delivery.getZone() != null && delivery.getZone().getCode()!=null) {
 			inputParameters.setProvince(delivery.getZone().getCode());
