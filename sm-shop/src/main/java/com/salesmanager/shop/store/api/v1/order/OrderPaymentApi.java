@@ -170,7 +170,8 @@ public class OrderPaymentApi {
 
 			return transaction;
 
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			LOGGER.error("Error while initializing the payment", e);
 			try {
 				response.sendError(503, "Error while initializing the payment " + e.getMessage());
