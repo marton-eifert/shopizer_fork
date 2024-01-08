@@ -76,37 +76,41 @@ public class ProductImageServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	}
 
 	@Override
-	public void addProductImage(Product product, ProductImage productImage, ImageContentFile inputImage)
-			throws ServiceException {
+public void addProductImage(Product product, ProductImage productImage, ImageContentFile inputImage)
+		throws ServiceException {
 
-		productImage.setProduct(product);
+	productImage.setProduct(product);
 
-		try {
-			if (productImage.getImageType() == 0) {
-				Assert.notNull(inputImage.getFile(), "ImageContentFile.file cannot be null");
-				productFileManager.addProductImage(productImage, inputImage);
-			}
-
-			// insert ProductImage
-			ProductImage img = saveOrUpdate(productImage);
-			//manual workaround since aspect is not working
-			eventPublisher.publishEvent(new SaveProductImageEvent(eventPublisher, img, product));
-
-		} catch (Exception e) {
-			throw new ServiceException(e);
-		} finally {
-			try {
-
-				if (inputImage.getFile() != null) {
-					inputImage.getFile().close();
-				}
-
-			} catch (Exception ignore) {
-
-			}
+	try {
+		if (productImage.getImageType() == 0) {
+			Assert.notNull(inputImage.getFile(), "ImageContentFile.file cannot be null");
+			productFileManager.addProductImage(productImage, inputImage);
 		}
 
+		// insert ProductImage
+		ProductImage img = saveOrUpdate(productImage);
+		//manual workaround since aspect is not working
+		eventPublisher.publishEvent(new SaveProductImageEvent(eventPublisher, img, product));
+
+	} catch (Exception e) {
+		throw new ServiceException(e);
+	} finally {
+		try {
+
+			if (inputImage.getFile() != null) {
+				inputImage.getFile().close();
+			}
+
+		} catch (Exception ignore) {
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Added logging for the ignored exception to improve exception handling and comply with green coding standards.
+			*/
+			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Exception ignored during file closure", ignore);
+		}
 	}
+
+}
+
 
 	@Override
 	public ProductImage saveOrUpdate(ProductImage productImage) throws ServiceException {
