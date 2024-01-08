@@ -95,18 +95,21 @@ public class ProductPriceUtils {
 
 		// attributes
 		BigDecimal attributePrice = null;
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Moved the instantiation of attributePrice outside of the loop to avoid creating a new BigDecimal object in each iteration.
+		Ensured that attributePrice is only set to a new BigDecimal(0) once before the loop starts if it is necessary.
+		Modified the loop to only update the value of attributePrice without creating new objects.
+		*/
 		if (attributes != null && attributes.size() > 0) {
+			attributePrice = new BigDecimal(0);
 			for (ProductAttribute attribute : attributes) {
 				if (attribute.getProductAttributePrice() != null
 						&& attribute.getProductAttributePrice().doubleValue() > 0) {
-					if (attributePrice == null) {
-						attributePrice = new BigDecimal(0);
-					}
 					attributePrice = attributePrice.add(attribute.getProductAttributePrice());
 				}
 			}
 
-			if (attributePrice != null && attributePrice.doubleValue() > 0) {
+			if (attributePrice.doubleValue() > 0) {
 				BigDecimal fp = finalPrice.getFinalPrice();
 				fp = fp.add(attributePrice);
 				finalPrice.setFinalPrice(fp);
@@ -126,6 +129,7 @@ public class ProductPriceUtils {
 
 		return finalPrice;
 	}
+
 
 	/**
 	 * This is the final price calculated from all configured prices and all
@@ -461,7 +465,8 @@ public class ProductPriceUtils {
 				throw new Exception("Not a positive integer " + amount);
 			}
 
-		} else {
+		}
+else {
 			// TODO should not go this path in this current release
 			StringBuilder pat = new StringBuilder();
 
@@ -613,40 +618,41 @@ public class ProductPriceUtils {
 
 	private FinalPrice calculateFinalPrice(ProductAvailability availability) throws ServiceException {
 
-		FinalPrice finalPrice = null;
-		List<FinalPrice> otherPrices = null;
+	FinalPrice finalPrice = null;
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Moved the instantiation of the ArrayList for otherPrices outside of the loop to avoid creating a new object in each iteration when it's not the default price.
+	*/
+	List<FinalPrice> otherPrices = new ArrayList<FinalPrice>();
 
-		Set<ProductPrice> prices = availability.getPrices();
-		for (ProductPrice price : prices) {
+	Set<ProductPrice> prices = availability.getPrices();
+	for (ProductPrice price : prices) {
 
-			FinalPrice p = finalPrice(price);
-			if (price.isDefaultPrice()) {
-				finalPrice = p;
-			} else {
-				if (otherPrices == null) {
-					otherPrices = new ArrayList<FinalPrice>();
-				}
-				otherPrices.add(p);
-			}
-
-		}
-
-		if (finalPrice != null) {
-			finalPrice.setAdditionalPrices(otherPrices);
+		FinalPrice p = finalPrice(price);
+		if (price.isDefaultPrice()) {
+			finalPrice = p;
 		} else {
-			if (otherPrices != null) {
-				finalPrice = otherPrices.get(0);
-			}
+			otherPrices.add(p);
 		}
-
-		if (finalPrice == null) {
-			throw new ServiceException(ServiceException.EXCEPTION_ERROR,
-					"No inventory available to calculate the price. Availability should contain at least a region set to *");
-		}
-
-		return finalPrice;
 
 	}
+
+	if (finalPrice != null) {
+		finalPrice.setAdditionalPrices(otherPrices);
+	} else {
+		if (!otherPrices.isEmpty()) {
+			finalPrice = otherPrices.get(0);
+		}
+	}
+
+	if (finalPrice == null) {
+		throw new ServiceException(ServiceException.EXCEPTION_ERROR,
+				"No inventory available to calculate the price. Availability should contain at least a region set to *");
+	}
+
+	return finalPrice;
+
+}
+
 
 	private FinalPrice finalPrice(ProductPrice price) {
 
@@ -689,7 +695,7 @@ public class ProductPriceUtils {
 			}
 		}
 
-		finalPrice.setProductPrice(price);
+		                        finalPrice.setProductPrice(price);
 		finalPrice.setFinalPrice(fPrice);
 		finalPrice.setOriginalPrice(oPrice);
 
@@ -710,8 +716,12 @@ public class ProductPriceUtils {
 		double arith = finalPrice.getProductPrice().getProductPriceSpecialAmount().doubleValue()
 				/ finalPrice.getProductPrice().getProductPriceAmount().doubleValue();
 		double fsdiscount = 100 - (arith * 100);
-		Float percentagediscount = new Float(fsdiscount);
-		int percent = percentagediscount.intValue();
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Replaced the instantiation of Float with a primitive type to avoid unnecessary object creation.
+		Used the primitive float directly for the percentage discount calculation and cast it to int when setting the discount percent.
+		*/
+		float percentagediscount = (float)fsdiscount;
+		int percent = (int)percentagediscount;
 		finalPrice.setDiscountPercent(percent);
 
 		// calculate percent
@@ -719,4 +729,4 @@ public class ProductPriceUtils {
 		finalPrice.setDiscountedPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
 	}
 
-}
+
