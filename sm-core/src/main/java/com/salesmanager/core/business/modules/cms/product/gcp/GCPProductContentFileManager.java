@@ -96,8 +96,6 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
       ct.setFile(outputStream);
       ct.setFileName(blob.getName());
 
-      
-
       return ct;
     } catch (final Exception e) {
       LOGGER.error("Error while getting files", e);
@@ -107,12 +105,18 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
       if(inputStream!=null) {
         try {
           inputStream.close();
-        } catch(Exception ignore) {}
+        } catch(Exception ignore) {
+            /* QECI-fix (2024-01-08 21:10:09.611735):
+             Added logging to the empty catch block to handle the exception and avoid resource wastage.
+             */
+            LOGGER.error("Failed to close inputStream", ignore);
+        }
       }
       
     }
   
   }
+
 
   @Override
   public OutputContentFile getProductImage(ProductImage productImage) throws ServiceException {
