@@ -93,45 +93,45 @@ public class ShippingQuoteByWeightTest extends com.salesmanager.test.common.Abst
 	    // Availability
 	    ProductAvailability availability = new ProductAvailability();
 	    availability.setProductDateAvailable(new Date());
-	    availability.setProductQuantity(100);
-	    availability.setRegion("*");
-	    availability.setProduct(product);// associate with product
-	    
-	    product.getAvailabilities().add(availability);
+        availability.setProductQuantity(100);
+        availability.setRegion("*");
+        availability.setProduct(product);// associate with product
+        
+        product.getAvailabilities().add(availability);
 
-	    productAvailabilityService.create(availability);
+        productAvailabilityService.create(availability);
 
-	    ProductPrice dprice = new ProductPrice();
-	    dprice.setDefaultPrice(true);
-	    dprice.setProductPriceAmount(new BigDecimal(29.99));
-	    dprice.setProductAvailability(availability);
+        ProductPrice dprice = new ProductPrice();
+        dprice.setDefaultPrice(true);
+        dprice.setProductPriceAmount(new BigDecimal(29.99));
+        dprice.setProductAvailability(availability);
 
-	    ProductPriceDescription dpd = new ProductPriceDescription();
-	    dpd.setName("Base price");
-	    dpd.setProductPrice(dprice);
-	    dpd.setLanguage(en);
+        ProductPriceDescription dpd = new ProductPriceDescription();
+        dpd.setName("Base price");
+        dpd.setProductPrice(dprice);
+        dpd.setLanguage(en);
 
-	    dprice.getDescriptions().add(dpd);
-	    availability.getPrices().add(dprice);
-	    
-	    productPriceService.create(dprice);
-	    
-	    //get product
-	    product = productService.getBySku("TESTSKU", store, en);
+        dprice.getDescriptions().add(dpd);
+        availability.getPrices().add(dprice);
+        
+        productPriceService.create(dprice);
+        
+        //get product
+        product = productService.getBySku("TESTSKU", store, en);
 
 
-	    
-	    
-	    //check the product
-	    Set<ProductAvailability> avails = product.getAvailabilities();
-	    for(ProductAvailability as : avails) {
-		    Set<ProductPrice> availabilityPrices = as.getPrices();
-		    for(ProductPrice ps : availabilityPrices) {
-		    	System.out.println(ps.getProductPriceAmount().toString());
-		    }
-	    }
-	    
-	    //check availability
+        
+        
+        //check the product
+        Set<ProductAvailability> avails = product.getAvailabilities();
+        for(ProductAvailability as : avails) {
+            Set<ProductPrice> availabilityPrices = as.getPrices();
+            for(ProductPrice ps : availabilityPrices) {
+                System.out.println(ps.getProductPriceAmount().toString());
+            }
+        }
+        
+        //check availability
 	    Set<ProductPrice> availabilityPrices = availability.getPrices();
 	    for(ProductPrice ps : availabilityPrices) {
 	    	System.out.println(ps.getProductPriceAmount().toString());
