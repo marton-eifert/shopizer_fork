@@ -156,7 +156,8 @@ public class PersistableOrderApiPopulator extends AbstractDataPopulator<Persista
 			
 			return target;
 		
-		} catch(Exception e) {
+		}
+catch(Exception e) {
 			throw new ConversionException(e);
 		}
 	}
