@@ -120,93 +120,93 @@ public class PersistableProductDefinitionMapper implements Mapper<PersistablePro
 			List<Language> languages = new ArrayList<Language>();
 			Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
 			if(!CollectionUtils.isEmpty(source.getDescriptions())) {
-				for(com.salesmanager.shop.model.catalog.product.ProductDescription description : source.getDescriptions()) {
-					
-				  ProductDescription productDescription = new ProductDescription();
-				  Language lang = languageService.getByCode(description.getLanguage());
-	              if(lang==null) {
-	                    throw new ConversionException("Language code " + description.getLanguage() + " is invalid, use ISO code (en, fr ...)");
-	               }
-				   if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
-				      for(ProductDescription desc : destination.getDescriptions()) {
-				        if(desc.getLanguage().getCode().equals(description.getLanguage())) {
-				          productDescription = desc;
-				          break;
-				        }
-				      }
-				    }
+                for(com.salesmanager.shop.model.catalog.product.ProductDescription description : source.getDescriptions()) {
+                    
+                  ProductDescription productDescription = new ProductDescription();
+                  Language lang = languageService.getByCode(description.getLanguage());
+                  if(lang==null) {
+                        throw new ConversionException("Language code " + description.getLanguage() + " is invalid, use ISO code (en, fr ...)");
+                   }
+                   if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
+                      for(ProductDescription desc : destination.getDescriptions()) {
+                        if(desc.getLanguage().getCode().equals(description.getLanguage())) {
+                          productDescription = desc;
+                          break;
+                        }
+                      }
+                    }
 
-					productDescription.setProduct(destination);
-					productDescription.setDescription(description.getDescription());
+                    productDescription.setProduct(destination);
+                    productDescription.setDescription(description.getDescription());
 
-					productDescription.setProductHighlight(description.getHighlights());
+                    productDescription.setProductHighlight(description.getHighlights());
 
-					productDescription.setName(description.getName());
-					productDescription.setSeUrl(description.getFriendlyUrl());
-					productDescription.setMetatagKeywords(description.getKeyWords());
-					productDescription.setMetatagDescription(description.getMetaDescription());
-					productDescription.setTitle(description.getTitle());
-					
-					languages.add(lang);
-					productDescription.setLanguage(lang);
-					descriptions.add(productDescription);
-				}
-			}
-			
-			if(descriptions.size()>0) {
-				destination.setDescriptions(descriptions);
-			}
+                    productDescription.setName(description.getName());
+                    productDescription.setSeUrl(description.getFriendlyUrl());
+                    productDescription.setMetatagKeywords(description.getKeyWords());
+                    productDescription.setMetatagDescription(description.getMetaDescription());
+                    productDescription.setTitle(description.getTitle());
+                    
+                    languages.add(lang);
+                    productDescription.setLanguage(lang);
+                    descriptions.add(productDescription);
+                }
+            }
+            
+            if(descriptions.size()>0) {
+                destination.setDescriptions(descriptions);
+            }
 
-			/**
-			 * Product definition
-			 */
-			ProductAvailability productAvailability = null;
-		    ProductPrice defaultPrice = null;
-		    if(!CollectionUtils.isEmpty(destination.getAvailabilities())) {
-		      for(ProductAvailability avail : destination.getAvailabilities()) {
-			        Set<ProductPrice> prices = avail.getPrices();
-			        for(ProductPrice p : prices) {
-			          if(p.isDefaultPrice()) {
-			            if(productAvailability == null) {
-			              productAvailability = avail;
-			              defaultPrice = p;
-			              productAvailability.setProductQuantity(source.getQuantity());
-			              productAvailability.setProductStatus(source.isCanBePurchased());
-			              p.setProductPriceAmount(source.getPrice());
-			              break;
-			            }
-			          }
-			        }
-		      }
-		    }
-			
-		    if(productAvailability == null) { //create with default values
-		      productAvailability = new ProductAvailability(destination, store);
-		      destination.getAvailabilities().add(productAvailability);
-		      
-		      productAvailability.setProductQuantity(source.getQuantity());
-			  productAvailability.setProductQuantityOrderMin(1);
-			  productAvailability.setProductQuantityOrderMax(1);
-			  productAvailability.setRegion(Constants.ALL_REGIONS);
-			  productAvailability.setAvailable(Boolean.valueOf(destination.isAvailable()));
-			  productAvailability.setProductStatus(source.isCanBePurchased());
-		    }
-
-
+            /**
+             * Product definition
+             */
+            ProductAvailability productAvailability = null;
+            ProductPrice defaultPrice = null;
+            if(!CollectionUtils.isEmpty(destination.getAvailabilities())) {
+              for(ProductAvailability avail : destination.getAvailabilities()) {
+                    Set<ProductPrice> prices = avail.getPrices();
+                    for(ProductPrice p : prices) {
+                      if(p.isDefaultPrice()) {
+                        if(productAvailability == null) {
+                          productAvailability = avail;
+                          defaultPrice = p;
+                          productAvailability.setProductQuantity(source.getQuantity());
+                          productAvailability.setProductStatus(source.isCanBePurchased());
+                          p.setProductPriceAmount(source.getPrice());
+                          break;
+                        }
+                      }
+                    }
+              }
+            }
+            
+            if(productAvailability == null) { //create with default values
+              productAvailability = new ProductAvailability(destination, store);
+              destination.getAvailabilities().add(productAvailability);
+              
+              productAvailability.setProductQuantity(source.getQuantity());
+              productAvailability.setProductQuantityOrderMin(1);
+              productAvailability.setProductQuantityOrderMax(1);
+              productAvailability.setRegion(Constants.ALL_REGIONS);
+              productAvailability.setAvailable(Boolean.valueOf(destination.isAvailable()));
+              productAvailability.setProductStatus(source.isCanBePurchased());
+            }
 
 
-			if(defaultPrice == null) {
-				
-				BigDecimal defaultPriceAmount = new BigDecimal(0);
-				if(source.getPrice() != null) {
-					defaultPriceAmount = source.getPrice();
-				}
 
-			    defaultPrice = new ProductPrice();
-			    defaultPrice.setDefaultPrice(true);
-			    defaultPrice.setProductPriceAmount(defaultPriceAmount);
-			    defaultPrice.setCode(ProductPriceEntity.DEFAULT_PRICE_CODE);
-			    defaultPrice.setProductAvailability(productAvailability);
+
+            if(defaultPrice == null) {
+                
+                BigDecimal defaultPriceAmount = new BigDecimal(0);
+                if(source.getPrice() != null) {
+                    defaultPriceAmount = source.getPrice();
+                }
+
+                defaultPrice = new ProductPrice();
+                defaultPrice.setDefaultPrice(true);
+                defaultPrice.setProductPriceAmount(defaultPriceAmount);
+                defaultPrice.setCode(ProductPriceEntity.DEFAULT_PRICE_CODE);
+                defaultPrice.setProductAvailability(productAvailability);
                 productAvailability.getPrices().add(defaultPrice);
                 for(Language lang : languages) {
                 
@@ -216,9 +216,9 @@ public class PersistableProductDefinitionMapper implements Mapper<PersistablePro
                   ppd.setName(ProductPriceDescription.DEFAULT_PRICE_DESCRIPTION);
                   defaultPrice.getDescriptions().add(ppd);
                 }
-			}
-			
-			if(source.getProductSpecifications()!=null) {
+            }
+            
+            if(source.getProductSpecifications()!=null) {
 				destination.setProductHeight(source.getProductSpecifications().getHeight());
 				destination.setProductLength(source.getProductSpecifications().getLength());
 				destination.setProductWeight(source.getProductSpecifications().getWeight());
