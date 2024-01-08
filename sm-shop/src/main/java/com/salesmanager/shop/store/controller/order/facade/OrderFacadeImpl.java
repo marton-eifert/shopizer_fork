@@ -1150,7 +1150,8 @@ public class OrderFacadeImpl implements OrderFacade {
 
 	@Override
 	public ShippingQuote getShippingQuote(Customer customer, ShoppingCart cart, MerchantStore store, Language language)
-			throws Exception {
+			throws Exception
+{
 
 		Validate.notNull(customer, "Customer cannot be null");
 		Validate.notNull(cart, "cart cannot be null");
