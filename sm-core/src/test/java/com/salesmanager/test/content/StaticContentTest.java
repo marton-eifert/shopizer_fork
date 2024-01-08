@@ -60,7 +60,13 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
             throw new ServiceException( "Can't read" + file1.getAbsolutePath() );
         }
 
-        final byte[] is = IOUtils.toByteArray( new FileInputStream( file1 ) );
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+        Explicitly closing the FileInputStream using a try-with-resources statement to ensure it is closed properly after use. */
+        final byte[] is;
+        try (FileInputStream fileInputStream = new FileInputStream(file1)) {
+            is = IOUtils.toByteArray(fileInputStream);
+        }
+
         final ByteArrayInputStream inputStream = new ByteArrayInputStream( is );
         final InputContentFile cmsContentImage = new InputContentFile();
         cmsContentImage.setFileName( file1.getName() );
@@ -72,21 +78,21 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
 
     
         //get image
-		OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());
+        OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());
 
         //print image
-   	 	OutputStream outputStream = new FileOutputStream (OUTPUT_FOLDER + image.getFileName()); 
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+        Explicitly closing the FileOutputStream using a try-with-resources statement to ensure it is closed properly after use. */
+        try (OutputStream outputStream = new FileOutputStream(OUTPUT_FOLDER + image.getFileName())) {
+            ByteArrayOutputStream baos = image.getFile();
+            baos.writeTo(outputStream);
+        }
+        
+        
+        //remove image
+            contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());
+        
 
-   	 	ByteArrayOutputStream baos =  image.getFile();
-   	 	baos.writeTo(outputStream);
-		
-		
-		//remove image
-   	 	contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());
-		
-
-
-    }
-	
 
 }
+
