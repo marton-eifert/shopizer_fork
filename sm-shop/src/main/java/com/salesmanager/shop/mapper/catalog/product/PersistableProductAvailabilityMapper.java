@@ -76,7 +76,8 @@ public class PersistableProductAvailabilityMapper implements Mapper<PersistableP
 
 			
 
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			throw new ServiceRuntimeException("An error occured while mapping product availability", e);
 		}
 		
