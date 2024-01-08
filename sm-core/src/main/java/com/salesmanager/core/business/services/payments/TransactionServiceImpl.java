@@ -49,40 +49,45 @@ public class TransactionServiceImpl  extends SalesManagerEntityServiceImpl<Long,
 	}
 	
 	@Override
-	public List<Transaction> listTransactions(Order order) throws ServiceException {
-		
-		List<Transaction> transactions = transactionRepository.findByOrder(order.getId());
-		ObjectMapper mapper = new ObjectMapper();
-		for(Transaction transaction : transactions) {
-				if(!StringUtils.isBlank(transaction.getDetails())) {
-					try {
-						@SuppressWarnings("unchecked")
-						Map<String,String> objects = mapper.readValue(transaction.getDetails(), Map.class);
-						transaction.setTransactionDetails(objects);
-					} catch (Exception e) {
-						throw new ServiceException(e);
-					}
+public List<Transaction> listTransactions(Order order) throws ServiceException {
+	
+	List<Transaction> transactions = transactionRepository.findByOrder(order.getId());
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Moved ObjectMapper instantiation outside of the loop to avoid repeated object creation
+	and reuse the same instance for each iteration when reading transaction details.
+	*/
+	ObjectMapper mapper = new ObjectMapper();
+	for(Transaction transaction : transactions) {
+			if(!StringUtils.isBlank(transaction.getDetails())) {
+				try {
+					@SuppressWarnings("unchecked")
+					Map<String,String> objects = mapper.readValue(transaction.getDetails(), Map.class);
+					transaction.setTransactionDetails(objects);
+				} catch (Exception e) {
+					throw new ServiceException(e);
 				}
-		}
-		
-		return transactions;
+			}
 	}
 	
-	/**
-	 * Authorize
-	 * AuthorizeAndCapture
-	 * Capture
-	 * Refund
-	 * 
-	 * Check transactions
-	 * next transaction flow is
-	 * Build map of transactions map
-	 * filter get last from date
-	 * get last transaction type
-	 * verify which step transaction it if
-	 * check if target transaction is in transaction map we are in trouble...
-	 * 
-	 */
+	return transactions;
+}
+
+/**
+ * Authorize
+ * AuthorizeAndCapture
+ * Capture
+ * Refund
+ * 
+ * Check transactions
+ * next transaction flow is
+ * Build map of transactions map
+ * filter get last from date
+ * get last transaction type
+ * verify which step transaction it if
+ * check if target transaction is in transaction map we are in trouble...
+ * 
+ */
+
 	public Transaction lastTransaction(Order order, MerchantStore store) throws ServiceException {
 		
 		List<Transaction> transactions = transactionRepository.findByOrder(order.getId());
