@@ -63,46 +63,47 @@ public class CaptchaRequestUtils {
 	    
 
 	    try {
-	      // Execute the method.
+          // Execute the method.
             HttpResponse httpResponse = client.execute(post);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
 
-	      if (statusCode != HttpStatus.SC_OK) {
-	    	throw new Exception("Got an invalid response from reCaptcha " + url + " [" + httpResponse.getStatusLine() + "]");
-	      }
+          if (statusCode != HttpStatus.SC_OK) {
+            throw new Exception("Got an invalid response from reCaptcha " + url + " [" + httpResponse.getStatusLine() + "]");
+          }
 
-	      // Read the response body.
+          // Read the response body.
             HttpEntity entity = httpResponse.getEntity();
             byte[] responseBody =EntityUtils.toByteArray(entity);
 
 
-	      // Deal with the response.
-	      // Use caution: ensure correct character encoding and is not binary data
-	      //System.out.println(new String(responseBody));
-	      
-	      String json = new String(responseBody);
-	      
-	      Map<String,String> map = new HashMap<String,String>();
-	  	  ObjectMapper mapper = new ObjectMapper();
-	  	  
-	  	  map = mapper.readValue(json, 
-			    new TypeReference<HashMap<String,String>>(){});
-	  	  
-	  	  String successInd = map.get(SUCCESS_INDICATOR);
-	  	  
-	  	  if(StringUtils.isBlank(successInd)) {
-	  		  throw new Exception("Unreadable response from reCaptcha " + json);
-	  	  }
-	  	  
-	  	  Boolean responseBoolean = Boolean.valueOf(successInd);
-	  	  
-	  	  if(responseBoolean) {
-	  		checkCaptcha = true;
-	  	  }
-	  	  
-	  	  return checkCaptcha;
+          // Deal with the response.
+          // Use caution: ensure correct character encoding and is not binary data
+          //System.out.println(new String(responseBody));
+          
+          String json = new String(responseBody);
+          
+          Map<String,String> map = new HashMap<String,String>();
+            ObjectMapper mapper = new ObjectMapper();
+            
+            map = mapper.readValue(json, 
+                new TypeReference<HashMap<String,String>>(){});
+            
+            String successInd = map.get(SUCCESS_INDICATOR);
+            
+            if(StringUtils.isBlank(successInd)) {
+                throw new Exception("Unreadable response from reCaptcha " + json);
+            }
+            
+            Boolean responseBoolean = Boolean.valueOf(successInd);
+            
+            if(responseBoolean) {
+              checkCaptcha = true;
+            }
+            
+            return checkCaptcha;
 
-	    } finally {
+        }
+finally {
 	      // Release the connection.
 	      post.releaseConnection();
 	    }  
