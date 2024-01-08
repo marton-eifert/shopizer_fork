@@ -209,11 +209,16 @@ public class ContentServiceImpl extends SalesManagerEntityServiceImpl<Long, Cont
 					contentImage.getFile().close();
 				}
 			} catch (Exception ignore) {
+				/* QECI-fix (2024-01-08 21:10:09.611735):
+				Replaced the empty catch block with a logging statement to handle the exception
+				and provide information about the ignored exception. */
+				LOG.warn("Failed to close content image file", ignore);
 			}
 
 		}
 
 	}
+
 
 	private void addFile(final String merchantStoreCode, InputContentFile contentImage) throws ServiceException {
 
@@ -244,46 +249,46 @@ public class ContentServiceImpl extends SalesManagerEntityServiceImpl<Long, Cont
 	}
 
 	/**
-	 * Method responsible for adding list of content images for given merchant
-	 * store in underlying Infinispan tree cache. It will take list of
-	 * {@link CMSContentImage} and will store them for given merchant store.
-	 * 
-	 * @param merchantStoreCode
-	 *            Merchant store
-	 * @param contentImagesList
-	 *            list of {@link CMSContentImage} being stored
-	 * @throws ServiceException
-	 *             service exception
-	 */
-	@Override
-	public void addContentFiles(String merchantStoreCode, List<InputContentFile> contentFilesList)
-			throws ServiceException {
+     * Method responsible for adding list of content images for given merchant
+     * store in underlying Infinispan tree cache. It will take list of
+     * {@link CMSContentImage} and will store them for given merchant store.
+     * 
+     * @param merchantStoreCode
+     *            Merchant store
+     * @param contentImagesList
+     *            list of {@link CMSContentImage} being stored
+     * @throws ServiceException
+     *             service exception
+     */
+    @Override
+    public void addContentFiles(String merchantStoreCode, List<InputContentFile> contentFilesList)
+            throws ServiceException {
 
-		Assert.notNull(merchantStoreCode, "Merchant store ID can not be null");
-		Assert.notEmpty(contentFilesList, "File list can not be empty");
-		LOG.info("Adding total {} images for given merchant", contentFilesList.size());
+        Assert.notNull(merchantStoreCode, "Merchant store ID can not be null");
+        Assert.notEmpty(contentFilesList, "File list can not be empty");
+        LOG.info("Adding total {} images for given merchant", contentFilesList.size());
 
-		String p = null;
-		Optional<String> path = Optional.ofNullable(p);
+        String p = null;
+        Optional<String> path = Optional.ofNullable(p);
 
-		LOG.info("Adding content images for merchant....");
-		contentFileManager.addFiles(merchantStoreCode, path, contentFilesList);
-		// staticContentFileManager.addFiles(merchantStoreCode,
-		// contentFilesList);
+        LOG.info("Adding content images for merchant....");
+        contentFileManager.addFiles(merchantStoreCode, path, contentFilesList);
+        // staticContentFileManager.addFiles(merchantStoreCode,
+        // contentFilesList);
 
-		try {
-			for (InputContentFile file : contentFilesList) {
-				if (file.getFile() != null) {
-					file.getFile().close();
-				}
-			}
-		} catch (Exception e) {
-			throw new ServiceException(e);
-		}
+        try {
+            for (InputContentFile file : contentFilesList) {
+                if (file.getFile() != null) {
+                    file.getFile().close();
+                }
+            }
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
 
-	}
+    }
 
-	/**
+    /**
 	 * Method to remove given content image.Images are stored in underlying
 	 * system based on there name. Name will be used to search given image for
 	 * removal
