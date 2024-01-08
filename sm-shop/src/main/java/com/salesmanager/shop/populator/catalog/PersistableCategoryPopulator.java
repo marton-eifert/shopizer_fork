@@ -115,40 +115,41 @@ public class PersistableCategoryPopulator extends
 
 
 		if(!CollectionUtils.isEmpty(source.getDescriptions())) {
-			Set<com.salesmanager.core.model.catalog.category.CategoryDescription> descriptions = new HashSet<com.salesmanager.core.model.catalog.category.CategoryDescription>();
-			if(CollectionUtils.isNotEmpty(target.getDescriptions())) {
-    			for(com.salesmanager.core.model.catalog.category.CategoryDescription description : target.getDescriptions()) {
-    			    for(CategoryDescription d : source.getDescriptions()) {
-    			        if(StringUtils.isBlank(d.getLanguage())) {
-    			          throw new ConversionException("Source category description has no language");
-    			        }
-    			        if(d.getLanguage().equals(description.getLanguage().getCode())) {
-            				description.setCategory(target);
-            				description = buildDescription(d, description);
-            				descriptions.add(description);
-    			        }
-    			    }
-    			}
+            Set<com.salesmanager.core.model.catalog.category.CategoryDescription> descriptions = new HashSet<com.salesmanager.core.model.catalog.category.CategoryDescription>();
+            if(CollectionUtils.isNotEmpty(target.getDescriptions())) {
+                for(com.salesmanager.core.model.catalog.category.CategoryDescription description : target.getDescriptions()) {
+                    for(CategoryDescription d : source.getDescriptions()) {
+                        if(StringUtils.isBlank(d.getLanguage())) {
+                          throw new ConversionException("Source category description has no language");
+                        }
+                        if(d.getLanguage().equals(description.getLanguage().getCode())) {
+                            description.setCategory(target);
+                            description = buildDescription(d, description);
+                            descriptions.add(description);
+                        }
+                    }
+                }
 
-			} else {
-			  for(CategoryDescription d : source.getDescriptions()) {
+            } else {
+              for(CategoryDescription d : source.getDescriptions()) {
                 com.salesmanager.core.model.catalog.category.CategoryDescription t = new com.salesmanager.core.model.catalog.category.CategoryDescription();
 
-			    this.buildDescription(d, t);
-			    t.setCategory(target);
-			    descriptions.add(t);
+                this.buildDescription(d, t);
+                t.setCategory(target);
+                descriptions.add(t);
 
-			  }
+              }
 
-			}
-			target.setDescriptions(descriptions);
-		}
-
-
-		return target;
+            }
+            target.setDescriptions(descriptions);
+        }
 
 
-		} catch(Exception e) {
+        return target;
+
+
+        }
+catch(Exception e) {
 			throw new ConversionException(e);
 		}
 
