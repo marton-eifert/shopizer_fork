@@ -54,39 +54,42 @@ public class PersistableProductOptionMapper implements Mapper<PersistableProduct
     
     try {
 
-      if(!CollectionUtils.isEmpty(source.getDescriptions())) {
-        for(com.salesmanager.shop.model.catalog.product.attribute.ProductOptionDescription desc : source.getDescriptions()) {
-          ProductOptionDescription description = null;
-          if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
-            for(ProductOptionDescription d : destination.getDescriptions()) {
-              if(!StringUtils.isBlank(desc.getLanguage()) && desc.getLanguage().equals(d.getLanguage().getCode())) {
-            	  d.setDescription(desc.getDescription());
-            	  d.setName(desc.getName());
-            	  d.setTitle(desc.getTitle());
-            	  description = d;
-            	  break;
-              } 
-            }
-          } 
-          if(description == null) {
-	          description = description(desc);
-	          description.setProductOption(destination);
-	          destination.getDescriptions().add(description);
-          }
+  if(!CollectionUtils.isEmpty(source.getDescriptions())) {
+    /* QECI-fix (2024-01-08 21:10:09.611735):
+     * Replaced nested loops with a hashmap to store the language codes and associated descriptions from the destination.
+     * This reduces the complexity from O(n^2) to O(n) by avoiding nested iteration over the destination descriptions.
+     */
+    Map<String, ProductOptionDescription> languageCodeToDescriptionMap = new HashMap<>();
+    if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
+      for(ProductOptionDescription d : destination.getDescriptions()) {
+        if(!StringUtils.isBlank(d.getLanguage().getCode())) {
+          languageCodeToDescriptionMap.put(d.getLanguage().getCode(), d);
         }
       }
-      
-      destination.setCode(source.getCode());
-      destination.setMerchantStore(store);
-      destination.setProductOptionSortOrder(source.getOrder());
-      destination.setProductOptionType(source.getType());
-      destination.setReadOnly(source.isReadOnly());
-
-
-      return destination;
-      } catch (Exception e) {
-        throw new ServiceRuntimeException("Error while converting product option", e);
+    }
+    for(com.salesmanager.shop.model.catalog.product.attribute.ProductOptionDescription desc : source.getDescriptions()) {
+      ProductOptionDescription description = languageCodeToDescriptionMap.get(desc.getLanguage());
+      if(description != null) {
+        description.setDescription(desc.getDescription());
+        description.setName(desc.getName());
+        description.setTitle(desc.getTitle());
+      } else {
+        description = description(desc);
+        description.setProductOption(destination);
+        destination.getDescriptions().add(description);
       }
+    }
+  }
+  
+  destination.setCode(source.getCode());
+  destination.setMerchantStore(store);
+  destination.setProductOptionSortOrder(source.getOrder());
+  destination.setProductOptionType(source.getType());
+  destination.setReadOnly(source.isReadOnly());
+
+
+  return destination;
+  } catch (Exception e) {
+    throw new ServiceRuntimeException("Error while converting product option", e);
   }
 
-}
