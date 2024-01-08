@@ -56,45 +56,46 @@ public class ConfigurationModulesLoader {
 		ObjectMapper mapper = new ObjectMapper();
 		
 		try {
-			
+            
 
             Map[] objects = mapper.readValue(value, Map[].class);
 
-			for (Map object : objects) {
+            for (Map object : objects) {
 
 
-				IntegrationConfiguration configuration = new IntegrationConfiguration();
+                IntegrationConfiguration configuration = new IntegrationConfiguration();
 
-				String moduleCode = (String) object.get("moduleCode");
-				if (object.get("active") != null) {
-					configuration.setActive((Boolean) object.get("active"));
-				}
-				if (object.get("defaultSelected") != null) {
-					configuration.setDefaultSelected((Boolean) object.get("defaultSelected"));
-				}
-				if (object.get("environment") != null) {
-					configuration.setEnvironment((String) object.get("environment"));
-				}
-				configuration.setModuleCode(moduleCode);
+                String moduleCode = (String) object.get("moduleCode");
+                if (object.get("active") != null) {
+                    configuration.setActive((Boolean) object.get("active"));
+                }
+                if (object.get("defaultSelected") != null) {
+                    configuration.setDefaultSelected((Boolean) object.get("defaultSelected"));
+                }
+                if (object.get("environment") != null) {
+                    configuration.setEnvironment((String) object.get("environment"));
+                }
+                configuration.setModuleCode(moduleCode);
 
-				modules.put(moduleCode, configuration);
+                modules.put(moduleCode, configuration);
 
-				if (object.get("integrationKeys") != null) {
-					Map<String, String> confs = (Map<String, String>) object.get("integrationKeys");
-					configuration.setIntegrationKeys(confs);
-				}
+                if (object.get("integrationKeys") != null) {
+                    Map<String, String> confs = (Map<String, String>) object.get("integrationKeys");
+                    configuration.setIntegrationKeys(confs);
+                }
 
-				if (object.get("integrationKeys") != null) {
-					Map<String, List<String>> options = (Map<String, List<String>>) object.get("integrationOptions");
-					configuration.setIntegrationOptions(options);
-				}
+                if (object.get("integrationKeys") != null) {
+                    Map<String, List<String>> options = (Map<String, List<String>>) object.get("integrationOptions");
+                    configuration.setIntegrationOptions(options);
+                }
 
 
-			}
+            }
             
             return modules;
 
-  		} catch (Exception e) {
+          }
+catch (Exception e) {
   			throw new ServiceException(e);
   		}
   		
