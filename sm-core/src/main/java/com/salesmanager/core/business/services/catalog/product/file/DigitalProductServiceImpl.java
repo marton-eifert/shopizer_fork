@@ -36,43 +36,43 @@ public class DigitalProductServiceImpl extends SalesManagerEntityServiceImpl<Lon
 	}
 	
 	@Override
-	public void addProductFile(Product product, DigitalProduct digitalProduct, InputContentFile inputFile) throws ServiceException {
-	
-		Assert.notNull(digitalProduct,"DigitalProduct cannot be null");
-		Assert.notNull(product,"Product cannot be null");
-		digitalProduct.setProduct(product);
+    public void addProductFile(Product product, DigitalProduct digitalProduct, InputContentFile inputFile) throws ServiceException {
+    
+        Assert.notNull(digitalProduct,"DigitalProduct cannot be null");
+        Assert.notNull(product,"Product cannot be null");
+        digitalProduct.setProduct(product);
 
-		try {
-			
-			Assert.notNull(inputFile.getFile(),"InputContentFile.file cannot be null");
-			
-			Assert.notNull(product.getMerchantStore(),"Product.merchantStore cannot be null");
-			this.saveOrUpdate(digitalProduct);
-			
-		    String path = null;
-		    
-			
-			productDownloadsFileManager.addFile(product.getMerchantStore().getCode(), Optional.of(path), inputFile);
-			
-			product.setProductVirtual(true);
-			productService.update(product);
-		
-		} catch (Exception e) {
-			throw new ServiceException(e);
-		} finally {
-			try {
+        try {
+            
+            Assert.notNull(inputFile.getFile(),"InputContentFile.file cannot be null");
+            
+            Assert.notNull(product.getMerchantStore(),"Product.merchantStore cannot be null");
+            this.saveOrUpdate(digitalProduct);
+            
+            String path = null;
+            
+            
+            productDownloadsFileManager.addFile(product.getMerchantStore().getCode(), Optional.of(path), inputFile);
+            
+            product.setProductVirtual(true);
+            productService.update(product);
+        
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        } finally {
+            try {
 
-				if(inputFile.getFile()!=null) {
-					inputFile.getFile().close();
-				}
+                if(inputFile.getFile()!=null) {
+                    inputFile.getFile().close();
+                }
 
-			} catch(Exception ignore) {}
-		}
-		
-		
-	}
-	
-	@Override
+            } catch(Exception ignore) {}
+        }
+        
+        
+    }
+    
+    @Override
 	public DigitalProduct getByProduct(MerchantStore store, Product product) throws ServiceException {
 		return digitalProductRepository.findByProduct(store.getId(), product.getId());
 	}
