@@ -141,7 +141,8 @@ public class PersistableOrderProductPopulator extends
 			}
 
 			
-		} catch (Exception e) {
+		}
+catch (Exception e) {
 			throw new ConversionException(e);
 		}
 		
