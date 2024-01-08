@@ -211,7 +211,8 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 						property.setPropertyValue(readableOptionValue);
 						destination.getProperties().add(property);
 
-					} else {// selectable option
+					} else
+{// selectable option
 
 						/**
 						 * Returns a list of ReadableProductOptions
@@ -266,33 +267,33 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 						List<ProductOptionValueDescription> podescriptions = optionValue.getDescriptionsSettoList();
 						ProductOptionValueDescription podescription = null;
 						if (podescriptions != null && podescriptions.size() > 0) {
-							podescription = podescriptions.get(0);
-							if (podescriptions.size() > 1) {
-								for (ProductOptionValueDescription optionValueDescription : podescriptions) {
-									if (optionValueDescription.getLanguage().getId().intValue() == language.getId()
-											.intValue()) {
-										podescription = optionValueDescription;
-										break;
-									}
-								}
-							}
-						}
-						valueDescription.setName(podescription.getName());
-						valueDescription.setDescription(podescription.getDescription());
-						optValue.setDescription(valueDescription);
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	 * Replaced the nested loop with a hashmap to reduce complexity from O(n^2) to O(n).
+	 * Created a hashmap before the loop, mapping language IDs to ProductOptionValueDescription objects.
+	 * Removed the inner loop, as the hashmap provides direct access to the required object.
+	 */
+	HashMap<Integer, ProductOptionValueDescription> languageIdToDescriptionMap = new HashMap<>();
+	for (ProductOptionValueDescription optionValueDescription : podescriptions) {
+		languageIdToDescriptionMap.put(optionValueDescription.getLanguage().getId(), optionValueDescription);
+	}
+	podescription = languageIdToDescriptionMap.getOrDefault(language.getId(), podescriptions.get(0));
+}
+valueDescription.setName(podescription.getName());
+valueDescription.setDescription(podescription.getDescription());
+optValue.setDescription(valueDescription);
 
-						if (opt != null) {
-							opt.getOptionValues().add(optValue);
-						}
-					}
-				}
-			}
-		}
-		
-		ReadableProductVariant defaultInstance = null;
+if (opt != null) {
+	opt.getOptionValues().add(optValue);
+}
+}
+}
+}
 
-		// variants
-		if (!CollectionUtils.isEmpty(source.getVariants()))
+ReadableProductVariant defaultInstance = null;
+
+// variants
+if (!CollectionUtils.isEmpty(source.getVariants()))
+
 
 		{
 			List<ReadableProductVariant> instances = source
