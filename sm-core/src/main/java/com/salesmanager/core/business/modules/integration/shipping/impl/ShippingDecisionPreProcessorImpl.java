@@ -83,10 +83,15 @@ public class ShippingDecisionPreProcessorImpl implements ShippingQuotePrePostPro
 			}
 		}
 		
-		//calculate volume (L x W x H)
+		                        //calculate volume (L x W x H)
 		Double volume = null;
 		Double weight = 0D;
 		Double size = null;
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Moved the instantiation of the sizeList ArrayList outside of the loop to avoid creating a new object in each iteration.
+		Reuse the sizeList by clearing its contents at the beginning of each loop iteration.
+		*/
+		List<Double> sizeList = new ArrayList<Double>();
 		//calculate weight, volume and largest size
 		for(PackageDetails pack : packages) {
 			weight = weight + pack.getShippingWeight();
@@ -95,7 +100,7 @@ public class ShippingDecisionPreProcessorImpl implements ShippingQuotePrePostPro
 				volume = tmpVolume;
 			} 
 			//largest size
-			List<Double> sizeList = new ArrayList<Double>();
+			sizeList.clear();
 			sizeList.add(pack.getShippingHeight());
 			sizeList.add(pack.getShippingLength());
 			sizeList.add(pack.getShippingWidth());
@@ -115,6 +120,7 @@ public class ShippingDecisionPreProcessorImpl implements ShippingQuotePrePostPro
 		} else {
 			inputParameters.setProvince(delivery.getState());
 		}
+
 		//inputParameters.setModuleName(currentModule.getCode());
 		
 		
