@@ -99,7 +99,7 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
             if(items!=null) {
                 shoppingCartItemsList=new ArrayList<ShoppingCartItem>();
                 for(com.salesmanager.core.model.shoppingcart.ShoppingCartItem item : items) {
-                	
+                    
                     ShoppingCartItem shoppingCartItem = new ShoppingCartItem();
                     shoppingCartItem.setCode(cart.getCode());
                     shoppingCartItem.setSku(item.getProduct().getSku());
@@ -109,12 +109,12 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
                     
                     String itemName = item.getProduct().getProductDescription().getName();
                     if(!CollectionUtils.isEmpty(item.getProduct().getDescriptions())) {
-                    	for(ProductDescription productDescription : item.getProduct().getDescriptions()) {
-                    		if(language != null && language.getId().intValue() == productDescription.getLanguage().getId().intValue()) {
-                    			itemName = productDescription.getName();
-                    			break;
-                    		}
-                    	}
+                        for(ProductDescription productDescription : item.getProduct().getDescriptions()) {
+                            if(language != null && language.getId().intValue() == productDescription.getLanguage().getId().intValue()) {
+                                itemName = productDescription.getName();
+                                break;
+                            }
+                        }
                     }
                     
                     shoppingCartItem.setName(itemName);
@@ -144,26 +144,26 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
                             List<ProductOptionDescription> optionDescriptions = attribute.getProductAttribute().getProductOption().getDescriptionsSettoList();
                             List<ProductOptionValueDescription> optionValueDescriptions = attribute.getProductAttribute().getProductOptionValue().getDescriptionsSettoList();
                             if(!CollectionUtils.isEmpty(optionDescriptions) && !CollectionUtils.isEmpty(optionValueDescriptions)) {
-                            	
-                            	String optionName = optionDescriptions.get(0).getName();
-                            	String optionValue = optionValueDescriptions.get(0).getName();
-                            	
-                            	for(ProductOptionDescription optionDescription : optionDescriptions) {
-                            		if(optionDescription.getLanguage() != null && optionDescription.getLanguage().getId().intValue() == language.getId().intValue()) {
-                            			optionName = optionDescription.getName();
-                            			break;
-                            		}
-                            	}
-                            	
-                            	for(ProductOptionValueDescription optionValueDescription : optionValueDescriptions) {
-                            		if(optionValueDescription.getLanguage() != null && optionValueDescription.getLanguage().getId().intValue() == language.getId().intValue()) {
-                            			optionValue = optionValueDescription.getName();
-                            			break;
-                            		}
-                            	}
-                            	cartAttribute.setOptionName(optionName);
-                            	cartAttribute.setOptionValue(optionValue);
-                            	cartAttributes.add(cartAttribute);
+                                
+                                String optionName = optionDescriptions.get(0).getName();
+                                String optionValue = optionValueDescriptions.get(0).getName();
+                                
+                                for(ProductOptionDescription optionDescription : optionDescriptions) {
+                                    if(optionDescription.getLanguage() != null && optionDescription.getLanguage().getId().intValue() == language.getId().intValue()) {
+                                        optionName = optionDescription.getName();
+                                        break;
+                                    }
+                                }
+                                
+                                for(ProductOptionValueDescription optionValueDescription : optionValueDescriptions) {
+                                    if(optionValueDescription.getLanguage() != null && optionValueDescription.getLanguage().getId().intValue() == language.getId().intValue()) {
+                                        optionValue = optionValueDescription.getName();
+                                        break;
+                                    }
+                                }
+                                cartAttribute.setOptionName(optionName);
+                                cartAttribute.setOptionValue(optionValue);
+                                cartAttributes.add(cartAttribute);
                             }
                         }
                         shoppingCartItem.setShoppingCartAttributes(cartAttributes);
@@ -176,7 +176,7 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
             }
             
             if(shoppingCart.getOrderId() != null) {
-            	cart.setOrderId(shoppingCart.getOrderId());
+                cart.setOrderId(shoppingCart.getOrderId());
             }
 
             OrderSummary summary = new OrderSummary();
@@ -186,15 +186,15 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
             OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,store, language );
 
             if(CollectionUtils.isNotEmpty(orderSummary.getTotals())) {
-            	List<OrderTotal> totals = new ArrayList<OrderTotal>();
-            	for(com.salesmanager.core.model.order.OrderTotal t : orderSummary.getTotals()) {
-            		OrderTotal total = new OrderTotal();
-            		total.setCode(t.getOrderTotalCode());
-            		total.setText(t.getText());
-            		total.setValue(t.getValue());
-            		totals.add(total);
-            	}
-            	cart.setTotals(totals);
+                List<OrderTotal> totals = new ArrayList<OrderTotal>();
+                for(com.salesmanager.core.model.order.OrderTotal t : orderSummary.getTotals()) {
+                    OrderTotal total = new OrderTotal();
+                    total.setCode(t.getOrderTotalCode());
+                    total.setText(t.getText());
+                    total.setValue(t.getValue());
+                    totals.add(total);
+                }
+                cart.setTotals(totals);
             }
             
             cart.setSubTotal(pricingService.getDisplayAmount(orderSummary.getSubTotal(), store));
