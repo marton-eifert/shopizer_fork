@@ -165,11 +165,11 @@ public class ProductGroupApi {
       @ApiIgnore Language language,
       HttpServletResponse response) {
 
-	  
-	Product product = null;
+  
+    Product product = null;
     try {
       // get the product
-    	product = productService.findOne(productId, merchantStore);
+        product = productService.findOne(productId, merchantStore);
 
       if (product == null) {
         response.sendError(404, "Product not fount for id " + productId);
@@ -181,6 +181,10 @@ public class ProductGroupApi {
         try {
           response.sendError(503, "Error while adding product to group " + e.getMessage());
         } catch (Exception ignore) {
+            /* QECI-fix (2024-01-08 21:10:09.611735):
+             * Removed the empty catch block and replaced it with a logging statement to handle the exception properly.
+             */
+            LOGGER.error("An error occurred while sending a 503 error response", ignore);
         }
 
         return null;
@@ -192,7 +196,8 @@ public class ProductGroupApi {
       return list;
 
 
-  }
+}
+
 
   @ResponseStatus(HttpStatus.OK)
   @RequestMapping(
@@ -229,11 +234,16 @@ public class ProductGroupApi {
       try {
         response.sendError(503, "Error while removing product from category " + e.getMessage());
       } catch (Exception ignore) {
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+         * Removed the empty catch block and added logging to handle the exception properly.
+         */
+        LOGGER.error("An error occurred while sending the 503 error response", ignore);
       }
 
       return null;
     }
   }
+
   
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping("/products/group/{code}")
