@@ -261,9 +261,16 @@ public class ProductFileManagerImpl extends ProductFileManager {
     } catch (Exception e) {
       throw new ServiceException(e);
     } finally {
+      /* QECI-fix (2024-01-08 21:10:09.611735):
+       * Added logging to the catch block to handle the exception properly and avoid empty catch blocks.
+       * This ensures that exceptions are not silently ignored, improving the robustness of the code
+       * and avoiding unnecessary resource consumption.
+       */
       try {
         productImage.getImage().close();
       } catch (Exception ignore) {
+        // Log the exception to handle it properly
+        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Failed to close image resource", ignore);
       }
     }
 
@@ -287,6 +294,7 @@ public class ProductFileManagerImpl extends ProductFileManager {
   public List<OutputContentFile> getImages(Product product) throws ServiceException {
     return getImage.getImages(product);
   }
+
 
 
 
