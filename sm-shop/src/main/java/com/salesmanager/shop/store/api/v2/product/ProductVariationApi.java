@@ -137,17 +137,25 @@ public class ProductVariationApi {
     List<ReadableProductVariantValue> variants = options.getOptions();
     List<ProductAttribute> attributes = new ArrayList<ProductAttribute>();
     
+    /* QECI-fix (2024-01-08 21:10:09.611735):
+    Refactored the nested loop to use a hashmap for efficient attribute lookup.
+    This avoids the O(n^2) complexity of the nested loop by using two O(n) operations.
+    */
+    Map<Long, Map<Long, ProductAttribute>> attributeMap = new HashMap<>();
     Set<ProductAttribute> productAttributes = product.getAttributes();
     for(ProductAttribute attribute : productAttributes) {
       Long option = attribute.getProductOption().getId();
       Long optionValue = attribute.getProductOptionValue().getId();
-      for(ReadableProductVariantValue v : variants) {
-        if(v.getOption().longValue() == option.longValue()
-            && v.getValue().longValue() == optionValue.longValue()) {
-          attributes.add(attribute);
-        }
+      attributeMap.computeIfAbsent(option, k -> new HashMap<>()).put(optionValue, attribute);
+    }
+    
+    for(ReadableProductVariantValue v : variants) {
+      Long option = v.getOption();
+      Long value = v.getValue();
+      ProductAttribute attribute = attributeMap.getOrDefault(option, Collections.emptyMap()).get(value);
+      if (attribute != null) {
+        attributes.add(attribute);
       }
-      
     }
 
     FinalPrice price = pricingService.calculateProductPrice(product, attributes);
@@ -157,6 +165,7 @@ public class ProductVariationApi {
     populator.populate(price, readablePrice, merchantStore, language);
     return readablePrice;
   }
+
 
   
   @RequestMapping(value = "/category/{id}/variations", method = RequestMethod.GET)
