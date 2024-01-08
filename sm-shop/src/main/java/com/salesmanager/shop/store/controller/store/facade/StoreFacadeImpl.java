@@ -335,7 +335,14 @@ public class StoreFacadeImpl implements StoreFacade {
 		configTO.setKey(config.getKey());
 		configTO.setType(config.getMerchantConfigurationType());
 		configTO.setValue(config.getValue());
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Avoid creating new Boolean objects unnecessarily by using the primitive boolean type directly.
+		Changed from:
 		configTO.setActive(config.getActive() != null ? config.getActive().booleanValue() : false);
+		To:
+		configTO.setActive(config.getActive() != null && config.getActive());
+		*/
+		configTO.setActive(config.getActive() != null && config.getActive());
 		return configTO;
 	}
 
@@ -346,7 +353,14 @@ public class StoreFacadeImpl implements StoreFacade {
 		configTO.setKey(config.getKey());
 		configTO.setMerchantConfigurationType(configurationType);
 		configTO.setValue(config.getValue());
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Replace the instantiation of the Boolean wrapper type with a primitive boolean literal.
+		Changed from:
 		configTO.setActive(new Boolean(config.isActive()));
+		To:
+		configTO.setActive(config.isActive());
+		*/
+		configTO.setActive(config.isActive());
 		return configTO;
 	}
 
@@ -356,6 +370,7 @@ public class StoreFacadeImpl implements StoreFacade {
 		image.setPath(imagePath);
 		return image;
 	}
+
 
 	@Override
 	public void deleteLogo(String code) {
