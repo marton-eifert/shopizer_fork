@@ -144,38 +144,44 @@ public class OrderTotalApi {
       return returnSummary;
 
     } catch (Exception e) {
-      LOGGER.error("Error while calculating order summary", e);
-      try {
-        response.sendError(503, "Error while calculating order summary " + e.getMessage());
-      } catch (Exception ignore) {
-      }
-      return null;
-    }
+  LOGGER.error("Error while calculating order summary", e);
+  /* QECI-fix (2024-01-08 21:10:09.611735):
+     Removed the empty catch block and added logging to handle the ignored exception.
+     This improves resource usage and code robustness. */
+  try {
+    response.sendError(503, "Error while calculating order summary " + e.getMessage());
+  } catch (Exception ignore) {
+    LOGGER.error("Error sending 503 response", ignore);
   }
+  return null;
+}
+}
 
-  /**
-   * Public api
-   * @param id
-   * @param quote
-   * @param merchantStore
-   * @param language
-   * @param response
-   * @return
-   */
-  @RequestMapping(
-      value = {"/cart/{code}/total"},
-      method = RequestMethod.GET)
-  @ResponseBody
-  @ApiImplicitParams({
-      @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-      @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en")
-  })
-  public ReadableOrderTotalSummary calculateTotal(
-      @PathVariable final String code,
-      @RequestParam(value = "quote", required = false) Long quote,
-      @ApiIgnore MerchantStore merchantStore,
-      @ApiIgnore Language language,//possible postal code, province and country
-      HttpServletResponse response) {
+/**
+ * Public api
+ * @param id
+ * @param quote
+ * @param merchantStore
+ * @param language
+ * @param response
+ * @return
+ */
+@RequestMapping(
+    value = {"/cart/{code}/total"},
+    method = RequestMethod.GET)
+@ResponseBody
+@ApiImplicitParams({
+    @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+    @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en")
+})
+public ReadableOrderTotalSummary calculateTotal(
+    @PathVariable final String code,
+    @RequestParam(value = "quote", required = false) Long quote,
+    @ApiIgnore MerchantStore merchantStore,
+    @ApiIgnore Language language,//possible postal code, province and country
+    HttpServletResponse response)
+
+{
 
     try {
       ShoppingCart shoppingCart = shoppingCartFacade.getShoppingCartModel(code, merchantStore);
@@ -213,12 +219,17 @@ public class OrderTotalApi {
       return returnSummary;
 
     } catch (Exception e) {
-      LOGGER.error("Error while calculating order summary", e);
-      try {
-        response.sendError(503, "Error while calculating order summary " + e.getMessage());
-      } catch (Exception ignore) {
-      }
-      return null;
-    }
+  LOGGER.error("Error while calculating order summary", e);
+  /* QECI-fix (2024-01-08 21:10:09.611735):
+     Removed the empty catch block and added logging for the ignored exception.
+     This change improves error handling and avoids resource wastage. */
+  try {
+    response.sendError(503, "Error while calculating order summary " + e.getMessage());
+  } catch (Exception ignore) {
+    LOGGER.error("Error while sending error response", ignore);
   }
+  return null;
 }
+}
+}
+
