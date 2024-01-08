@@ -69,35 +69,43 @@ public class PersistableTaxRateMapper implements Mapper<PersistableTaxRate, TaxR
 	}
 	
 	private com.salesmanager.core.model.tax.taxrate.TaxRate taxRate(com.salesmanager.core.model.tax.taxrate.TaxRate destination, PersistableTaxRate source) throws Exception {
-		//List<com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptions = new ArrayList<com.salesmanager.core.model.tax.taxrate.TaxRateDescription>();
-		
-	      if(!CollectionUtils.isEmpty(source.getDescriptions())) {
-	          for(TaxRateDescription desc : source.getDescriptions()) {
-	        	com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = null;
-	            if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
-	              for(com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
-	                if(!StringUtils.isBlank(desc.getLanguage()) && desc.getLanguage().equals(d.getLanguage().getCode())) {
-	              	  d.setDescription(desc.getDescription());
-	              	  d.setName(desc.getName());
-	              	  d.setTitle(desc.getTitle());
-	              	  description = d;
-	              	  break;
-	                } 
-	              }
-	            } 
-	            if(description == null) {
-	  	          description = description(desc);
-	  	          description.setTaxRate(destination);
-	  	          destination.getDescriptions().add(description);
-	            }
-	          }
-	        }
+        //List<com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptions = new ArrayList<com.salesmanager.core.model.tax.taxrate.TaxRateDescription>();
+        
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+        Refactored the nested loops to use a hashmap for storing descriptions by language code.
+        This reduces the complexity from O(n^2) to O(n) by avoiding nested iteration over descriptions.
+        */
+        Map<String, com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptionMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
+            for(com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
+                if(d.getLanguage() != null && !StringUtils.isBlank(d.getLanguage().getCode())) {
+                    descriptionMap.put(d.getLanguage().getCode(), d);
+                }
+            }
+        }
+        if(!CollectionUtils.isEmpty(source.getDescriptions())) {
+            for(TaxRateDescription desc : source.getDescriptions()) {
+                if(!StringUtils.isBlank(desc.getLanguage())) {
+                    com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage());
+                    if(description != null) {
+                        description.setDescription(desc.getDescription());
+                        description.setName(desc.getName());
+                        description.setTitle(desc.getTitle());
+                    } else {
+                        description = description(desc);
+                        description.setTaxRate(destination);
+                        destination.getDescriptions().add(description);
+                    }
+                }
+            }
+        }
 
-	        return destination;
+        return destination;
 
-	}
-	
-	private com.salesmanager.core.model.tax.taxrate.TaxRateDescription description(TaxRateDescription source) throws Exception {
+}
+
+    
+    private com.salesmanager.core.model.tax.taxrate.TaxRateDescription description(TaxRateDescription source) throws Exception {
 		
 		
 	    Validate.notNull(source.getLanguage(),"description.language should not be null");
