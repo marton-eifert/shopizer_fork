@@ -129,11 +129,18 @@ public class ProductRelationshipApi {
       try {
         response.sendError(503, "Error while getting product reviews" + e.getMessage());
       } catch (Exception ignore) {
+        /*
+        QECI-fix (2024-01-08 21:10:09.611735):
+        Added logging to the empty catch block to handle the ignored exception properly.
+        This avoids the anti-pattern of an empty catch block and ensures that all exceptions are accounted for.
+        */
+        LOGGER.error("An exception was ignored", ignore);
       }
 
       return null;
     }
   }
+
 
   /*
   @RequestMapping( value={"/private/products/{id}/reviews/{reviewid}","/auth/products/{id}/reviews/{reviewid}"}, method=RequestMethod.PUT)
