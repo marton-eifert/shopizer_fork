@@ -53,43 +53,43 @@ public abstract class AbstractCustomerServices implements UserDetailsService{
 		Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
 		try {
-			
-				LOGGER.debug("Loading user by user id: {}", userName);
+            
+                LOGGER.debug("Loading user by user id: {}", userName);
 
-				user = customerService.getByNick(userName);
-			
-				if(user==null) {
-					//return null;
-					throw new UsernameNotFoundException("User " + userName + " not found");
-				}
-	
-	
+                user = customerService.getByNick(userName);
+            
+                if(user==null) {
+                    //return null;
+                    throw new UsernameNotFoundException("User " + userName + " not found");
+                }
+    
+    
 
-			GrantedAuthority role = new SimpleGrantedAuthority(ROLE_PREFIX + Constants.PERMISSION_CUSTOMER_AUTHENTICATED);//required to login
-			authorities.add(role); 
-			
-			List<Integer> groupsId = new ArrayList<Integer>();
-			List<Group> groups = user.getGroups();
-			for(Group group : groups) {
-				groupsId.add(group.getId());
-			}
-			
-	
-			if(CollectionUtils.isNotEmpty(groupsId)) {
-		    	List<Permission> permissions = permissionService.getPermissions(groupsId);
-		    	for(Permission permission : permissions) {
-		    		GrantedAuthority auth = new SimpleGrantedAuthority(permission.getPermissionName());
-		    		authorities.add(auth);
-		    	}
-			}
-			
+            GrantedAuthority role = new SimpleGrantedAuthority(ROLE_PREFIX + Constants.PERMISSION_CUSTOMER_AUTHENTICATED);//required to login
+            authorities.add(role); 
+            
+            List<Integer> groupsId = new ArrayList<Integer>();
+            List<Group> groups = user.getGroups();
+            for(Group group : groups) {
+                groupsId.add(group.getId());
+            }
+            
+    
+            if(CollectionUtils.isNotEmpty(groupsId)) {
+                List<Permission> permissions = permissionService.getPermissions(groupsId);
+                for(Permission permission : permissions) {
+                    GrantedAuthority auth = new SimpleGrantedAuthority(permission.getPermissionName());
+                    authorities.add(auth);
+                }
+            }
+            
 
-		} catch (ServiceException e) {
-			LOGGER.error("Exception while querrying customer",e);
-			throw new SecurityDataAccessException("Cannot authenticate customer",e);
-		}
+        } catch (ServiceException e) {
+            LOGGER.error("Exception while querrying customer",e);
+            throw new SecurityDataAccessException("Cannot authenticate customer",e);
+        }
 
-		return userDetails(userName, user, authorities);
+        return userDetails(userName, user, authorities);
 		
 	}
 
