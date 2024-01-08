@@ -143,39 +143,40 @@ public class AjaxResponse implements JSONAware {
 		}
 		
 		if(CollectionUtils.isNotEmpty(this.getValidationMessages().values())) {
-			StringBuilder dataEntries = null;
-			int count = 0;
-			for(String key : this.getValidationMessages().keySet()) {
-				if(dataEntries == null) {
-					dataEntries = new StringBuilder();
-				}
-				dataEntries.append("{");
-				dataEntries.append("\"field\":\"").append(key).append("\"");
-				dataEntries.append(",");
-				dataEntries.append("\"message\":\"").append(this.getValidationMessages().get(key)).append("\"");
-				dataEntries.append("}");
-
-				if(count<this.getValidationMessages().size()-1) {
-					dataEntries.append(",");
-				}
-				count ++;
-			}
-			
-			returnString.append(",").append("\"validations\"").append(":[");
-			if(dataEntries!=null) {
-				returnString.append(dataEntries.toString());
-			}
-			returnString.append("]");
-
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Moved the instantiation of StringBuilder dataEntries outside of the loop to avoid creating a new object in each iteration.
+	Initialized dataEntries before the loop starts and reused it by resetting its content if necessary.
+	*/
+	StringBuilder dataEntries = new StringBuilder();
+	int count = 0;
+	for(String key : this.getValidationMessages().keySet()) {
+		if(count > 0) {
+			dataEntries.append(",");
 		}
-		
-		returnString.append("}}");
-
-		
-		return returnString.toString();
-
-		
+		dataEntries.append("{");
+		dataEntries.append("\"field\":\"").append(key).append("\"");
+		dataEntries.append(",");
+		dataEntries.append("\"message\":\"").append(this.getValidationMessages().get(key)).append("\"");
+		dataEntries.append("}");
+		count ++;
 	}
+	
+	returnString.append(",").append("\"validations\"").append(":[");
+	if(dataEntries.length() > 0) {
+		returnString.append(dataEntries.toString());
+	}
+	returnString.append("]");
+
+}
+
+returnString.append("}}");
+
+
+return returnString.toString();
+
+
+}
+
 	public Map<String,String> getDataMap() {
 		return dataMap;
 	}
