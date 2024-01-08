@@ -242,16 +242,20 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 				}
 
-				// Set<ShoppingCartItem> shoppingCartItems = new
-				// HashSet<ShoppingCartItem>();
+				/* QECI-fix (2024-01-08 21:10:09.611735):
+				Replaced string concatenation within the loop with StringBuilder to accumulate the debug messages.
+				After the loop, convert the StringBuilder content to a string and log it once, reducing the number of logging calls.
+				*/
+				StringBuilder debugMessages = new StringBuilder();
 				for (ShoppingCartItem item : items) {
-					LOGGER.debug("Populate item " + item.getId());
+					debugMessages.append("Populate item ").append(item.getId()).append("\n");
 					getPopulatedItem(item, store);
-					LOGGER.debug("Obsolete item ? " + item.isObsolete());
+					debugMessages.append("Obsolete item ? ").append(item.isObsolete()).append("\n");
 					if (item.isObsolete()) {
 						cartIsObsolete = true;
 					}
 				}
+				LOGGER.debug(debugMessages.toString());
 
 				Set<ShoppingCartItem> refreshedItems = new HashSet<>(items);
 
@@ -268,6 +272,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 			LOGGER.error(e.getMessage());
 			throw new ServiceException(e);
 		}
+
 
 		return shoppingCart;
 
@@ -315,26 +320,29 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 		if ((productAttributes != null && productAttributes.size() > 0)
 				|| (cartAttributes != null && cartAttributes.size() > 0)) {
 			if (cartAttributes != null) {
+				/*
+				QECI-fix (2024-01-08 21:10:09.611735):
+				Refactored the nested loop to use a hashmap for storing product attributes.
+				This reduces the complexity from O(n^2) to O(n) by eliminating the need to iterate
+				over the productAttributes list for each cartAttribute.
+				*/
+				Map<Long, ProductAttribute> productAttributeMap = new HashMap<>();
+				for (ProductAttribute productAttribute : productAttributes) {
+					productAttributeMap.put(productAttribute.getId(), productAttribute);
+				}
 				for (ShoppingCartAttributeItem attribute : cartAttributes) {
 					long attributeId = attribute.getProductAttributeId();
-					boolean existingAttribute = false;
-					for (ProductAttribute productAttribute : productAttributes) {
-
-						if (productAttribute.getId().equals(attributeId)) {
-							attribute.setProductAttribute(productAttribute);
-							attributesList.add(productAttribute);
-							existingAttribute = true;
-							break;
-						}
-					}
-
-					if (!existingAttribute) {
+					ProductAttribute productAttribute = productAttributeMap.get(attributeId);
+					if (productAttribute != null) {
+						attribute.setProductAttribute(productAttribute);
+						attributesList.add(productAttribute);
+					} else {
 						removeAttributesList.add(attribute);
 					}
-
 				}
 			}
 		}
+
 
 		// cleanup orphean item
 		if (CollectionUtils.isNotEmpty(removeAttributesList)) {
@@ -401,41 +409,42 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 		LOGGER.info("Starting merging shopping carts");
 		if (CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
-			Set<ShoppingCartItem> shoppingCartItemsSet = getShoppingCartItems(sessionCart, store, userShoppingModel);
-			boolean duplicateFound = false;
-			if (CollectionUtils.isNotEmpty(shoppingCartItemsSet)) {
-				for (ShoppingCartItem sessionShoppingCartItem : shoppingCartItemsSet) {
-					if (CollectionUtils.isNotEmpty(userShoppingModel.getLineItems())) {
-						for (ShoppingCartItem cartItem : userShoppingModel.getLineItems()) {
-							if (cartItem.getProduct().getId().longValue() == sessionShoppingCartItem.getProduct()
-									.getId().longValue()) {
-								if (CollectionUtils.isNotEmpty(cartItem.getAttributes())) {
-									if (!duplicateFound) {
-										LOGGER.info("Dupliate item found..updating exisitng product quantity");
-										cartItem.setQuantity(
-												cartItem.getQuantity() + sessionShoppingCartItem.getQuantity());
-										duplicateFound = true;
-										break;
-									}
-								}
-							}
-						}
-					}
-					if (!duplicateFound) {
-						LOGGER.info("New item found..adding item to Shopping cart");
-						userShoppingModel.getLineItems().add(sessionShoppingCartItem);
-					}
-				}
-
-			}
-
+	Set<ShoppingCartItem> shoppingCartItemsSet = getShoppingCartItems(sessionCart, store, userShoppingModel);
+	boolean duplicateFound = false;
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	Refactoring the code to use a hashmap for storing product IDs and their corresponding ShoppingCartItem.
+	This eliminates the need for nested loops and improves the efficiency of checking for duplicates.
+	*/
+	Map<Long, ShoppingCartItem> productMap = new HashMap<>();
+	if (CollectionUtils.isNotEmpty(userShoppingModel.getLineItems())) {
+		for (ShoppingCartItem cartItem : userShoppingModel.getLineItems()) {
+			productMap.put(cartItem.getProduct().getId(), cartItem);
 		}
-		LOGGER.info("Shopping Cart merged successfully.....");
-		saveOrUpdate(userShoppingModel);
-		removeShoppingCart(sessionCart);
-
-		return userShoppingModel;
 	}
+	if (CollectionUtils.isNotEmpty(shoppingCartItemsSet)) {
+		for (ShoppingCartItem sessionShoppingCartItem : shoppingCartItemsSet) {
+			ShoppingCartItem existingCartItem = productMap.get(sessionShoppingCartItem.getProduct().getId());
+			if (existingCartItem != null) {
+				if (CollectionUtils.isNotEmpty(existingCartItem.getAttributes())) {
+					LOGGER.info("Duplicate item found..updating existing product quantity");
+					existingCartItem.setQuantity(
+							existingCartItem.getQuantity() + sessionShoppingCartItem.getQuantity());
+					duplicateFound = true;
+				}
+			}
+			if (!duplicateFound) {
+				LOGGER.info("New item found..adding item to Shopping cart");
+				userShoppingModel.getLineItems().add(sessionShoppingCartItem);
+			}
+		}
+	}
+	LOGGER.info("Shopping Cart merged successfully.....");
+	saveOrUpdate(userShoppingModel);
+	removeShoppingCart(sessionCart);
+
+	return userShoppingModel;
+}
+
 
 	private Set<ShoppingCartItem> getShoppingCartItems(final ShoppingCart sessionCart, final MerchantStore store,
 			final ShoppingCart cartModel) throws Exception {
