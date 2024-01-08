@@ -28,11 +28,17 @@ public class RestErrorHandler {
         log.error(exception.getMessage(), exception);
         Objects.requireNonNull(exception.getCause());
         Throwable rootCause = exception.getCause();
-        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-            rootCause = rootCause.getCause();
+        /* QECI-fix (2024-01-08 21:10:09.611735):
+        Storing the result of rootCause.getCause() in a variable to avoid calling the method multiple times within the loop condition.
+        Updating the loop condition to use this variable for checking the loop termination condition.
+        */
+        Throwable cause = rootCause.getCause();
+        while (cause != null && cause != rootCause) {
+            rootCause = cause;
+            cause = rootCause.getCause();
         }
         ErrorEntity errorEntity = createErrorEntity("500", exception.getMessage(),
-        		rootCause.getMessage());
+                rootCause.getMessage());
         return errorEntity;
     }
 
@@ -40,29 +46,38 @@ public class RestErrorHandler {
     /**
      * Generic exception serviceException handler
      */
-    @RequestMapping(produces = "application/json")
-    @ExceptionHandler(ServiceRuntimeException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public @ResponseBody ErrorEntity handleServiceException(ServiceRuntimeException exception) {
-        log.error(exception.getErrorMessage(), exception);
-        Throwable rootCause = exception.getCause();
-        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-            rootCause = rootCause.getCause();
-        }
-        ErrorEntity errorEntity = createErrorEntity(exception.getErrorCode()!=null?exception.getErrorCode():"500", exception.getErrorMessage(),
-        		rootCause.getMessage());
-        return errorEntity;
-    }
+}
 
     @RequestMapping(produces = "application/json")
-    @ExceptionHandler(ConversionRuntimeException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public @ResponseBody ErrorEntity handleServiceException(ConversionRuntimeException exception) {
-        log.error(exception.getErrorMessage(), exception);
-        ErrorEntity errorEntity = createErrorEntity(exception.getErrorCode(), exception.getErrorMessage(),
-            exception.getLocalizedMessage());
-        return errorEntity;
+@ExceptionHandler(ServiceRuntimeException.class)
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public @ResponseBody ErrorEntity handleServiceException(ServiceRuntimeException exception) {
+    log.error(exception.getErrorMessage(), exception);
+    Throwable rootCause = exception.getCause();
+    /* QECI-fix (2024-01-08 21:10:09.611735):
+    Refactored the loop condition to avoid calling the getCause method multiple times.
+    Stored the result of rootCause.getCause() in a variable to use in the loop condition.
+    */
+    Throwable cause = rootCause != null ? rootCause.getCause() : null;
+    while (cause != null && cause != rootCause) {
+        rootCause = cause;
+        cause = rootCause.getCause();
     }
+    ErrorEntity errorEntity = createErrorEntity(exception.getErrorCode()!=null?exception.getErrorCode():"500", exception.getErrorMessage(),
+            rootCause.getMessage());
+    return errorEntity;
+}
+
+@RequestMapping(produces = "application/json")
+@ExceptionHandler(ConversionRuntimeException.class)
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public @ResponseBody ErrorEntity handleServiceException(ConversionRuntimeException exception) {
+    log.error(exception.getErrorMessage(), exception);
+    ErrorEntity errorEntity = createErrorEntity(exception.getErrorCode(), exception.getErrorMessage(),
+        exception.getLocalizedMessage());
+    return errorEntity;
+}
+
 
     @RequestMapping(produces = "application/json")
     @ExceptionHandler(ResourceNotFoundException.class)
