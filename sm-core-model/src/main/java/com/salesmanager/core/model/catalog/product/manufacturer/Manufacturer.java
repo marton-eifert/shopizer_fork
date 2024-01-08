@@ -52,8 +52,13 @@ public class Manufacturer extends SalesManagerEntity<Long, Manufacturer> impleme
 	@Column(name = "MANUFACTURER_IMAGE")
 	private String image;
 	
+	/* QECI-fix (2024-01-08 21:10:09.611735):
+	 * Changed the instantiation of the Integer wrapper type to use a primitive int literal.
+	 * This avoids the unnecessary creation of an Integer object and uses a more efficient primitive type.
+	 */
 	@Column(name="SORT_ORDER")
-	private Integer order = new Integer(0);
+	private int order = 0;
+
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="MERCHANT_ID", nullable=false)
