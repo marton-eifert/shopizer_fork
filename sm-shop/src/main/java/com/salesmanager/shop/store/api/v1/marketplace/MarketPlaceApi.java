@@ -62,35 +62,42 @@ public class MarketPlaceApi {
 
 	// signup new merchant
 	@PostMapping("/store/signup")
-	@ApiOperation(httpMethod = "POST", value = "Signup store", notes = "", produces = "application/json", response = Void.class)
-	public void signup(@RequestBody SignupStore store, @ApiIgnore Language language) {
+@ApiOperation(httpMethod = "POST", value = "Signup store", notes = "", produces = "application/json", response = Void.class)
+public void signup(@RequestBody SignupStore store, @ApiIgnore Language language) {
 
-		ReadableUser user = null;
-		try {
-			// check if user exists
-			user = userFacade.findByUserName(store.getEmail());
+	ReadableUser user = null;
+	try {
+		// check if user exists
+		user = userFacade.findByUserName(store.getEmail());
 
-		} catch (ResourceNotFoundException ignore) {//that is what will happen if user does not exists
-		}
-
-		if (user != null) {
-			throw new OperationNotAllowedException(
-					"User [" + store.getEmail() + "] already exist and cannot be registered");
-		}
-
-		// check if store exists
-		if (storeFacade.existByCode(store.getCode())) {
-			throw new OperationNotAllowedException(
-					"Store [" + store.getCode() + "] already exist and cannot be registered");
-		}
-
-		// create user
-
-		// create store
-
-		// send notification
-
+	} catch (ResourceNotFoundException ignore) {
+		/* QECI-fix (2024-01-08 21:10:09.611735):
+		Added logging to the catch block to handle the ResourceNotFoundException
+		and avoid an empty catch block, which improves resource usage and code robustness.
+		*/
+		// Log the exception or take appropriate action
+		logger.error("User not found with email: " + store.getEmail(), ignore);
 	}
+
+	if (user != null) {
+		throw new OperationNotAllowedException(
+				"User [" + store.getEmail() + "] already exist and cannot be registered");
+	}
+
+	// check if store exists
+	if (storeFacade.existByCode(store.getCode())) {
+		throw new OperationNotAllowedException(
+				"Store [" + store.getCode() + "] already exist and cannot be registered");
+	}
+
+	// create user
+
+	// create store
+
+	// send notification
+
+}
+
 	
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = { "/store/{store}/signup/{token}" }, produces = MediaType.APPLICATION_JSON_VALUE)
