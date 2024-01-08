@@ -204,7 +204,8 @@ public class ZonesLoader {
 	// internal complex mapping stuff, don't try this at home ...
 	private void mapZone(Language l, Map<String, List<ZoneDescription>> zonesDescriptionsMap,
 			Map<String, Country> countriesMap, Map<String, Zone> zonesMap, Map<String, String> zonesMark,
-			Map<String, String> list) {
+			Map<String, String> list)
+{
 
 		String zoneCode = list.get("zoneCode");
 		ZoneDescription zoneDescription = new ZoneDescription();
