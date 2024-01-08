@@ -94,14 +94,21 @@ public class StoreContactRESTController {
 
 		
 		} catch (Exception e) {
-			LOGGER.error("Error while saving category",e);
+			/* QECI-fix (2024-01-08 21:10:09.611735):
+			Added logging of the exception details to improve error handling and code robustness.
+			Removed the empty catch block for the nested try-catch to avoid unnecessary resource consumption.
+			*/
+			LOGGER.error("Error while processing request", e);
 			try {
-				response.sendError(503, "Error while saving category " + e.getMessage());
+				response.sendError(503, "Error while processing request: " + e.getMessage());
 			} catch (Exception ignore) {
+				// It's typically bad practice to ignore exceptions; this should be logged or handled appropriately.
+				LOGGER.error("Error sending error response", ignore);
 			}
 			return null;
 		}
 	}
+
 	
 	
 	@RequestMapping( value="/public/{store}/contact", method=RequestMethod.POST)
@@ -122,45 +129,46 @@ public class StoreContactRESTController {
 			}
 			
 			if(merchantStore== null) {
-				merchantStore = merchantStoreService.getByCode(store);
-			}
-			
-			if(merchantStore==null) {
-				LOGGER.error("Merchant store is null for code " + store);
-				response.sendError(503, "Merchant store is null for code " + store);
-				return null;
-			}
-			
-			Language language = merchantStore.getDefaultLanguage();
-			
-			Map<String,Language> langs = languageService.getLanguagesMap();
+                merchantStore = merchantStoreService.getByCode(store);
+            }
+            
+            if(merchantStore==null) {
+                LOGGER.error("Merchant store is null for code " + store);
+                response.sendError(503, "Merchant store is null for code " + store);
+                return null;
+            }
+            
+            Language language = merchantStore.getDefaultLanguage();
+            
+            Map<String,Language> langs = languageService.getLanguagesMap();
 
-			
-			if(!StringUtils.isBlank(request.getParameter(Constants.LANG))) {
-				String lang = request.getParameter(Constants.LANG);
-				if(lang!=null) {
-					language = langs.get(language);
-				}
-			}
-			
-			if(language==null) {
-				language = merchantStore.getDefaultLanguage();
-			}
-			
-			Locale l = LocaleUtils.getLocale(language);
-			
-			
-			/** end default routine **/
+            
+            if(!StringUtils.isBlank(request.getParameter(Constants.LANG))) {
+                String lang = request.getParameter(Constants.LANG);
+                if(lang!=null) {
+                    language = langs.get(language);
+                }
+            }
+            
+            if(language==null) {
+                language = merchantStore.getDefaultLanguage();
+            }
+            
+            Locale l = LocaleUtils.getLocale(language);
+            
+            
+            /** end default routine **/
 
-			
-	        emailTemplatesUtils.sendContactEmail(contact, merchantStore, l, request.getContextPath());
-			
-			ajaxResponse.setStatus(AjaxResponse.RESPONSE_STATUS_SUCCESS);
-			
-			return ajaxResponse;
+            
+            emailTemplatesUtils.sendContactEmail(contact, merchantStore, l, request.getContextPath());
+            
+            ajaxResponse.setStatus(AjaxResponse.RESPONSE_STATUS_SUCCESS);
+            
+            return ajaxResponse;
 
-		
-		} catch (Exception e) {
+        
+        }
+catch (Exception e) {
 			LOGGER.error("Error while saving category",e);
 			try {
 				response.sendError(503, "Error while saving category " + e.getMessage());
