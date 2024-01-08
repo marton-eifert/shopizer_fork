@@ -58,45 +58,47 @@ public class PersistableProductOptionValueMapper
 			}
 
 			if (!CollectionUtils.isEmpty(source.getDescriptions())) {
-				for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription desc : source
-						.getDescriptions()) {
-					ProductOptionValueDescription description = null;
-					if (!CollectionUtils.isEmpty(destination.getDescriptions())) {
-						for (ProductOptionValueDescription d : destination.getDescriptions()) {
-							if (!StringUtils.isBlank(desc.getLanguage())
-									&& desc.getLanguage().equals(d.getLanguage().getCode())) {
-								
-				            	  d.setDescription(desc.getDescription());
-				            	  d.setName(desc.getName());
-				            	  d.setTitle(desc.getTitle());
-				            	  if(StringUtils.isBlank(d.getName())) {
-				            		  d.setName(d.getDescription());
-				            	  }
-				            	  description = d;
-				            	  break;
+    /* QECI-fix (2024-01-08 21:10:09.611735):
+     * Replaced nested loops with a hashmap to store descriptions by language code.
+     * This reduces the complexity from O(n^2) to O(n) and improves performance.
+     */
+    Map<String, ProductOptionValueDescription> descriptionMap = new HashMap<>();
+    if (!CollectionUtils.isEmpty(destination.getDescriptions())) {
+        for (ProductOptionValueDescription d : destination.getDescriptions()) {
+            if (!StringUtils.isBlank(d.getLanguage().getCode())) {
+                descriptionMap.put(d.getLanguage().getCode(), d);
+            }
+        }
+    }
+    for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription desc : source.getDescriptions()) {
+        ProductOptionValueDescription description = null;
+        if (!StringUtils.isBlank(desc.getLanguage())) {
+            description = descriptionMap.get(desc.getLanguage());
+        }
+        if (description != null) {
+            description.setDescription(desc.getDescription());
+            description.setName(desc.getName());
+            description.setTitle(desc.getTitle());
+            if(StringUtils.isBlank(description.getName())) {
+                description.setName(description.getDescription());
+            }
+        } else {
+            description = description(desc);
+            description.setProductOptionValue(destination);
+            destination.getDescriptions().add(description);
+        }
+    }
+}
 
-							}
-						}
-					} //else {
-			          if(description == null) {
-				          description = description(desc);
-				          description.setProductOptionValue(destination);
-				          destination.getDescriptions().add(description);
-			          }
-						//description = description(desc);
-						//description.setProductOptionValue(destination);
-					//}
-					//destination.getDescriptions().add(description);
-				}
-			}
-
-			destination.setCode(source.getCode());
-			destination.setMerchantStore(store);
-			destination.setProductOptionValueSortOrder(source.getSortOrder());
+destination.setCode(source.getCode());
+destination.setMerchantStore(store);
+destination.setProductOptionValueSortOrder(source.getSortOrder());
 
 
-			return destination;
-		} catch (Exception e) {
+return destination;
+}
+
+catch (Exception e) {
 			throw new ServiceRuntimeException("Error while converting product option", e);
 		}
 	}
