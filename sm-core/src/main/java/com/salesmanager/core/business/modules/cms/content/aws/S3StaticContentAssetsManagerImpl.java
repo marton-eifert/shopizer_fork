@@ -85,7 +85,11 @@ public class S3StaticContentAssetsManagerImpl implements ContentAssetsManager {
 			ListObjectsV2Request listObjectsRequest = new ListObjectsV2Request().withBucketName(bucketName)
 					.withPrefix(nodePath(merchantStoreCode, fileContentType));
 
-			List<String> fileNames = null;
+			/* QECI-fix (2024-01-09 19:06:55.798727):
+			 * Avoid instantiations inside loops
+			 * Moved the instantiation of the ArrayList<String> for fileNames outside of the loop.
+			 */
+			List<String> fileNames = new ArrayList<String>();
 
 			final AmazonS3 s3 = s3Client();
 			ListObjectsV2Result results = s3.listObjectsV2(listObjectsRequest);
@@ -93,9 +97,6 @@ public class S3StaticContentAssetsManagerImpl implements ContentAssetsManager {
 			for (S3ObjectSummary os : objects) {
 				if (isInsideSubFolder(os.getKey())) {
 					continue;
-				}
-				if (fileNames == null) {
-					fileNames = new ArrayList<String>();
 				}
 				String mimetype = URLConnection.guessContentTypeFromName(os.getKey());
 				if (!StringUtils.isBlank(mimetype)) {
@@ -111,6 +112,8 @@ public class S3StaticContentAssetsManagerImpl implements ContentAssetsManager {
 
 		}
 	}
+}
+
 
 	@Override
 	public List<OutputContentFile> getFiles(String merchantStoreCode, Optional<String> folderPath, FileContentType fileContentType)
