@@ -707,7 +707,25 @@ public ProductList listByStore(MerchantStore store, Language language, ProductCr
 	}
 
 	if (criteria.getManufacturerId() != null) {
-		countQ.setParameter("manuf
+		countQ.setParameter("manufid", criteria.getManufacturerId());
+		}
+
+
+		/**/
+		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+				&& !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+			int count = 0;
+			for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
+				countQ.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
+				countQ.setParameter("val" + count + attributeCriteria.getAttributeCode(),
+						"%" + attributeCriteria.getAttributeValue() + "%");
+				count++;
+			}
+		}
+
+		if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+			countQ.setParameter("lang", language.getCode());
+		}
 
 		if (!StringUtils.isBlank(criteria.getProductName())) {
 			countQ.setParameter("nm", new StringBuilder().append("%").append(criteria.getProductName().toLowerCase())
