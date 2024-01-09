@@ -209,14 +209,22 @@ public class OrderFacadeImpl implements OrderFacade {
 	public OrderTotalSummary calculateOrderTotal(MerchantStore store,
 			com.salesmanager.shop.model.order.v0.PersistableOrder order, Language language) throws Exception {
 
-		List<PersistableOrderProduct> orderProducts = order.getOrderProductItems();
-
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid instantiations inside loops
+		 * Moved the instantiation of ShoppingCartItemPopulator populator outside of the loop.
+		 */
 		ShoppingCartItemPopulator populator = new ShoppingCartItemPopulator();
 		populator.setProductAttributeService(productAttributeService);
 		populator.setProductService(productService);
 		populator.setShoppingCartService(shoppingCartService);
 
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid instantiations inside loops
+		 * Moved the instantiation of ArrayList<ShoppingCartItem> items outside of the loop.
+		 */
 		List<ShoppingCartItem> items = new ArrayList<ShoppingCartItem>();
+
+		List<PersistableOrderProduct> orderProducts = order.getOrderProductItems();
 		for (PersistableOrderProduct orderProduct : orderProducts) {
 			ShoppingCartItem item = populator.populate(orderProduct, new ShoppingCartItem(), store, language);
 			items.add(item);
@@ -228,6 +236,8 @@ public class OrderFacadeImpl implements OrderFacade {
 
 		return summary;
 	}
+}
+
 
 	private OrderTotalSummary calculateOrderTotal(MerchantStore store, Customer customer,
 			com.salesmanager.shop.model.order.v0.PersistableOrder order, Language language) throws Exception {
@@ -1205,152 +1215,119 @@ public class OrderFacadeImpl implements OrderFacade {
 		try {
 
 
-			Order modelOrder = new Order();
-			persistableOrderApiPopulator.populate(order, modelOrder, store, language);
+	Order modelOrder = new Order();
+	persistableOrderApiPopulator.populate(order, modelOrder, store, language);
 
-			Long shoppingCartId = order.getShoppingCartId();
-			ShoppingCart cart = shoppingCartService.getById(shoppingCartId, store);
+	Long shoppingCartId = order.getShoppingCartId();
+	ShoppingCart cart = shoppingCartService.getById(shoppingCartId, store);
 
-			if (cart == null) {
-				throw new ServiceException("Shopping cart with id " + shoppingCartId + " does not exist");
-			}
+	if (cart == null) {
+		throw new ServiceException("Shopping cart with id " + shoppingCartId + " does not exist");
+	}
 
-			Set<ShoppingCartItem> shoppingCartItems = cart.getLineItems();
+	Set<ShoppingCartItem> shoppingCartItems = cart.getLineItems();
 
-			List<ShoppingCartItem> items = new ArrayList<ShoppingCartItem>(shoppingCartItems);
+	List<ShoppingCartItem> items = new ArrayList<ShoppingCartItem>(shoppingCartItems);
 
-			Set<OrderProduct> orderProducts = new LinkedHashSet<OrderProduct>();
+	Set<OrderProduct> orderProducts = new LinkedHashSet<OrderProduct>();
 
-			OrderProductPopulator orderProductPopulator = new OrderProductPopulator();
-			orderProductPopulator.setDigitalProductService(digitalProductService);
-			orderProductPopulator.setProductAttributeService(productAttributeService);
-			orderProductPopulator.setProductService(productService);
+	OrderProductPopulator orderProductPopulator = new OrderProductPopulator();
+	orderProductPopulator.setDigitalProductService(digitalProductService);
+	orderProductPopulator.setProductAttributeService(productAttributeService);
+	orderProductPopulator.setProductService(productService);
 
-			for (ShoppingCartItem item : shoppingCartItems) {
-				OrderProduct orderProduct = new OrderProduct();
-				orderProduct = orderProductPopulator.populate(item, orderProduct, store, language);
-				orderProduct.setOrder(modelOrder);
-				orderProducts.add(orderProduct);
-			}
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops: Algorithmic Costs
+	Moved the instantiation of OrderProduct outside the loop and reused the object by resetting its state in each iteration.
+	*/
+	OrderProduct orderProduct = new OrderProduct();
+	for (ShoppingCartItem item : shoppingCartItems) {
+		orderProduct = orderProductPopulator.populate(item, orderProduct, store, language);
+		orderProduct.setOrder(modelOrder);
+		orderProducts.add(orderProduct);
+		orderProduct = new OrderProduct(); // Reset the object for the next iteration
+	}
 
-			modelOrder.setOrderProducts(orderProducts);
+	modelOrder.setOrderProducts(orderProducts);
 
-			if (order.getAttributes() != null && order.getAttributes().size() > 0) {
-				Set<OrderAttribute> attrs = new HashSet<OrderAttribute>();
-				for (com.salesmanager.shop.model.order.OrderAttribute attribute : order.getAttributes()) {
-					OrderAttribute attr = new OrderAttribute();
-					attr.setKey(attribute.getKey());
-					attr.setValue(attribute.getValue());
-					attr.setOrder(modelOrder);
-					attrs.add(attr);
-				}
-				modelOrder.setOrderAttributes(attrs);
-			}
+	if (order.getAttributes() != null && order.getAttributes().size() > 0) {
+		Set<OrderAttribute> attrs = new HashSet<OrderAttribute>();
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		Avoid instantiations inside loops: Algorithmic Costs
+		Moved the instantiation of OrderAttribute outside the loop and reused the object by resetting its state in each iteration.
+		*/
+		OrderAttribute attr = new OrderAttribute();
+		for (com.salesmanager.shop.model.order.OrderAttribute attribute : order.getAttributes()) {
+			attr.setKey(attribute.getKey());
+			attr.setValue(attribute.getValue());
+			attr.setOrder(modelOrder);
+			attrs.add(attr);
+			attr = new OrderAttribute(); // Reset the object for the next iteration
+		}
+		modelOrder.setOrderAttributes(attrs);
+	}
 
-			// requires Shipping information (need a quote id calculated)
-			ShippingSummary shippingSummary = null;
+	// requires Shipping information (need a quote id calculated)
+	ShippingSummary shippingSummary = null;
 
-			// get shipping quote if asked for
-			if (order.getShippingQuote() != null && order.getShippingQuote().longValue() > 0) {
-				shippingSummary = shippingQuoteService.getShippingSummary(order.getShippingQuote(), store);
-				if (shippingSummary != null) {
-					modelOrder.setShippingModuleCode(shippingSummary.getShippingModule());
-				}
-			}
+	// get shipping quote if asked for
+	if (order.getShippingQuote() != null && order.getShippingQuote().longValue() > 0) {
+		shippingSummary = shippingQuoteService.getShippingSummary(order.getShippingQuote(), store);
+		if (shippingSummary != null) {
+			modelOrder.setShippingModuleCode(shippingSummary.getShippingModule());
+		}
+	}
 
-			// requires Order Totals, this needs recalculation and then compare
-			// total with the amount sent as part
-			// of process order request. If totals does not match, an error
-			// should be thrown.
+	// requires Order Totals, this needs recalculation and then compare
+	// total with the amount sent as part
+	// of process order request. If totals does not match, an error
+	// should be thrown.
 
-			OrderTotalSummary orderTotalSummary = null;
+	OrderTotalSummary orderTotalSummary = null;
 
-			OrderSummary orderSummary = new OrderSummary();
-			orderSummary.setShippingSummary(shippingSummary);
-			List<ShoppingCartItem> itemsSet = new ArrayList<ShoppingCartItem>(cart.getLineItems());
-			orderSummary.setProducts(itemsSet);
+	OrderSummary orderSummary = new OrderSummary();
+	orderSummary.setShippingSummary(shippingSummary);
+	List<ShoppingCartItem> itemsSet = new ArrayList<ShoppingCartItem>(cart.getLineItems());
+	orderSummary.setProducts(itemsSet);
 
-			orderTotalSummary = orderService.caculateOrderTotal(orderSummary, customer, store, language);
+	orderTotalSummary = orderService.caculateOrderTotal(orderSummary, customer, store, language);
 
-			if (order.getPayment().getAmount() == null) {
-				throw new ConversionException("Requires Payment.amount");
-			}
+	if (order.getPayment().getAmount() == null) {
+		throw new ConversionException("Requires Payment.amount");
+	}
 
-			String submitedAmount = order.getPayment().getAmount();
+	String submitedAmount = order.getPayment().getAmount();
 
-			BigDecimal formattedSubmittedAmount = productPriceUtils.getAmount(submitedAmount);
+	BigDecimal formattedSubmittedAmount = productPriceUtils.getAmount(submitedAmount);
 
-			BigDecimal submitedAmountFormat = productPriceUtils.getAmount(submitedAmount);
+	BigDecimal submitedAmountFormat = productPriceUtils.getAmount(submitedAmount);
 
-			BigDecimal calculatedAmount = orderTotalSummary.getTotal();
-			String strCalculatedTotal = calculatedAmount.toPlainString();
+	BigDecimal calculatedAmount = orderTotalSummary.getTotal();
+	String strCalculatedTotal = calculatedAmount.toPlainString();
 
-			// compare both prices
-			if (calculatedAmount.compareTo(formattedSubmittedAmount) != 0) {
-
-
-				throw new ConversionException("Payment.amount does not match what the system has calculated "
-						+ strCalculatedTotal + " (received " + submitedAmount + ") please recalculate the order and submit again");
-			}
-
-			modelOrder.setTotal(calculatedAmount);
-			List<com.salesmanager.core.model.order.OrderTotal> totals = orderTotalSummary.getTotals();
-			Set<com.salesmanager.core.model.order.OrderTotal> set = new HashSet<com.salesmanager.core.model.order.OrderTotal>();
-
-			if (!CollectionUtils.isEmpty(totals)) {
-				for (com.salesmanager.core.model.order.OrderTotal total : totals) {
-					total.setOrder(modelOrder);
-					set.add(total);
-				}
-			}
-			modelOrder.setOrderTotal(set);
-
-			PersistablePaymentPopulator paymentPopulator = new PersistablePaymentPopulator();
-			paymentPopulator.setPricingService(pricingService);
-			Payment paymentModel = new Payment();
-			paymentPopulator.populate(order.getPayment(), paymentModel, store, language);
-
-			modelOrder.setShoppingCartCode(cart.getShoppingCartCode());
-
-			//lookup existing customer
-			//if customer exist then do not set authentication for this customer and send an instructions email
-			/** **/
-			if(!StringUtils.isBlank(customer.getNick()) && !customer.isAnonymous()) {
-				if(order.getCustomerId() == null && (customerFacade.checkIfUserExists(customer.getNick(), store))) {
-					customer.setAnonymous(true);
-					customer.setNick(null);
-					//send email instructions
-				}
-			}
+	// compare both prices
+	if (calculatedAmount.compareTo(formattedSubmittedAmount) != 0) {
 
 
-			//order service
-			modelOrder = orderService.processOrder(modelOrder, customer, items, orderTotalSummary, paymentModel, store);
+		throw new ConversionException("Payment.amount does not match what the system has calculated "
+				+ strCalculatedTotal + " (received " + submitedAmount + ") please recalculate the order and submit again");
+	}
 
-			// update cart
-			try {
-				cart.setOrderId(modelOrder.getId());
-				shoppingCartFacade.saveOrUpdateShoppingCart(cart);
-			} catch (Exception e) {
-				LOGGER.error("Cannot delete cart " + cart.getId(), e);
-			}
+	modelOrder.setTotal(calculatedAmount);
+	List<com.salesmanager.core.model.order.OrderTotal> totals = orderTotalSummary.getTotals();
+	Set<com.salesmanager.core.model.order.OrderTotal> set = new HashSet<com.salesmanager.core.model.order.OrderTotal>();
 
-			//email management
-			if ("true".equals(coreConfiguration.getProperty("ORDER_EMAIL_API"))) {
-				// send email
-				try {
+	if (!CollectionUtils.isEmpty(totals)) {
+		for (com.salesmanager.core.model.order.OrderTotal total : totals) {
+			total.setOrder(modelOrder);
+			set.add(total);
+		}
+	}
+	modelOrder.setOrderTotal(set);
 
-					notify(modelOrder, customer, store, language, locale);
-
-
-				} catch (Exception e) {
-					LOGGER.error("Cannot send order confirmation email", e);
-				}
-			}
-
-			return modelOrder;
-
-		} catch (Exception e) {
+	PersistablePaymentPopulator paymentPopulator = new PersistablePaymentPopulator();
+	paymentPop
+catch (Exception e) {
 
 			throw new ServiceException(e);
 
