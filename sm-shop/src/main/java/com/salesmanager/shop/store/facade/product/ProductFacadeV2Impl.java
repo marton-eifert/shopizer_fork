@@ -152,138 +152,88 @@ public class ProductFacadeV2Impl implements ProductFacade {
 	 */
 
 	@Override
-	public ReadableProductList getProductListsByCriterias(MerchantStore store, Language language,
-			ProductCriteria criterias) throws Exception {
-		Validate.notNull(criterias, "ProductCriteria must be set for this product");
+public ReadableProductList getProductListsByCriterias(MerchantStore store, Language language,
+        ProductCriteria criterias) throws Exception {
+    Validate.notNull(criterias, "ProductCriteria must be set for this product");
 
-		/** This is for category **/
-		if (CollectionUtils.isNotEmpty(criterias.getCategoryIds())) {
+    /** This is for category **/
+    if (CollectionUtils.isNotEmpty(criterias.getCategoryIds())) {
 
-			if (criterias.getCategoryIds().size() == 1) {
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         * Avoid instantiations inside loops:
+         * Moved the instantiation of the ArrayList<Long> ids outside of the if-statement.
+         */
+        List<Long> ids = new ArrayList<Long>();
+        if (criterias.getCategoryIds().size() == 1) {
 
-				com.salesmanager.core.model.catalog.category.Category category = categoryService
-						.getById(criterias.getCategoryIds().get(0));
+            com.salesmanager.core.model.catalog.category.Category category = categoryService
+                    .getById(criterias.getCategoryIds().get(0));
 
-				if (category != null) {
-					String lineage = new StringBuilder().append(category.getLineage())
-							.toString();
+            if (category != null) {
+                String lineage = new StringBuilder().append(category.getLineage())
+                        .toString();
 
-					List<com.salesmanager.core.model.catalog.category.Category> categories = categoryService
-							.getListByLineage(store, lineage);
+                List<com.salesmanager.core.model.catalog.category.Category> categories = categoryService
+                        .getListByLineage(store, lineage);
 
-					List<Long> ids = new ArrayList<Long>();
-					if (categories != null && categories.size() > 0) {
-						for (com.salesmanager.core.model.catalog.category.Category c : categories) {
-							ids.add(c.getId());
-						}
-					}
-					ids.add(category.getId());
-					criterias.setCategoryIds(ids);
-				}
-			}
-		}
+                if (categories != null && categories.size() > 0) {
+                    for (com.salesmanager.core.model.catalog.category.Category c : categories) {
+                        ids.add(c.getId());
+                    }
+                }
+                ids.add(category.getId());
+                criterias.setCategoryIds(ids);
+            }
+        }
+    }
 
-		
-		Page<Product> modelProductList = productService.listByStore(store, language, criterias, criterias.getStartPage(), criterias.getMaxCount());
-		
-		List<Product> products = modelProductList.getContent();
-		ReadableProductList productList = new ReadableProductList();
+    
+    Page<Product> modelProductList = productService.listByStore(store, language, criterias, criterias.getStartPage(), criterias.getMaxCount());
+    
+    List<Product> products = modelProductList.getContent();
+    ReadableProductList productList = new ReadableProductList();
 
-		
-		/**
-		 * ReadableProductMapper
-		 */
-		
-		List<ReadableProduct> readableProducts = products.stream().map(p -> readableProductMapper.convert(p, store, language))
-				.sorted(Comparator.comparing(ReadableProduct::getSortOrder)).collect(Collectors.toList());
-
-
-		productList.setRecordsTotal(modelProductList.getTotalElements());
-		productList.setNumber(modelProductList.getNumberOfElements());
-		productList.setProducts(readableProducts);
-		productList.setTotalPages(modelProductList.getTotalPages());
-
-		return productList;
-	}
-
-	@Override
-	public List<ReadableProduct> relatedItems(MerchantStore store, Product product, Language language)
-			throws Exception {
-		//same as v1
-		ReadableProductPopulator populator = new ReadableProductPopulator();
-		populator.setPricingService(pricingService);
-		populator.setimageUtils(imageUtils);
-
-		List<ProductRelationship> relatedItems = productRelationshipService.getByType(store, product,
-				ProductRelationshipType.RELATED_ITEM);
-		if (relatedItems != null && relatedItems.size() > 0) {
-			List<ReadableProduct> items = new ArrayList<ReadableProduct>();
-			for (ProductRelationship relationship : relatedItems) {
-				Product relatedProduct = relationship.getRelatedProduct();
-				ReadableProduct proxyProduct = populator.populate(relatedProduct, new ReadableProduct(), store,
-						language);
-				items.add(proxyProduct);
-			}
-			return items;
-		}
-		return null;
-	}
+    
+    /**
+     * ReadableProductMapper
+     */
+    
+    List<ReadableProduct> readableProducts = products.stream().map(p -> readableProductMapper.convert(p, store, language))
+            .sorted(Comparator.comparing(ReadableProduct::getSortOrder)).collect(Collectors.toList());
 
 
-	/**
-	@Override
-	public ReadableProductPrice getProductPrice(Long id, ProductPriceRequest priceRequest, MerchantStore store,
-			Language language) {
+    productList.setRecordsTotal(modelProductList.getTotalElements());
+    productList.setNumber(modelProductList.getNumberOfElements());
+    productList.setProducts(readableProducts);
+    productList.setTotalPages(modelProductList.getTotalPages());
 
-		
-		Validate.notNull(id, "Product id cannot be null");
-		Validate.notNull(priceRequest, "Product price request cannot be null");
-		Validate.notNull(store, "MerchantStore cannot be null");
-		Validate.notNull(language, "Language cannot be null");
-		
-		try {
-			Product model = productService.findOne(id, store);
-			
-			List<ProductAttribute> attributes = null;
-			
-			if(!CollectionUtils.isEmpty(priceRequest.getOptions())) {
-				List<Long> attrinutesIds = priceRequest.getOptions().stream().map(p -> p.getId()).collect(Collectors.toList());
-				
-				attributes = productAttributeService.getByAttributeIds(store, model, attrinutesIds);      
-				
-				for(ProductAttribute attribute : attributes) {
-					if(attribute.getProduct().getId().longValue()!= id.longValue()) {
-						//throw unauthorized
-						throw new OperationNotAllowedException("Attribute with id [" + attribute.getId() + "] is not attached to product id [" + id + "]");
-					}
-				}
-			}
-			
-			if(!StringUtils.isBlank(priceRequest.getSku())) {
-				 //change default availability with sku (instance availability)
-				List<ProductAvailability> availabilityList = productAvailabilityService.getBySku(priceRequest.getSku(), store);
-				if(CollectionUtils.isNotEmpty(availabilityList)) {
-					model.setAvailabilities(new HashSet<ProductAvailability>(availabilityList));
-				}
-			}
-			
-			FinalPrice price;
-		
-			//attributes can be null;
-			price = pricingService.calculateProductPrice(model, attributes);
-	    	ReadableProductPrice readablePrice = new ReadableProductPrice();
-	    	ReadableFinalPricePopulator populator = new ReadableFinalPricePopulator();
-	    	populator.setPricingService(pricingService);
-	    	
-	    	
-	    	return populator.populate(price, readablePrice, store, language);
-    	
-		} catch (Exception e) {
-			throw new ServiceRuntimeException("An error occured while getting product price",e);
-		}
-		
-
-	}
-	**/
-
+    return productList;
 }
+
+@Override
+public List<ReadableProduct> relatedItems(MerchantStore store, Product product, Language language)
+        throws Exception {
+    //same as v1
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+     * Avoid instantiations inside loops:
+     * Moved the instantiation of ReadableProductPopulator populator outside of the loop.
+     */
+    ReadableProductPopulator populator = new ReadableProductPopulator();
+    populator.setPricingService(pricingService);
+    populator.setimageUtils(imageUtils);
+
+    List<ProductRelationship> relatedItems = productRelationshipService.getByType(store, product,
+            ProductRelationshipType.RELATED_ITEM);
+    if (relatedItems != null && relatedItems.size() > 0) {
+        List<ReadableProduct> items = new ArrayList<ReadableProduct>();
+        for (ProductRelationship relationship : relatedItems) {
+            Product relatedProduct = relationship.getRelatedProduct();
+            ReadableProduct proxyProduct = populator.populate(relatedProduct, new ReadableProduct(), store,
+                    language);
+            items.add(proxyProduct);
+        }
+        return items;
+    }
+    return null;
+}
+
