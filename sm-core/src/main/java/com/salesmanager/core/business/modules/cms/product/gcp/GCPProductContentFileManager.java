@@ -328,4 +328,12 @@ private String filePath(String merchant, String sku, String size, String fileNam
   sb.append(merchant)
   .append(Constants.SLASH).append(sku).append(Constants.SLASH);
   
-  sb.append(size
+  sb.append(size);
+    sb.append(Constants.SLASH).append(fileName);
+
+    return sb.toString();
+
+  }
+
+
+}
