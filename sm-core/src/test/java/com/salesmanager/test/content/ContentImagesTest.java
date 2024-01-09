@@ -45,32 +45,41 @@ public class ContentImagesTest extends com.salesmanager.test.common.AbstractSale
 			throw new ServiceException("Can't read" + file1.getAbsolutePath());
 		}
 
-		byte[] is = IOUtils.toByteArray(new FileInputStream(file1));
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(is);
-		InputContentFile cmsContentImage = new InputContentFile();
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid Programs not using explicitly OPEN and CLOSE for files or streams:
+		 * Wrapped FileInputStream with try-with-resources to ensure the stream is closed after use.
+		 */
+		try (FileInputStream fis = new FileInputStream(file1)) {
+			byte[] is = IOUtils.toByteArray(fis);
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(is);
+			InputContentFile cmsContentImage = new InputContentFile();
 
-		cmsContentImage.setFileName(file1.getName());
-		cmsContentImage.setFile(inputStream);
+			cmsContentImage.setFileName(file1.getName());
+			cmsContentImage.setFile(inputStream);
 
-		// logo as a content
-		contentService.addLogo(store.getCode(), cmsContentImage);
+			// logo as a content
+			contentService.addLogo(store.getCode(), cmsContentImage);
 
-		store.setStoreLogo(file1.getName());
-		merchantService.update(store);
+			store.setStoreLogo(file1.getName());
+			merchantService.update(store);
 
-		// query the store
-		store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
+			// query the store
+			store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
 
-		// get the logo
-		String logo = store.getStoreLogo();
+			// get the logo
+			String logo = store.getStoreLogo();
 
-		OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.LOGO, logo);
+			OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.LOGO, logo);
 
-		// print image
-		OutputStream outputStream = new FileOutputStream("C:/doc/logo-" + image.getFileName());
-
-		ByteArrayOutputStream baos = image.getFile();
-		baos.writeTo(outputStream);
+			/* QECI-fix (2024-01-09 19:06:55.798727):
+			 * Avoid Programs not using explicitly OPEN and CLOSE for files or streams:
+			 * Wrapped FileOutputStream with try-with-resources to ensure the stream is closed after use.
+			 */
+			try (OutputStream outputStream = new FileOutputStream("C:/doc/logo-" + image.getFileName())) {
+				ByteArrayOutputStream baos = image.getFile();
+				baos.writeTo(outputStream);
+			}
+		}
 
 		// remove image
 		contentService.removeFile(store.getCode(), FileContentType.LOGO, store.getStoreLogo());
@@ -79,3 +88,4 @@ public class ContentImagesTest extends com.salesmanager.test.common.AbstractSale
 	
 
 }
+
