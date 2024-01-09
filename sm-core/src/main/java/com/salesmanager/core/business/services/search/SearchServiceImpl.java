@@ -450,81 +450,83 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 	}
 
 	private String manufacturer(Manufacturer manufacturer, String language) {
-		ManufacturerDescription description = manufacturer.getDescriptions().stream()
-				.filter(d -> d.getLanguage().getCode().equals(language)).findFirst().get();
-		return description.getName();
-	}
+        ManufacturerDescription description = manufacturer.getDescriptions().stream()
+                .filter(d -> d.getLanguage().getCode().equals(language)).findFirst().get();
+        return description.getName();
+    }
 
-	private String category(Category category, String language) {
-		CategoryDescription description = category.getDescriptions().stream()
-				.filter(d -> d.getLanguage().getCode().equals(language)).findFirst().get();
-		return description.getName();
-	}
+    private String category(Category category, String language) {
+        CategoryDescription description = category.getDescriptions().stream()
+                .filter(d -> d.getLanguage().getCode().equals(language)).findFirst().get();
+        return description.getName();
+    }
 
-	private Map<String, String> attributes(Product product, String language) {
+    private Map<String, String> attributes(Product product, String language) {
 
-		/**
-		 * ProductAttribute ProductOption ProductOptionValue
-		 */
+        /**
+         * ProductAttribute ProductOption ProductOptionValue
+         */
 
-		Map<String, String> allAttributes = new HashMap<String, String>();
+        Map<String, String> allAttributes = new HashMap<String, String>();
 
-		for (ProductAttribute attribute : product.getAttributes()) {
-			Map<String, String> attr = attribute(attribute, language);
-			allAttributes.putAll(attr);
-		}
+        for (ProductAttribute attribute : product.getAttributes()) {
+            Map<String, String> attr = attribute(attribute, language);
+            allAttributes.putAll(attr);
+        }
 
-		return allAttributes;
+        return allAttributes;
 
-	}
+    }
 
-	private Map<String, String> attribute(ProductAttribute attribute, String language) {
-		Map<String, String> attributeValue = new HashMap<String, String>();
+    private Map<String, String> attribute(ProductAttribute attribute, String language) {
+        Map<String, String> attributeValue = new HashMap<String, String>();
 
-		ProductOptionDescription optionDescription = attribute.getProductOption().getDescriptions().stream()
-				.filter(a -> a.getLanguage().getCode().equals(language)).findFirst().get();		
-				
-		ProductOptionValueDescription value = attribute.getProductOptionValue().getDescriptions().stream()
-				.filter(a -> a.getLanguage().getCode().equals(language)).findFirst().get();
+        ProductOptionDescription optionDescription = attribute.getProductOption().getDescriptions().stream()
+                .filter(a -> a.getLanguage().getCode().equals(language)).findFirst().get();        
+                
+        ProductOptionValueDescription value = attribute.getProductOptionValue().getDescriptions().stream()
+                .filter(a -> a.getLanguage().getCode().equals(language)).findFirst().get();
 
-		attributeValue.put(optionDescription.getName(), value.getName());
+        attributeValue.put(optionDescription.getName(), value.getName());
 
-		return attributeValue;
-	}
-	
-	private void settings(SearchConfiguration config, String language) throws Exception{
-		Validate.notEmpty(language, "Configuration requires language");
-		String settings = resourceAsText(loadSearchConfig(SETTINGS + "_DEFAULT.json"));
-		//specific settings
-		if(language.equals("en")) {
-			settings = resourceAsText(loadSearchConfig(SETTINGS+ "_" + language +".json"));
-		}
-		
-		config.getSettings().put(language, settings);
+        return attributeValue;
+    }
+    
+    private void settings(SearchConfiguration config, String language) throws Exception{
+        Validate.notEmpty(language, "Configuration requires language");
+        String settings = resourceAsText(loadSearchConfig(SETTINGS + "_DEFAULT.json"));
+        //specific settings
+        if(language.equals("en")) {
+            settings = resourceAsText(loadSearchConfig(SETTINGS+ "_" + language +".json"));
+        }
+        
+        config.getSettings().put(language, settings);
 
-	}
-	
-	private void mappings(SearchConfiguration config, String language) throws Exception {
-		Validate.notEmpty(language, "Configuration requires language");
+    }
+    
+    private void mappings(SearchConfiguration config, String language) throws Exception {
+        Validate.notEmpty(language, "Configuration requires language");
 
-		config.getProductMappings().put(language, resourceAsText(loadSearchConfig(PRODUCT_MAPPING_DEFAULT)));
-		config.getKeywordsMappings().put(language,KEYWORDS_MAPPING_DEFAULT);
-			
-	}
+        config.getProductMappings().put(language, resourceAsText(loadSearchConfig(PRODUCT_MAPPING_DEFAULT)));
+        config.getKeywordsMappings().put(language,KEYWORDS_MAPPING_DEFAULT);
+            
+    }
 
-	
-	private String resourceAsText(Resource resource) throws Exception {
-		InputStream mappingstream = resource.getInputStream();
-		
-	    return new BufferedReader(
-	    	      new InputStreamReader(mappingstream, StandardCharsets.UTF_8))
-	    	        .lines()
-	    	        .collect(Collectors.joining("\n"));
-	}
-	
-	private Resource loadSearchConfig(String file) {
-	    return resourceLoader.getResource(
-	      "classpath:" + file);
-	}
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+    Refactored the resourceAsText method to use try-with-resources to ensure the InputStream is closed properly.
+    */
+    private String resourceAsText(Resource resource) throws Exception {
+        try (InputStream mappingstream = resource.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(mappingstream, StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
+    }
+    
+    private Resource loadSearchConfig(String file) {
+        return resourceLoader.getResource(
+          "classpath:" + file);
+    }
 
 }
+
