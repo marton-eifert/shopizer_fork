@@ -182,150 +182,143 @@ public class CmsStaticContentFileManagerImpl
 	}
 
 	/**
-	 * Method to return static data for given Merchant store based on the file
-	 * name. Content data will be searched in underlying Infinispan cache tree
-	 * and {@link OutputStaticContentData} will be returned on finding an
-	 * associated file. In case of no file, null be returned.
-	 * 
-	 * @param store
-	 *            Merchant store
-	 * @param contentFileName
-	 *            name of file being requested
-	 * @return {@link OutputStaticContentData}
-	 * @throws ServiceException
-	 */
-	@Override
-	public OutputContentFile getFile(final String merchantStoreCode, Optional<String> path, final FileContentType fileContentType,
-			final String contentFileName) throws ServiceException {
+     * Method to return static data for given Merchant store based on the file
+     * name. Content data will be searched in underlying Infinispan cache tree
+     * and {@link OutputStaticContentData} will be returned on finding an
+     * associated file. In case of no file, null be returned.
+     * 
+     * @param store
+     *            Merchant store
+     * @param contentFileName
+     *            name of file being requested
+     * @return {@link OutputStaticContentData}
+     * @throws ServiceException
+     */
+    @Override
+    public OutputContentFile getFile(final String merchantStoreCode, Optional<String> path, final FileContentType fileContentType,
+            final String contentFileName) throws ServiceException {
 
-		if (cacheManager.getTreeCache() == null) {
-			throw new ServiceException("CmsStaticContentFileManagerInfinispan has a null cacheManager.getTreeCache()");
-		}
-		OutputContentFile outputStaticContentData = new OutputContentFile();
-		InputStream input = null;
-		try {
+        if (cacheManager.getTreeCache() == null) {
+            throw new ServiceException("CmsStaticContentFileManagerInfinispan has a null cacheManager.getTreeCache()");
+        }
+        OutputContentFile outputStaticContentData = new OutputContentFile();
+        InputStream input = null;
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         * Avoid instantiations inside loops:
+         * Moved the instantiation of ByteArrayOutputStream outside of the loop to reuse it.
+         */
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
 
-			String nodePath = this.getNodePath(merchantStoreCode, fileContentType);
+            String nodePath = this.getNodePath(merchantStoreCode, fileContentType);
 
-			final Node<String, Object> merchantNode = this.getNode(nodePath);
+            final Node<String, Object> merchantNode = this.getNode(nodePath);
 
-			final byte[] fileBytes = (byte[]) merchantNode.get(contentFileName);
+            final byte[] fileBytes = (byte[]) merchantNode.get(contentFileName);
 
-			if (fileBytes == null) {
-				LOGGER.warn("file byte is null, no file found");
-				return null;
-			}
+            if (fileBytes == null) {
+                LOGGER.warn("file byte is null, no file found");
+                return null;
+            }
 
-			input = new ByteArrayInputStream(fileBytes);
+            input = new ByteArrayInputStream(fileBytes);
 
-			final ByteArrayOutputStream output = new ByteArrayOutputStream();
-			IOUtils.copy(input, output);
+            output.reset();
+            IOUtils.copy(input, output);
 
-			outputStaticContentData.setFile(output);
-			outputStaticContentData.setMimeType(URLConnection.getFileNameMap().getContentTypeFor(contentFileName));
-			outputStaticContentData.setFileName(contentFileName);
-			outputStaticContentData.setFileContentType(fileContentType);
+            outputStaticContentData.setFile(output);
+            outputStaticContentData.setMimeType(URLConnection.getFileNameMap().getContentTypeFor(contentFileName));
+            outputStaticContentData.setFileName(contentFileName);
+            outputStaticContentData.setFileContentType(fileContentType);
 
-		} catch (final Exception e) {
-			LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
-			throw new ServiceException(e);
-		}
-		return outputStaticContentData;
-	}
+        } catch (final Exception e) {
+            LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
+            throw new ServiceException(e);
+        }
+        return outputStaticContentData;
+    }
 
-	@Override
-	public List<OutputContentFile> getFiles(final String merchantStoreCode, Optional<String> path, final FileContentType staticContentType)
-			throws ServiceException {
+    @Override
+    public List<OutputContentFile> getFiles(final String merchantStoreCode, Optional<String> path, final FileContentType staticContentType)
+            throws ServiceException {
 
-		if (cacheManager.getTreeCache() == null) {
-			throw new ServiceException("CmsStaticContentFileManagerInfinispan has a null cacheManager.getTreeCache()");
-		}
-		List<OutputContentFile> images = new ArrayList<OutputContentFile>();
-		try {
+        if (cacheManager.getTreeCache() == null) {
+            throw new ServiceException("CmsStaticContentFileManagerInfinispan has a null cacheManager.getTreeCache()");
+        }
+        List<OutputContentFile> images = new ArrayList<OutputContentFile>();
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         * Avoid instantiations inside loops:
+         * Moved the instantiation of FileNameMap and ByteArrayOutputStream outside of the loop to reuse them.
+         */
+        FileNameMap fileNameMap = URLConnection.getFileNameMap();
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
 
-			FileNameMap fileNameMap = URLConnection.getFileNameMap();
-			String nodePath = this.getNodePath(merchantStoreCode, staticContentType);
+            String nodePath = this.getNodePath(merchantStoreCode, staticContentType);
 
-			final Node<String, Object> merchantNode = this.getNode(nodePath);
+            final Node<String, Object> merchantNode = this.getNode(nodePath);
 
-			for (String key : merchantNode.getKeys()) {
+            for (String key : merchantNode.getKeys()) {
 
-				byte[] imageBytes = (byte[]) merchantNode.get(key);
+                byte[] imageBytes = (byte[]) merchantNode.get(key);
 
-				OutputContentFile contentImage = new OutputContentFile();
+                OutputContentFile contentImage = new OutputContentFile();
 
-				InputStream input = new ByteArrayInputStream(imageBytes);
-				ByteArrayOutputStream output = new ByteArrayOutputStream();
-				IOUtils.copy(input, output);
+                InputStream input = new ByteArrayInputStream(imageBytes);
+                output.reset();
+                IOUtils.copy(input, output);
 
-				String contentType = fileNameMap.getContentTypeFor(key);
+                String contentType = fileNameMap.getContentTypeFor(key);
 
-				contentImage.setFile(output);
-				contentImage.setMimeType(contentType);
-				contentImage.setFileName(key);
+                contentImage.setFile(output);
+                contentImage.setMimeType(contentType);
+                contentImage.setFileName(key);
 
-				images.add(contentImage);
+                images.add(contentImage);
 
-			}
+            }
 
-		} catch (final Exception e) {
-			LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
-			throw new ServiceException(e);
-		}
+        } catch (final Exception e) {
+            LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
+            throw new ServiceException(e);
+        }
 
-		return images;
+        return images;
 
-	}
+    }
 
-	@Override
-	public void removeFile(final String merchantStoreCode, final FileContentType staticContentType,
-			final String fileName, Optional<String> path) throws ServiceException {
+    @Override
+    public void removeFile(final String merchantStoreCode, final FileContentType staticContentType,
+            final String fileName, Optional<String> path) throws ServiceException {
 
-		if (cacheManager.getTreeCache() == null) {
-			throw new ServiceException("CmsStaticContentFileManagerInfinispan has a null cacheManager.getTreeCache()");
-		}
+        if (cacheManager.getTreeCache() == null) {
+            throw new ServiceException("CmsStaticContentFileManagerInfinispan has a null cacheManager.getTreeCache()");
+        }
 
-		try {
+        try {
 
-			String nodePath = this.getNodePath(merchantStoreCode, staticContentType);
-			final Node<String, Object> merchantNode = this.getNode(nodePath);
+            String nodePath = this.getNodePath(merchantStoreCode, staticContentType);
+            final Node<String, Object> merchantNode = this.getNode(nodePath);
 
-			merchantNode.remove(fileName);
+            merchantNode.remove(fileName);
 
-		} catch (final Exception e) {
-			LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
-			throw new ServiceException(e);
-		}
+        } catch (final Exception e) {
+            LOGGER.error("Error while fetching file for {} merchant ", merchantStoreCode);
+            throw new ServiceException(e);
+        }
 
-	}
+    }
 
-	/**
-	 * Removes the data in a given merchant node
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public void removeFiles(final String merchantStoreCode, Optional<String> path) throws ServiceException {
+    /**
+     * Removes the data in a given merchant node
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void removeFiles(final String merchantStoreCode, Optional<String> path) throws ServiceException {
 
-		LOGGER.info("Removing all images for {} merchant ", merchantStoreCode);
-		if (cacheManager.getTreeCache() == null) {
-			LOGGER.error("Unable to find cacheManager.getTreeCache() in Infinispan..");
-			throw new ServiceException("CmsImageFileManagerInfinispan has a null cacheManager.getTreeCache()");
-		}
+        LOGGER.info("Removing all images
 
-		try {
-
-			final StringBuilder merchantPath = new StringBuilder();
-			merchantPath.append(getRootName()).append(merchantStoreCode);
-			cacheManager.getTreeCache().getRoot().remove(merchantPath.toString());
-
-		} catch (final Exception e) {
-			LOGGER.error("Error while deleting content image for {} merchant ", merchantStoreCode);
-			throw new ServiceException(e);
-		}
-
-	}
-
-	@SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({ "unchecked" })
 	private Node<String, Object> getNode(final String node) {
 		LOGGER.debug("Fetching node for store {} from Infinispan", node);
 		final StringBuilder merchantPath = new StringBuilder();
