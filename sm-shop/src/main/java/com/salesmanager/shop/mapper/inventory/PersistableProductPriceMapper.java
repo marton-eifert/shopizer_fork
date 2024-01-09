@@ -156,17 +156,23 @@ public class PersistableProductPriceMapper implements Mapper<PersistableProductP
 			return Collections.emptySet();
 		}
 		Set<ProductPriceDescription> descs = new HashSet<ProductPriceDescription>();
-		for (com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc : descriptions) {
-			ProductPriceDescription description = null;
-			if (CollectionUtils.isNotEmpty(price.getDescriptions())) {
-				for (ProductPriceDescription d : price.getDescriptions()) {
-					if (isPositive(desc.getId()) && desc.getId().equals(d.getId())) {
-						desc.setId(d.getId());
-					}
-				}
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid nested loops:
+		 * Replaced the nested loop with a hashmap to store existing descriptions by their ID,
+		 * reducing the complexity from O(n^2) to O(n).
+		 */
+		Map<Long, ProductPriceDescription> existingDescriptions = new HashMap<>();
+		if (CollectionUtils.isNotEmpty(price.getDescriptions())) {
+			for (ProductPriceDescription d : price.getDescriptions()) {
+				existingDescriptions.put(d.getId(), d);
 			}
-			description = getDescription(desc);
-			description.setProductPrice(price);
+		}
+		for (com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc : descriptions) {
+			ProductPriceDescription description = existingDescriptions.get(desc.getId());
+			if (description == null) {
+				description = getDescription(desc);
+				description.setProductPrice(price);
+			}
 			descs.add(description);
 		}
 		return descs;
@@ -199,3 +205,4 @@ public class PersistableProductPriceMapper implements Mapper<PersistableProductP
 	}
 
 }
+
