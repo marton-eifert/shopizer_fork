@@ -56,12 +56,16 @@ public class ProductImageServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	public void addProductImages(Product product, List<ProductImage> productImages) throws ServiceException {
 
 		try {
+			/* QECI-fix (2024-01-09 19:06:55.798727):
+			 * Avoid instantiations inside loops
+			 * Moved the instantiation of ImageContentFile outside of the loop and reset its properties inside the loop.
+			 */
+			ImageContentFile cmsContentImage = new ImageContentFile();
 			for (ProductImage productImage : productImages) {
 
 				Assert.notNull(productImage.getImage());
 
 				InputStream inputStream = productImage.getImage();
-				ImageContentFile cmsContentImage = new ImageContentFile();
 				cmsContentImage.setFileName(productImage.getProductImage());
 				cmsContentImage.setFile(inputStream);
 				cmsContentImage.setFileContentType(FileContentType.PRODUCT);
@@ -74,6 +78,8 @@ public class ProductImageServiceImpl extends SalesManagerEntityServiceImpl<Long,
 		}
 
 	}
+}
+
 
 	@Override
 	public void addProductImage(Product product, ProductImage productImage, ImageContentFile inputImage)
