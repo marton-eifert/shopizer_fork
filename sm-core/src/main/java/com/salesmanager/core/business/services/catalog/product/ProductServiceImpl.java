@@ -278,6 +278,15 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		List<Long> newImageIds = new ArrayList<Long>();
 		Set<ProductImage> images = product.getImages();
 
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid instantiations inside loops:
+		 * Moved the instantiation of ImageContentFile and InputStream outside the loops.
+		 * Reuse the cmsContentImage and inputStream objects by resetting their properties inside the loops.
+		 */
+		ImageContentFile cmsContentImage = new ImageContentFile();
+		cmsContentImage.setFileContentType(FileContentType.PRODUCT);
+		InputStream inputStream = null;
+
 		try {
 
 			if (images != null && images.size() > 0) {
@@ -285,11 +294,9 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 					if (image.getImage() != null && (image.getId() == null || image.getId() == 0L)) {
 						image.setProduct(product);
 
-						InputStream inputStream = image.getImage();
-						ImageContentFile cmsContentImage = new ImageContentFile();
+						inputStream = image.getImage();
 						cmsContentImage.setFileName(image.getProductImage());
 						cmsContentImage.setFile(inputStream);
-						cmsContentImage.setFileContentType(FileContentType.PRODUCT);
 
 						productImageService.addProductImage(product, image, cmsContentImage);
 						newImageIds.add(image.getId());
@@ -309,11 +316,9 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 					if (image.getImage() != null && image.getId() == null) {
 						image.setProduct(product);
 
-						InputStream inputStream = image.getImage();
-						ImageContentFile cmsContentImage = new ImageContentFile();
+						inputStream = image.getImage();
 						cmsContentImage.setFileName(image.getProductImage());
 						cmsContentImage.setFile(inputStream);
-						cmsContentImage.setFileContentType(FileContentType.PRODUCT);
 
 						productImageService.addProductImage(product, image, cmsContentImage);
 						newImageIds.add(image.getId());
@@ -334,6 +339,7 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return product;
 
 	}
+
 
 	@Override
 	public Product findOne(Long id, MerchantStore merchant) {
