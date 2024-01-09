@@ -22,8 +22,6 @@ import com.salesmanager.core.model.content.InputContentFile;
 import com.salesmanager.core.model.content.OutputContentFile;
 import com.salesmanager.core.model.merchant.MerchantStore;
 
-
-
 /**
  * Test 
  * 
@@ -34,19 +32,19 @@ import com.salesmanager.core.model.merchant.MerchantStore;
  */
 @Ignore
 public class StaticContentTest extends com.salesmanager.test.common.AbstractSalesManagerCoreTestCase {
-	
+    
 
-	@Inject
-	private ContentService contentService;
-	
-	/**
-	 * Change this path to an existing image path
-	 */
-	private final static String IMAGE_FILE = "/Users/carlsamson/Documents/Database.png";
-	
-	private final static String OUTPUT_FOLDER = "/Users/carlsamson/Documents/test/";
-	
-	
+    @Inject
+    private ContentService contentService;
+    
+    /**
+     * Change this path to an existing image path
+     */
+    private final static String IMAGE_FILE = "/Users/carlsamson/Documents/Database.png";
+    
+    private final static String OUTPUT_FOLDER = "/Users/carlsamson/Documents/test/";
+    
+    
     @Test
     public void createImage()
         throws ServiceException, FileNotFoundException, IOException
@@ -60,33 +58,36 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
             throw new ServiceException( "Can't read" + file1.getAbsolutePath() );
         }
 
-        final byte[] is = IOUtils.toByteArray( new FileInputStream( file1 ) );
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream( is );
-        final InputContentFile cmsContentImage = new InputContentFile();
-        cmsContentImage.setFileName( file1.getName() );
-        cmsContentImage.setFile( inputStream );
-        cmsContentImage.setFileContentType(FileContentType.IMAGE);
-        
-        //Add image
-        contentService.addContentFile(store.getCode(), cmsContentImage);
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+         Using try-with-resources to ensure FileInputStream is closed after use.
+        */
+        try (FileInputStream fileInputStream = new FileInputStream(file1)) {
+            final byte[] is = IOUtils.toByteArray(fileInputStream);
+            final ByteArrayInputStream inputStream = new ByteArrayInputStream(is);
+            final InputContentFile cmsContentImage = new InputContentFile();
+            cmsContentImage.setFileName(file1.getName());
+            cmsContentImage.setFile(inputStream);
+            cmsContentImage.setFileContentType(FileContentType.IMAGE);
+            
+            //Add image
+            contentService.addContentFile(store.getCode(), cmsContentImage);
+        }
 
-    
         //get image
-		OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());
+        OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());
 
-        //print image
-   	 	OutputStream outputStream = new FileOutputStream (OUTPUT_FOLDER + image.getFileName()); 
-
-   	 	ByteArrayOutputStream baos =  image.getFile();
-   	 	baos.writeTo(outputStream);
-		
-		
-		//remove image
-   	 	contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());
-		
-
-
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+         Using try-with-resources to ensure FileOutputStream is closed after use.
+        */
+        try (OutputStream outputStream = new FileOutputStream(OUTPUT_FOLDER + image.getFileName())) {
+            ByteArrayOutputStream baos = image.getFile();
+            baos.writeTo(outputStream);
+        }
+        
+        //remove image
+            contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());
     }
-	
-
 }
+
