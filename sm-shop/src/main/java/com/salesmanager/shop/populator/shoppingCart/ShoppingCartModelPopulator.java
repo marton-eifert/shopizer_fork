@@ -189,87 +189,91 @@ public class ShoppingCartModelPopulator
 
    
     private com.salesmanager.core.model.shoppingcart.ShoppingCartItem createCartItem( 
-    		com.salesmanager.core.model.shoppingcart.ShoppingCart cart,                                                                                            
-    		ShoppingCartItem shoppingCartItem,                                                                                  
-    		MerchantStore store ) throws Exception
-    {
+    com.salesmanager.core.model.shoppingcart.ShoppingCart cart,                                                                                            
+    ShoppingCartItem shoppingCartItem,                                                                                  
+    MerchantStore store ) throws Exception
+{
 
 
 
-        Product product = productService.getBySku(shoppingCartItem.getSku(), store, store.getDefaultLanguage());
-            if ( product == null )
-            {
-                throw new Exception( "Item with sku " + shoppingCartItem.getSku() + " does not exist" );
-            }
-
-            if ( product.getMerchantStore().getId().intValue() != store.getId().intValue() )
-            {
-                throw new Exception( "Item with sku " + shoppingCartItem.getSku() + " does not belong to merchant "
-                    + store.getId() );
-            }
-
-
-
-
-
-        com.salesmanager.core.model.shoppingcart.ShoppingCartItem item =
-            new com.salesmanager.core.model.shoppingcart.ShoppingCartItem( cart, product );
-        item.setQuantity( shoppingCartItem.getQuantity() );
-        item.setItemPrice( shoppingCartItem.getProductPrice() );
-        item.setShoppingCart( cart );
-        item.setSku(shoppingCartItem.getSku());
-
-        // attributes
-        List<ShoppingCartAttribute> cartAttributes = shoppingCartItem.getShoppingCartAttributes();
-        if ( !CollectionUtils.isEmpty( cartAttributes ) )
+    Product product = productService.getBySku(shoppingCartItem.getSku(), store, store.getDefaultLanguage());
+        if ( product == null )
         {
-            Set<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem> newAttributes =
-                new HashSet<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem>();
-            for ( ShoppingCartAttribute attribute : cartAttributes )
-            {
-                ProductAttribute productAttribute = productAttributeService.getById( attribute.getAttributeId() );
-                if ( productAttribute != null
-                    && productAttribute.getProduct().getId().longValue() == product.getId().longValue() )
-                {
-                    com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attributeItem =
-                        new com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem( item,
-                                                                                                         productAttribute );
-                    if ( attribute.getAttributeId() > 0 )
-                    {
-                        attributeItem.setId( attribute.getId() );
-                    }
-                    item.addAttributes( attributeItem );
-                    //newAttributes.add( attributeItem );
-                }
-
-            }
-            
-            //item.setAttributes( newAttributes );
+            throw new Exception( "Item with sku " + shoppingCartItem.getSku() + " does not exist" );
         }
 
-        return item;
+        if ( product.getMerchantStore().getId().intValue() != store.getId().intValue() )
+        {
+            throw new Exception( "Item with sku " + shoppingCartItem.getSku() + " does not belong to merchant "
+                + store.getId() );
+        }
 
-    }
 
 
 
 
-    @Override
-    protected ShoppingCart createTarget()
+    com.salesmanager.core.model.shoppingcart.ShoppingCartItem item =
+        new com.salesmanager.core.model.shoppingcart.ShoppingCartItem( cart, product );
+    item.setQuantity( shoppingCartItem.getQuantity() );
+    item.setItemPrice( shoppingCartItem.getProductPrice() );
+    item.setShoppingCart( cart );
+    item.setSku(shoppingCartItem.getSku());
+
+    // attributes
+    List<ShoppingCartAttribute> cartAttributes = shoppingCartItem.getShoppingCartAttributes();
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops:
+    Moved the instantiation of newAttributes outside of the loop to avoid repeated object creation.
+    */
+    Set<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem> newAttributes =
+        new HashSet<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem>();
+    if ( !CollectionUtils.isEmpty( cartAttributes ) )
     {
-      
-        return new ShoppingCart();
+        for ( ShoppingCartAttribute attribute : cartAttributes )
+        {
+            ProductAttribute productAttribute = productAttributeService.getById( attribute.getAttributeId() );
+            if ( productAttribute != null
+                && productAttribute.getProduct().getId().longValue() == product.getId().longValue() )
+            {
+                com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attributeItem =
+                    new com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem( item,
+                                                                                                     productAttribute );
+                if ( attribute.getAttributeId() > 0 )
+                {
+                    attributeItem.setId( attribute.getId() );
+                }
+                item.addAttributes( attributeItem );
+                //newAttributes.add( attributeItem );
+            }
+
+        }
+        
+        //item.setAttributes( newAttributes );
     }
 
+    return item;
 
-	public Customer getCustomer() {
-		return customer;
-	}
+}
 
 
-	public void setCustomer(Customer customer) {
-		this.customer = customer;
-	}
+
+
+@Override
+protected ShoppingCart createTarget()
+{
+  
+    return new ShoppingCart();
+}
+
+
+public Customer getCustomer() {
+    return customer;
+}
+
+
+public void setCustomer(Customer customer) {
+    this.customer = customer;
+}
 
 
    
@@ -280,3 +284,4 @@ public class ShoppingCartModelPopulator
    
 
 }
+
