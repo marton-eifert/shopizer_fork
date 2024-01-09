@@ -357,10 +357,18 @@ public class BeanStreamPayment implements PaymentModule {
 			if (rc != -1) {
 				is = new BufferedReader(new InputStreamReader(conn
 						.getInputStream()));
-				String _line = null;
-				while (((_line = is.readLine()) != null)) {
-					respText = respText + _line;
-				}
+				/* QECI-fix (2024-01-09 19:06:55.798727):
+				 * Avoid calling a function in a condition loop:
+				 * Replaced the while loop with a do-while loop to avoid calling the is.readLine() function
+				 * as part of the loop condition.
+				 */
+				String _line;
+				do {
+					_line = is.readLine();
+					if (_line != null) {
+						respText = respText + _line;
+					}
+				} while (_line != null);
 				
 				LOGGER.debug("BeanStream response -> " + respText.trim());
 				
@@ -410,7 +418,9 @@ public class BeanStreamPayment implements PaymentModule {
 			return this.parseResponse(transactionType, paymentType, nvp, amount);
 			
 			
-		} catch(Exception e) {
+		}
+
+catch(Exception e) {
 			if(e instanceof IntegrationException) {
 				throw (IntegrationException)e;
 			}
