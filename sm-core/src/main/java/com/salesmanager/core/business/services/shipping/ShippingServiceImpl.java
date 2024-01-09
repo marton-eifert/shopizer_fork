@@ -963,3 +963,4 @@ public boolean hasTaxOnShipping(Merchant Store store) throws ServiceException {
 	return shippingConfiguration.isTaxOnShipping();
 }
 
+}
