@@ -43,18 +43,27 @@ public class ShoppingCartItemPopulator extends
 			throw new ResourceNotFoundException("No product found for sku [" + source.getSku() +"]");
 		}
 
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid string concatenation in loops
+		 * Replaced string concatenation within the loop with a StringBuilder to accumulate the error messages efficiently.
+		 */
+		StringBuilder errorMessages = new StringBuilder();
 		if(source.getAttributes()!=null) {
-
 			for(com.salesmanager.shop.model.catalog.product.attribute.ProductAttribute attr : source.getAttributes()) {
 				ProductAttribute attribute = productAttributeService.getById(attr.getId());
 				if(attribute==null) {
-					throw new ConversionException("ProductAttribute with id " + attr.getId() + " is null");
+					errorMessages.append("ProductAttribute with id ").append(attr.getId()).append(" is null\n");
+					continue;
 				}
 				if(attribute.getProduct().getId().longValue()!=source.getProduct().getId().longValue()) {
-					throw new ConversionException("ProductAttribute with id " + attr.getId() + " is not assigned to Product id " + source.getProduct().getId());
+					errorMessages.append("ProductAttribute with id ").append(attr.getId()).append(" is not assigned to Product id ").append(source.getProduct().getId()).append("\n");
+				} else {
+					product.getAttributes().add(attribute);
 				}
-				product.getAttributes().add(attribute);
 			}
+		}
+		if (errorMessages.length() > 0) {
+			throw new ConversionException(errorMessages.toString());
 		}
 
 		try {
@@ -96,3 +105,4 @@ public class ShoppingCartItemPopulator extends
 	}
 
 }
+
