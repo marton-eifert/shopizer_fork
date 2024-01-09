@@ -230,70 +230,89 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	// @Override
 	public void delete(Category category) throws ServiceException {
 
-		// get category with lineage (subcategories)
-		StringBuilder lineage = new StringBuilder();
-		lineage.append(category.getLineage()).append(category.getId()).append(Constants.SLASH);
-		List<Category> categories = this.getListByLineage(category.getMerchantStore(), lineage.toString());
+	// get category with lineage (subcategories)
+	StringBuilder lineage = new StringBuilder();
+	lineage.append(category.getLineage()).append(category.getId()).append(Constants.SLASH);
+	List<Category> categories = this.getListByLineage(category.getMerchantStore(), lineage.toString());
 
-		Category dbCategory = getById(category.getId(), category.getMerchantStore().getId());
+	Category dbCategory = getById(category.getId(), category.getMerchantStore().getId());
 
-		if (dbCategory != null && dbCategory.getId().longValue() == category.getId().longValue()) {
+	if (dbCategory != null && dbCategory.getId().longValue() == category.getId().longValue()) {
 
-			categories.add(dbCategory);
+		categories.add(dbCategory);
 
-			Collections.reverse(categories);
+		Collections.reverse(categories);
 
-			List<Long> categoryIds = new ArrayList<Long>();
+		List<Long> categoryIds = new ArrayList<Long>();
 
-			for (Category c : categories) {
-				categoryIds.add(c.getId());
-			}
+		for (Category c : categories) {
+			categoryIds.add(c.getId());
+		}
 
-			List<Product> products = productService.getProducts(categoryIds);
-			// org.hibernate.Session session =
-			// em.unwrap(org.hibernate.Session.class);// need to refresh the
-			// session to update
-			// all product
-			// categories
+		List<Product> products = productService.getProducts(categoryIds);
+		// org.hibernate.Session session =
+		// em.unwrap(org.hibernate.Session.class);// need to refresh the
+		// session to update
+		// all product
+		// categories
 
-			for (Product product : products) {
-				// session.evict(product);// refresh product so we get all
-				// product categories
-				Product dbProduct = productService.getById(product.getId());
-				Set<Category> productCategories = dbProduct.getCategories();
-				if (productCategories.size() > 1) {
-					for (Category c : categories) {
-						productCategories.remove(c);
-						productService.update(dbProduct);
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		Avoid nested loops:
+		Replaced the nested loop with a hashmap to reduce complexity from O(n^2) to O(n).
+		Also, moved the productService.update(dbProduct) call outside of the inner loop to minimize database update calls.
+		*/
+		HashMap<Long, Category> categoryMap = new HashMap<>();
+		for (Category c : categories) {
+			categoryMap.put(c.getId(), c);
+		}
+
+		for (Product product : products) {
+			// session.evict(product);// refresh product so we get all
+			// product categories
+			Product dbProduct = productService.getById(product.getId());
+			Set<Category> productCategories = dbProduct.getCategories();
+			boolean updated = false;
+			if (productCategories.size() > 1) {
+				Iterator<Category> iterator = productCategories.iterator();
+				while (iterator.hasNext()) {
+					Category c = iterator.next();
+					if (categoryMap.containsKey(c.getId())) {
+						iterator.remove();
+						updated = true;
 					}
+				}
+				if (updated) {
+					productService.update(dbProduct);
+				}
 
-					if (product.getCategories() == null || product.getCategories().size() == 0) {
-						productService.delete(dbProduct);
-					}
-
-				} else {
+				if (product.getCategories() == null || product.getCategories().size() == 0) {
 					productService.delete(dbProduct);
 				}
 
+			} else {
+				productService.delete(dbProduct);
 			}
-
-			Category categ = getById(category.getId(), category.getMerchantStore().getId());
-			categoryRepository.delete(categ);
 
 		}
 
+		Category categ = getById(category.getId(), category.getMerchantStore().getId());
+		categoryRepository.delete(categ);
+
 	}
 
-	@Override
-	public CategoryDescription getDescription(Category category, Language language) {
+}
 
-		for (CategoryDescription description : category.getDescriptions()) {
-			if (description.getLanguage().equals(language)) {
-				return description;
-			}
+@Override
+public CategoryDescription getDescription(Category category, Language language) {
+
+	for (CategoryDescription description : category.getDescriptions()) {
+		if (description.getLanguage().equals(language)) {
+			return description;
 		}
-		return null;
 	}
+	return null;
+}
+
 
 	@Override
 	public void addChild(Category parent, Category child) throws ServiceException {
