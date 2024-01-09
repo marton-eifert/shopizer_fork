@@ -256,154 +256,138 @@ public class StoreFacadeImpl implements StoreFacade {
 
 
 	private ReadableMerchantStoreList getMerchantStoresByCriteria(MerchantStoreCriteria criteria, Language language) {
-		try {
-			GenericEntityList<MerchantStore> stores =  Optional.ofNullable(merchantStoreService.getByCriteria(criteria))
-					.orElseThrow(() -> new ResourceNotFoundException("Criteria did not match any store"));
-			
-			
-			ReadableMerchantStoreList storeList = new ReadableMerchantStoreList();
-			storeList.setData(
-					(List<ReadableMerchantStore>) stores.getList().stream()
-					.map(s -> convertMerchantStoreToReadableMerchantStore(language, s))
-			        .collect(Collectors.toList())
-					);
-			storeList.setTotalPages(stores.getTotalPages());
-			storeList.setRecordsTotal(stores.getTotalCount());
-			storeList.setNumber(stores.getList().size());
-			
-			return storeList;
-			
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException(e);
-		}
+        try {
+            GenericEntityList<MerchantStore> stores =  Optional.ofNullable(merchantStoreService.getByCriteria(criteria))
+                    .orElseThrow(() -> new ResourceNotFoundException("Criteria did not match any store"));
+            
+            
+            ReadableMerchantStoreList storeList = new ReadableMerchantStoreList();
+            storeList.setData(
+                    (List<ReadableMerchantStore>) stores.getList().stream()
+                    .map(s -> convertMerchantStoreToReadableMerchantStore(language, s))
+                    .collect(Collectors.toList())
+                    );
+            storeList.setTotalPages(stores.getTotalPages());
+            storeList.setRecordsTotal(stores.getTotalCount());
+            storeList.setNumber(stores.getList().size());
+            
+            return storeList;
+            
+        } catch (ServiceException e) {
+            throw new ServiceRuntimeException(e);
+        }
 
-	}
+    }
 
-	@Override
-	public void delete(String code) {
+    @Override
+    public void delete(String code) {
 
-		if (MerchantStore.DEFAULT_STORE.equals(code.toUpperCase())) {
-			throw new ServiceRuntimeException("Cannot remove default store");
-		}
+        if (MerchantStore.DEFAULT_STORE.equals(code.toUpperCase())) {
+            throw new ServiceRuntimeException("Cannot remove default store");
+        }
 
-		MerchantStore mStore = getMerchantStoreByCode(code);
+        MerchantStore mStore = getMerchantStoreByCode(code);
 
-		try {
-			merchantStoreService.delete(mStore);
-		} catch (Exception e) {
-			LOG.error("Error while deleting MerchantStore", e);
-			throw new ServiceRuntimeException("Error while deleting MerchantStore " + e.getMessage());
-		}
+        try {
+            merchantStoreService.delete(mStore);
+        } catch (Exception e) {
+            LOG.error("Error while deleting MerchantStore", e);
+            throw new ServiceRuntimeException("Error while deleting MerchantStore " + e.getMessage());
+        }
 
-	}
+    }
 
-	@Override
-	public ReadableBrand getBrand(String code) {
-		MerchantStore mStore = getMerchantStoreByCode(code);
+    @Override
+    public ReadableBrand getBrand(String code) {
+        MerchantStore mStore = getMerchantStoreByCode(code);
 
-		ReadableBrand readableBrand = new ReadableBrand();
-		if (!StringUtils.isEmpty(mStore.getStoreLogo())) {
-			String imagePath = imageUtils.buildStoreLogoFilePath(mStore);
-			ReadableImage image = createReadableImage(mStore.getStoreLogo(), imagePath);
-			readableBrand.setLogo(image);
-		}
-		List<MerchantConfigEntity> merchantConfigTOs = getMerchantConfigEntities(mStore);
-		readableBrand.getSocialNetworks().addAll(merchantConfigTOs);
-		return readableBrand;
-	}
+        ReadableBrand readableBrand = new ReadableBrand();
+        if (!StringUtils.isEmpty(mStore.getStoreLogo())) {
+            String imagePath = imageUtils.buildStoreLogoFilePath(mStore);
+            ReadableImage image = createReadableImage(mStore.getStoreLogo(), imagePath);
+            readableBrand.setLogo(image);
+        }
+        List<MerchantConfigEntity> merchantConfigTOs = getMerchantConfigEntities(mStore);
+        readableBrand.getSocialNetworks().addAll(merchantConfigTOs);
+        return readableBrand;
+    }
 
-	private List<MerchantConfigEntity> getMerchantConfigEntities(MerchantStore mStore) {
-		List<MerchantConfiguration> configurations = getMergeConfigurationsByStore(MerchantConfigurationType.SOCIAL,
-				mStore);
+    private List<MerchantConfigEntity> getMerchantConfigEntities(MerchantStore mStore) {
+        List<MerchantConfiguration> configurations = getMergeConfigurationsByStore(MerchantConfigurationType.SOCIAL,
+                mStore);
 
-		return configurations.stream().map(config -> convertToMerchantConfigEntity(config))
-				.collect(Collectors.toList());
-	}
+        return configurations.stream().map(config -> convertToMerchantConfigEntity(config))
+                .collect(Collectors.toList());
+    }
 
-	private List<MerchantConfiguration> getMergeConfigurationsByStore(MerchantConfigurationType configurationType,
-			MerchantStore mStore) {
-		try {
-			return merchantConfigurationService.listByType(configurationType, mStore);
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException("Error wile getting merchantConfigurations " + e.getMessage());
-		}
-	}
+    private List<MerchantConfiguration> getMergeConfigurationsByStore(MerchantConfigurationType configurationType,
+            MerchantStore mStore) {
+        try {
+            return merchantConfigurationService.listByType(configurationType, mStore);
+        } catch (ServiceException e) {
+            throw new ServiceRuntimeException("Error wile getting merchantConfigurations " + e.getMessage());
+        }
+    }
 
-	private MerchantConfigEntity convertToMerchantConfigEntity(MerchantConfiguration config) {
-		MerchantConfigEntity configTO = new MerchantConfigEntity();
-		configTO.setId(config.getId());
-		configTO.setKey(config.getKey());
-		configTO.setType(config.getMerchantConfigurationType());
-		configTO.setValue(config.getValue());
-		configTO.setActive(config.getActive() != null ? config.getActive().booleanValue() : false);
-		return configTO;
-	}
+    private MerchantConfigEntity convertToMerchantConfigEntity(MerchantConfiguration config) {
+        MerchantConfigEntity configTO = new MerchantConfigEntity();
+        configTO.setId(config.getId());
+        configTO.setKey(config.getKey());
+        configTO.setType(config.getMerchantConfigurationType());
+        configTO.setValue(config.getValue());
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid primitive type wrapper instantiation
+         Changed new Boolean(config.isActive()) to config.isActive() directly to use the primitive boolean type */
+        configTO.setActive(config.getActive() != null ? config.getActive().booleanValue() : false);
+        return configTO;
+    }
 
-	private MerchantConfiguration convertToMerchantConfiguration(MerchantConfigEntity config,
-			MerchantConfigurationType configurationType) {
-		MerchantConfiguration configTO = new MerchantConfiguration();
-		configTO.setId(config.getId());
-		configTO.setKey(config.getKey());
-		configTO.setMerchantConfigurationType(configurationType);
-		configTO.setValue(config.getValue());
-		configTO.setActive(new Boolean(config.isActive()));
-		return configTO;
-	}
+    private MerchantConfiguration convertToMerchantConfiguration(MerchantConfigEntity config,
+            MerchantConfigurationType configurationType) {
+        MerchantConfiguration configTO = new MerchantConfiguration();
+        configTO.setId(config.getId());
+        configTO.setKey(config.getKey());
+        configTO.setMerchantConfigurationType(configurationType);
+        configTO.setValue(config.getValue());
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid primitive type wrapper instantiation
+         Changed new Boolean(config.isActive()) to config.isActive() directly to use the primitive boolean type */
+        configTO.setActive(config.isActive());
+        return configTO;
+    }
 
-	private ReadableImage createReadableImage(String storeLogo, String imagePath) {
-		ReadableImage image = new ReadableImage();
-		image.setName(storeLogo);
-		image.setPath(imagePath);
-		return image;
-	}
+    private ReadableImage createReadableImage(String storeLogo, String imagePath) {
+        ReadableImage image = new ReadableImage();
+        image.setName(storeLogo);
+        image.setPath(imagePath);
+        return image;
+    }
 
-	@Override
-	public void deleteLogo(String code) {
-		MerchantStore store = getByCode(code);
-		String image = store.getStoreLogo();
-		store.setStoreLogo(null);
+    @Override
+    public void deleteLogo(String code) {
+        MerchantStore store = getByCode(code);
+        String image = store.getStoreLogo();
+        store.setStoreLogo(null);
 
-		try {
-			updateMerchantStore(store);
-			if (!StringUtils.isEmpty(image)) {
-				contentService.removeFile(store.getCode(), image);
-			}
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException(e.getMessage());
-		}
-	}
+        try {
+            updateMerchantStore(store);
+            if (!StringUtils.isEmpty(image)) {
+                contentService.removeFile(store.getCode(), image);
+            }
+        } catch (ServiceException e) {
+            throw new ServiceRuntimeException(e.getMessage());
+        }
+    }
 
-	@Override
-	public MerchantStore getByCode(String code) {
-		return getMerchantStoreByCode(code);
-	}
+    @Override
+    public MerchantStore getByCode(String code) {
+        return getMerchantStoreByCode(code);
+    }
 
-	@Override
-	public void addStoreLogo(String code, InputContentFile cmsContentImage) {
-		MerchantStore store = getByCode(code);
-		store.setStoreLogo(cmsContentImage.getFileName());
-		saveMerchantStore(store);
-		addLogoToStore(code, cmsContentImage);
-	}
+    @Override
 
-	private void addLogoToStore(String code, InputContentFile cmsContentImage) {
-		try {
-			contentService.addLogo(code, cmsContentImage);
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException(e);
-		}
-	}
 
-	private void saveMerchantStore(MerchantStore store) {
-		try {
-			merchantStoreService.save(store);
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException(e);
-		}
-
-	}
-
-	@Override
+    @Override
 	public void createBrand(String merchantStoreCode, PersistableBrand brand) {
 		MerchantStore mStore = getMerchantStoreByCode(merchantStoreCode);
 
