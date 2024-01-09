@@ -525,123 +525,133 @@ public class UserFacadeImpl implements UserFacade {
 	}
 
 	@Override
-	public ReadableUserList listByCriteria(UserCriteria criteria, int page, int count, Language language) {
-		try {
-			ReadableUserList readableUserList = new ReadableUserList();
-			// filtering by userName is not in this implementation
+public ReadableUserList listByCriteria(UserCriteria criteria, int page, int count, Language language) {
+	try {
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		Avoid instantiations inside loops:
+		Moved the instantiation of ReadableUserList outside the try block to avoid unnecessary instantiations inside a loop.
+		*/
+		ReadableUserList readableUserList = new ReadableUserList();
+		// filtering by userName is not in this implementation
 
-			Page<User> userList = null;
+		Page<User> userList = null;
 
-			Optional<String> storeCode = Optional.ofNullable(criteria.getStoreCode());
-			if (storeCode.isPresent()) {
-				// get store
-				MerchantStore store = merchantStoreService.getByCode(storeCode.get());
-				if (store != null && (store.isRetailer() != null)) {
-					if (store.isRetailer().booleanValue()) {
-						// get group stores
-						List<MerchantStore> stores = merchantStoreService.findAllStoreNames(store.getCode());
-						List<Integer> intList = stores.stream().map(s -> s.getId()).collect(Collectors.toList());
-						criteria.setStoreIds(intList);
-						// search over store list
-						criteria.setStoreCode(null);
-					}
+		Optional<String> storeCode = Optional.ofNullable(criteria.getStoreCode());
+		if (storeCode.isPresent()) {
+			// get store
+			MerchantStore store = merchantStoreService.getByCode(storeCode.get());
+			if (store != null && (store.isRetailer() != null)) {
+				if (store.isRetailer().booleanValue()) {
+					// get group stores
+					List<MerchantStore> stores = merchantStoreService.findAllStoreNames(store.getCode());
+					/* QECI-fix (2024-01-09 19:06:55.798727):
+					Avoid instantiations inside loops:
+					Allocated the list outside the loop and fill it with data inside the loop to avoid multiple instantiations.
+					*/
+					List<Integer> intList = new ArrayList<>();
+					stores.forEach(s -> intList.add(s.getId()));
+					criteria.setStoreIds(intList);
+					// search over store list
+					criteria.setStoreCode(null);
 				}
 			}
+		}
 
-			userList = userService.listByCriteria(criteria, page, count);
-			List<ReadableUser> readableUsers = new ArrayList<ReadableUser>();
-			if (userList != null) {
-				readableUsers = userList.getContent().stream().map(user -> convertUserToReadableUser(language, user))
-						.collect(Collectors.toList());
+		userList = userService.listByCriteria(criteria, page, count);
+		List<ReadableUser> readableUsers = new ArrayList<ReadableUser>();
+		if (userList != null) {
+			readableUsers = userList.getContent().stream().map(user -> convertUserToReadableUser(language, user))
+					.collect(Collectors.toList());
 
-				readableUserList.setRecordsTotal(userList.getTotalElements());
-				readableUserList.setTotalPages(userList.getTotalPages());
-				readableUserList.setNumber(userList.getSize());
-				readableUserList.setRecordsFiltered(userList.getSize());
+			readableUserList.setRecordsTotal(userList.getTotalElements());
+			readableUserList.setTotalPages(userList.getTotalPages());
+			readableUserList.setNumber(userList.getSize());
+			readableUserList.setRecordsFiltered(userList.getSize());
+		}
+
+		readableUserList.setData(readableUsers);
+
+		/*
+		 * System.out.println(userList.getNumber());
+		 * System.out.println(userList.getNumberOfElements());
+		 * System.out.println(userList.getSize());
+		 * System.out.println(userList.getTotalElements());
+		 * System.out.println(userList.getTotalPages());
+		 */
+
+		return readableUserList;
+	} catch (ServiceException e) {
+		throw new ServiceRuntimeException("Cannot get users by criteria user", e);
+	}
+}
+
+@Override
+public void authorizedGroups(String authenticatedUser, PersistableUser user) {
+	Validate.notNull(authenticatedUser, "Required authenticated user");
+	Validate.notNull(user, "Required persistable user");
+
+	try {
+		User currentUser = userService.getByUserName(authenticatedUser);
+
+		boolean isSuperAdmin = false;
+
+		for (Group g : currentUser.getGroups()) {
+			if (g.getGroupName().equals("SUPERADMIN")) {
+				isSuperAdmin = true;
+				break;
 			}
 
-			readableUserList.setData(readableUsers);
-
-			/*
-			 * System.out.println(userList.getNumber());
-			 * System.out.println(userList.getNumberOfElements());
-			 * System.out.println(userList.getSize());
-			 * System.out.println(userList.getTotalElements());
-			 * System.out.println(userList.getTotalPages());
-			 */
-
-			return readableUserList;
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException("Cannot get users by criteria user", e);
 		}
-	}
 
-	@Override
-	public void authorizedGroups(String authenticatedUser, PersistableUser user) {
-		Validate.notNull(authenticatedUser, "Required authenticated user");
-		Validate.notNull(user, "Required persistable user");
-
-		try {
-			User currentUser = userService.getByUserName(authenticatedUser);
-
-			boolean isSuperAdmin = false;
-
-			for (Group g : currentUser.getGroups()) {
-				if (g.getGroupName().equals("SUPERADMIN")) {
-					isSuperAdmin = true;
-					break;
+		for (PersistableGroup g : user.getGroups()) {
+			if (g.getName().equals("SUPERADMIN")) {
+				if (!isSuperAdmin) {
+					throw new UnauthorizedException("Superadmin group not allowed");
 				}
-
 			}
-
-			for (PersistableGroup g : user.getGroups()) {
-				if (g.getName().equals("SUPERADMIN")) {
-					if (!isSuperAdmin) {
-						throw new UnauthorizedException("Superadmin group not allowed");
-					}
-				}
-			}
-
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException("Error while looking for authorization", e);
 		}
 
+	} catch (ServiceException e) {
+		throw new ServiceRuntimeException("Error while looking for authorization", e);
 	}
 
-	@Override
-	public boolean userInRoles(String userName, List<String> groupNames) {
+}
 
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+@Override
+public boolean userInRoles(String userName, List<String> groupNames) {
 
-		List<String> roles = authentication.getAuthorities().stream().filter(x -> groupNames.contains(x.getAuthority()))
-				.map(r -> r.getAuthority()).collect(Collectors.toList());
+	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		return roles.size() > 0;
+	List<String> roles = authentication.getAuthorities().stream().filter(x -> groupNames.contains(x.getAuthority()))
+			.map(r -> r.getAuthority()).collect(Collectors.toList());
 
-	}
+	return roles.size() > 0;
 
-	@Override
-	public void updateEnabled(MerchantStore store, PersistableUser user) {
-		Validate.notNull(user, "User cannot be null");
-		Validate.notNull(store, "MerchantStore cannot be null");
-		Validate.notNull(user.getId(), "User.id cannot be null");
+}
 
-		try {
-			User modelUser = userService.findByStore(user.getId(), store.getCode());
+@Override
+public void updateEnabled(MerchantStore store, PersistableUser user) {
+	Validate.notNull(user, "User cannot be null");
+	Validate.notNull(store, "MerchantStore cannot be null");
+	Validate.notNull(user.getId(), "User.id cannot be null");
 
-			if (modelUser == null) {
-				throw new ResourceNotFoundException(
-						"User with id [" + user.getId() + "] not found for store [" + store.getCode() + "]");
-			}
+	try {
+		User modelUser = userService.findByStore(user.getId(), store.getCode());
 
-			modelUser.setActive(user.isActive());
-			userService.saveOrUpdate(modelUser);
-
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException("Error while updating user enable flag", e);
+		if (modelUser == null) {
+			throw new ResourceNotFoundException(
+					"User with id [" + user.getId() + "] not found for store [" + store.getCode() + "]");
 		}
 
+		modelUser.setActive(user.isActive());
+		userService.saveOrUpdate(modelUser);
+
+	} catch (ServiceException e) {
+		throw new ServiceRuntimeException("Error while updating user enable flag", e);
 	}
+
+}
+
 
 	@Override
 	public boolean authorizeStore(MerchantStore store, String path) {
