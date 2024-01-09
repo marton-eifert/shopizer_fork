@@ -25,72 +25,79 @@ import com.salesmanager.shop.admin.security.SecurityDataAccessException;
 import com.salesmanager.shop.constants.Constants;
 
 public abstract class AbstractCustomerServices implements UserDetailsService{
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCustomerServices.class);
-	
-	protected CustomerService customerService;
-	protected PermissionService  permissionService;
-	protected GroupService   groupService;
-	
-	public final static String ROLE_PREFIX = "ROLE_";//Spring Security 4
-	
-	public AbstractCustomerServices(
-			CustomerService customerService, 
-			PermissionService permissionService, 
-			GroupService groupService) {
-		
-		this.customerService = customerService;
-		this.permissionService = permissionService;
-		this.groupService = groupService;
-	}
-	
-	protected abstract UserDetails userDetails(String userName, Customer customer, Collection<GrantedAuthority> authorities);
-	
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCustomerServices.class);
+    
+    protected CustomerService customerService;
+    protected PermissionService  permissionService;
+    protected GroupService   groupService;
+    
+    public final static String ROLE_PREFIX = "ROLE_";//Spring Security 4
+    
+    public AbstractCustomerServices(
+            CustomerService customerService, 
+            PermissionService permissionService, 
+            GroupService groupService) {
+        
+        this.customerService = customerService;
+        this.permissionService = permissionService;
+        this.groupService = groupService;
+    }
+    
+    protected abstract UserDetails userDetails(String userName, Customer customer, Collection<GrantedAuthority> authorities);
+    
 
-	public UserDetails loadUserByUsername(String userName)
-			throws UsernameNotFoundException, DataAccessException {
-		Customer user = null;
-		Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+    public UserDetails loadUserByUsername(String userName)
+            throws UsernameNotFoundException, DataAccessException {
+        Customer user = null;
+        Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
-		try {
-			
-				LOGGER.debug("Loading user by user id: {}", userName);
+        try {
+            
+                LOGGER.debug("Loading user by user id: {}", userName);
 
-				user = customerService.getByNick(userName);
-			
-				if(user==null) {
-					//return null;
-					throw new UsernameNotFoundException("User " + userName + " not found");
-				}
-	
-	
+                user = customerService.getByNick(userName);
+            
+                if(user==null) {
+                    //return null;
+                    throw new UsernameNotFoundException("User " + userName + " not found");
+                }
+    
+            /* QECI-fix (2024-01-09 19:06:55.798727):
+             * Avoid instantiations inside loops:
+             * Moved the instantiation of the SimpleGrantedAuthority object for the role outside the loop.
+             */
+            GrantedAuthority role = new SimpleGrantedAuthority(ROLE_PREFIX + Constants.PERMISSION_CUSTOMER_AUTHENTICATED);//required to login
+            authorities.add(role); 
+            
+            List<Group> groups = user.getGroups();
+            /* QECI-fix (2024-01-09 19:06:55.798727):
+             * Avoid instantiations inside loops:
+             * Created the list of group IDs with an initial capacity if the size of the groups is known beforehand.
+             */
+            List<Integer> groupsId = new ArrayList<Integer>(groups.size());
+            for(Group group : groups) {
+                groupsId.add(group.getId());
+            }
+            
+    
+            if(CollectionUtils.isNotEmpty(groupsId)) {
+                List<Permission> permissions = permissionService.getPermissions(groupsId);
+                for(Permission permission : permissions) {
+                    GrantedAuthority auth = new SimpleGrantedAuthority(permission.getPermissionName());
+                    authorities.add(auth);
+                }
+            }
+            
 
-			GrantedAuthority role = new SimpleGrantedAuthority(ROLE_PREFIX + Constants.PERMISSION_CUSTOMER_AUTHENTICATED);//required to login
-			authorities.add(role); 
-			
-			List<Integer> groupsId = new ArrayList<Integer>();
-			List<Group> groups = user.getGroups();
-			for(Group group : groups) {
-				groupsId.add(group.getId());
-			}
-			
-	
-			if(CollectionUtils.isNotEmpty(groupsId)) {
-		    	List<Permission> permissions = permissionService.getPermissions(groupsId);
-		    	for(Permission permission : permissions) {
-		    		GrantedAuthority auth = new SimpleGrantedAuthority(permission.getPermissionName());
-		    		authorities.add(auth);
-		    	}
-			}
-			
+        } catch (ServiceException e) {
+            LOGGER.error("Exception while querrying customer",e);
+            throw new SecurityDataAccessException("Cannot authenticate customer",e);
+        }
 
-		} catch (ServiceException e) {
-			LOGGER.error("Exception while querrying customer",e);
-			throw new SecurityDataAccessException("Cannot authenticate customer",e);
-		}
-
-		return userDetails(userName, user, authorities);
-		
-	}
+        return userDetails(userName, user, authorities);
+        
+    }
 
 }
+
