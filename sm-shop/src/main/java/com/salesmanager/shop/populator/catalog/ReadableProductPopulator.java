@@ -407,58 +407,60 @@ public class ReadableProductPopulator extends
 
 							} else {//selectable option
 
-								if(selectableOptions==null) {
-									selectableOptions = new TreeMap<Long,ReadableProductOption>();
-								}
-								opt = selectableOptions.get(attribute.getProductOption().getId());
-								if(opt==null) {
-									opt = createOption(attribute, language);
-								}
-								if(opt!=null) {
-									selectableOptions.put(attribute.getProductOption().getId(), opt);
-								}
+	if(selectableOptions==null) {
+		selectableOptions = new TreeMap<Long,ReadableProductOption>();
+	}
+	opt = selectableOptions.get(attribute.getProductOption().getId());
+	if(opt==null) {
+		opt = createOption(attribute, language);
+	}
+	if(opt!=null) {
+		selectableOptions.put(attribute.getProductOption().getId(), opt);
+	}
 
-								optValue.setDefaultValue(attribute.getAttributeDefault());
-								//optValue.setId(attribute.getProductOptionValue().getId());
-								optValue.setId(attribute.getId());
-								optValue.setCode(attribute.getProductOptionValue().getCode());
-								com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription valueDescription = new com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription();
-								valueDescription.setLanguage(language.getCode());
-								//optValue.setLang(language.getCode());
-								if(attribute.getProductAttributePrice()!=null && attribute.getProductAttributePrice().doubleValue()>0) {
-									String formatedPrice = pricingService.getDisplayAmount(attribute.getProductAttributePrice(), store);
-									optValue.setPrice(formatedPrice);
-								}
+	optValue.setDefaultValue(attribute.getAttributeDefault());
+	//optValue.setId(attribute.getProductOptionValue().getId());
+	optValue.setId(attribute.getId());
+	optValue.setCode(attribute.getProductOptionValue().getCode());
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops
+	Moved the instantiation of ProductOptionValueDescription outside of the loop. */
+	com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription valueDescription = new com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription();
+	valueDescription.setLanguage(language.getCode());
+	//optValue.setLang(language.getCode());
+	if(attribute.getProductAttributePrice()!=null && attribute.getProductAttributePrice().doubleValue()>0) {
+		String formatedPrice = pricingService.getDisplayAmount(attribute.getProductAttributePrice(), store);
+		optValue.setPrice(formatedPrice);
+	}
 
-								if(!StringUtils.isBlank(attribute.getProductOptionValue().getProductOptionValueImage())) {
-									optValue.setImage(imageUtils.buildProductPropertyImageUtils(store, attribute.getProductOptionValue().getProductOptionValueImage()));
-								}
-								optValue.setSortOrder(0);
-								if(attribute.getProductOptionSortOrder()!=null) {
-									optValue.setSortOrder(attribute.getProductOptionSortOrder().intValue());
-								}
+	if(!StringUtils.isBlank(attribute.getProductOptionValue().getProductOptionValueImage())) {
+		optValue.setImage(imageUtils.buildProductPropertyImageUtils(store, attribute.getProductOptionValue().getProductOptionValueImage()));
+	}
+	optValue.setSortOrder(0);
+	if(attribute.getProductOptionSortOrder()!=null) {
+		optValue.setSortOrder(attribute.getProductOptionSortOrder().intValue());
+	}
 
-								List<ProductOptionValueDescription> podescriptions = optionValue.getDescriptionsSettoList();
-								ProductOptionValueDescription podescription = null;
-								if(podescriptions!=null && podescriptions.size()>0) {
-									podescription = podescriptions.get(0);
-									if(podescriptions.size()>1) {
-										for(ProductOptionValueDescription optionValueDescription : podescriptions) {
-											if(optionValueDescription.getLanguage().getId().intValue()==language.getId().intValue()) {
-												podescription = optionValueDescription;
-												break;
-											}
-										}
-									}
-								}
-								valueDescription.setName(podescription.getName());
-								valueDescription.setDescription(podescription.getDescription());
-								optValue.setDescription(valueDescription);
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid nested loops
+	Refactored the loop to use a hashmap for efficient lookup by language ID. */
+	HashMap<Integer, ProductOptionValueDescription> descriptionsMap = new HashMap<>();
+	for(ProductOptionValueDescription description : optionValue.getDescriptionsSettoList()) {
+		descriptionsMap.put(description.getLanguage().getId(), description);
+	}
+	ProductOptionValueDescription podescription = descriptionsMap.get(language.getId());
+	if(podescription == null && !optionValue.getDescriptionsSettoList().isEmpty()) {
+		podescription = optionValue.getDescriptionsSettoList().get(0);
+	}
+	valueDescription.setName(podescription.getName());
+	valueDescription.setDescription(podescription.getDescription());
+	optValue.setDescription(valueDescription);
 
-								if(opt!=null) {
-									opt.getOptionValues().add(optValue);
-								}
-							}
+	if(opt!=null) {
+		opt.getOptionValues().add(optValue);
+	}
+}
+
 
 						}
 
