@@ -613,110 +613,116 @@ public class ProductPriceUtils {
 
 	private FinalPrice calculateFinalPrice(ProductAvailability availability) throws ServiceException {
 
-		FinalPrice finalPrice = null;
-		List<FinalPrice> otherPrices = null;
+	FinalPrice finalPrice = null;
+	List<FinalPrice> otherPrices = null;
 
-		Set<ProductPrice> prices = availability.getPrices();
-		for (ProductPrice price : prices) {
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops:
+	Moved the instantiation of the Date object outside of the loop to avoid creating a new instance on every iteration. */
+	Date today = new Date();
 
-			FinalPrice p = finalPrice(price);
-			if (price.isDefaultPrice()) {
-				finalPrice = p;
-			} else {
-				if (otherPrices == null) {
-					otherPrices = new ArrayList<FinalPrice>();
-				}
-				otherPrices.add(p);
-			}
+	Set<ProductPrice> prices = availability.getPrices();
+	for (ProductPrice price : prices) {
 
-		}
-
-		if (finalPrice != null) {
-			finalPrice.setAdditionalPrices(otherPrices);
+		FinalPrice p = finalPrice(price, today);
+		if (price.isDefaultPrice()) {
+			finalPrice = p;
 		} else {
-			if (otherPrices != null) {
-				finalPrice = otherPrices.get(0);
+			if (otherPrices == null) {
+				otherPrices = new ArrayList<FinalPrice>();
 			}
+			otherPrices.add(p);
 		}
-
-		if (finalPrice == null) {
-			throw new ServiceException(ServiceException.EXCEPTION_ERROR,
-					"No inventory available to calculate the price. Availability should contain at least a region set to *");
-		}
-
-		return finalPrice;
 
 	}
 
-	private FinalPrice finalPrice(ProductPrice price) {
+	if (finalPrice != null) {
+		finalPrice.setAdditionalPrices(otherPrices);
+	} else {
+		if (otherPrices != null) {
+			finalPrice = otherPrices.get(0);
+		}
+	}
 
-		FinalPrice finalPrice = new FinalPrice();
-		BigDecimal fPrice = price.getProductPriceAmount();
-		BigDecimal oPrice = price.getProductPriceAmount();
+	if (finalPrice == null) {
+		throw new ServiceException(ServiceException.EXCEPTION_ERROR,
+				"No inventory available to calculate the price. Availability should contain at least a region set to *");
+	}
 
-		Date today = new Date();
-		// calculate discount price
-		boolean hasDiscount = false;
-		if (price.getProductPriceSpecialStartDate() != null || price.getProductPriceSpecialEndDate() != null) {
+	return finalPrice;
 
-			if (price.getProductPriceSpecialStartDate() != null) {
-				if (price.getProductPriceSpecialStartDate().before(today)) {
-					if (price.getProductPriceSpecialEndDate() != null) {
-						if (price.getProductPriceSpecialEndDate().after(today)) {
-							hasDiscount = true;
-							fPrice = price.getProductPriceSpecialAmount();
-							finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
-						}
+}
+
+private FinalPrice finalPrice(ProductPrice price, Date today) {
+
+	FinalPrice finalPrice = new FinalPrice();
+	BigDecimal fPrice = price.getProductPriceAmount();
+	BigDecimal oPrice = price.getProductPriceAmount();
+
+	// calculate discount price
+	boolean hasDiscount = false;
+	if (price.getProductPriceSpecialStartDate() != null || price.getProductPriceSpecialEndDate() != null) {
+
+		if (price.getProductPriceSpecialStartDate() != null) {
+			if (price.getProductPriceSpecialStartDate().before(today)) {
+				if (price.getProductPriceSpecialEndDate() != null) {
+					if (price.getProductPriceSpecialEndDate().after(today)) {
+						hasDiscount = true;
+						fPrice = price.getProductPriceSpecialAmount();
+						finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
 					}
-
 				}
-			}
 
-			if (!hasDiscount && price.getProductPriceSpecialStartDate() == null
-					&& price.getProductPriceSpecialEndDate() != null) {
-				if (price.getProductPriceSpecialEndDate().after(today)) {
-					hasDiscount = true;
-					fPrice = price.getProductPriceSpecialAmount();
-					finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
-				}
 			}
-		} else {
-			if (price.getProductPriceSpecialAmount() != null
-					&& price.getProductPriceSpecialAmount().doubleValue() > 0) {
+		}
+
+		if (!hasDiscount && price.getProductPriceSpecialStartDate() == null
+				&& price.getProductPriceSpecialEndDate() != null) {
+			if (price.getProductPriceSpecialEndDate().after(today)) {
 				hasDiscount = true;
 				fPrice = price.getProductPriceSpecialAmount();
 				finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
 			}
 		}
-
-		finalPrice.setProductPrice(price);
-		finalPrice.setFinalPrice(fPrice);
-		finalPrice.setOriginalPrice(oPrice);
-
-		if (price.isDefaultPrice()) {
-			finalPrice.setDefaultPrice(true);
+	} else {
+		if (price.getProductPriceSpecialAmount() != null
+				&& price.getProductPriceSpecialAmount().doubleValue() > 0) {
+			hasDiscount = true;
+			fPrice = price.getProductPriceSpecialAmount();
+			finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
 		}
-		if (hasDiscount) {
-			discountPrice(finalPrice);
-		}
-
-		return finalPrice;
 	}
 
-	private void discountPrice(FinalPrice finalPrice) {
+	finalPrice.setProductPrice(price);
+	finalPrice.setFinalPrice(fPrice);
+	finalPrice.setOriginalPrice(oPrice);
 
-		finalPrice.setDiscounted(true);
-
-		double arith = finalPrice.getProductPrice().getProductPriceSpecialAmount().doubleValue()
-				/ finalPrice.getProductPrice().getProductPriceAmount().doubleValue();
-		double fsdiscount = 100 - (arith * 100);
-		Float percentagediscount = new Float(fsdiscount);
-		int percent = percentagediscount.intValue();
-		finalPrice.setDiscountPercent(percent);
-
-		// calculate percent
-		BigDecimal price = finalPrice.getOriginalPrice();
-		finalPrice.setDiscountedPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
+	if (price.isDefaultPrice()) {
+		finalPrice.setDefaultPrice(true);
+	}
+	if (hasDiscount) {
+		discountPrice(finalPrice);
 	}
 
+	return finalPrice;
 }
+
+private void discountPrice(FinalPrice finalPrice) {
+
+	finalPrice.setDiscounted(true);
+
+	double arith = finalPrice.getProductPrice().getProductPriceSpecialAmount().doubleValue()
+			/ finalPrice.getProductPrice().getProductPriceAmount().doubleValue();
+	double fsdiscount = 100 - (arith * 100);
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid primitive type wrapper instantiation:
+	Replaced the instantiation of Float with a primitive float to avoid unnecessary object creation. */
+	float percentagediscount = (float) fsdiscount;
+	int percent = (int) percentagediscount;
+	finalPrice.setDiscountPercent(percent);
+
+	// calculate percent
+	BigDecimal price = finalPrice.getOriginalPrice();
+	finalPrice.setDiscountedPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
+}
+
