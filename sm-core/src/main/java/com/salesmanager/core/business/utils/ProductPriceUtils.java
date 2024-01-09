@@ -726,3 +726,4 @@ private void discountPrice(FinalPrice finalPrice) {
 	finalPrice.setDiscountedPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
 }
 
+}
