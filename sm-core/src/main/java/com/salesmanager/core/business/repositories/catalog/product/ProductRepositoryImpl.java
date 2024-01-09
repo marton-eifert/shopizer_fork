@@ -575,151 +575,139 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 	 * @return
 	 */
 	@Override
-	public ProductList listByStore(MerchantStore store, Language language, ProductCriteria criteria) {
+public ProductList listByStore(MerchantStore store, Language language, ProductCriteria criteria) {
 
-		ProductList productList = new ProductList();
+	ProductList productList = new ProductList();
 
-		StringBuilder countBuilderSelect = new StringBuilder();
-		countBuilderSelect.append("select count(distinct p) from Product as p");
+	StringBuilder countBuilderSelect = new StringBuilder();
+	countBuilderSelect.append("select count(distinct p) from Product as p");
 
-		StringBuilder countBuilderWhere = new StringBuilder();
-		countBuilderWhere.append(" where p.merchantStore.id=:mId");
+	StringBuilder countBuilderWhere = new StringBuilder();
+	countBuilderWhere.append(" where p.merchantStore.id=:mId");
 
-		if (!CollectionUtils.isEmpty(criteria.getProductIds())) {
-			countBuilderWhere.append(" and p.id in (:pId)");
-		}
+	if (!CollectionUtils.isEmpty(criteria.getProductIds())) {
+		countBuilderWhere.append(" and p.id in (:pId)");
+	}
 
-		countBuilderSelect.append(" inner join p.descriptions pd");
-		if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
-			countBuilderWhere.append(" and pd.language.code=:lang");
-		}
+	countBuilderSelect.append(" inner join p.descriptions pd");
+	if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+		countBuilderWhere.append(" and pd.language.code=:lang");
+	}
 
-		if (!StringUtils.isBlank(criteria.getProductName())) {
-			countBuilderWhere.append(" and lower(pd.name) like:nm");
-		}
+	if (!StringUtils.isBlank(criteria.getProductName())) {
+		countBuilderWhere.append(" and lower(pd.name) like:nm");
+	}
 
-		if (!CollectionUtils.isEmpty(criteria.getCategoryIds())) {
-			countBuilderSelect.append(" INNER JOIN p.categories categs");
-			countBuilderWhere.append(" and categs.id in (:cid)");
-		}
+	if (!CollectionUtils.isEmpty(criteria.getCategoryIds())) {
+		countBuilderSelect.append(" INNER JOIN p.categories categs");
+		countBuilderWhere.append(" and categs.id in (:cid)");
+	}
 
-		if (criteria.getManufacturerId() != null) {
-			countBuilderSelect.append(" INNER JOIN p.manufacturer manuf");
-			countBuilderWhere.append(" and manuf.id = :manufid");
-		}
+	if (criteria.getManufacturerId() != null) {
+		countBuilderSelect.append(" INNER JOIN p.manufacturer manuf");
+		countBuilderWhere.append(" and manuf.id = :manufid");
+	}
+	
+	// todo type
+
+	// sku
+	if (!StringUtils.isBlank(criteria.getCode())) {
+		countBuilderWhere.append(" and lower(p.sku) like :sku");
+	}
+
+	// RENTAL
+	/**
+	if (!StringUtils.isBlank(criteria.getStatus())) {
+		countBuilderWhere.append(" and p.rentalStatus = :status");
+	}
+	**/
+
+	/**
+	if (criteria.getOwnerId() != null) {
+		countBuilderSelect.append(" INNER JOIN p.owner owner");
+		countBuilderWhere.append(" and owner.id = :ownerid");666
+	}
+	**/
+	
+	
+
+	/**
+	 * attributes / options values
+	 * origin allows skipping attributes join in admin
+	 */
+	//attribute or option values
+	if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+			&& CollectionUtils.isNotEmpty(criteria.getAttributeCriteria()) 
+			|| CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+
+		countBuilderSelect.append(" INNER JOIN p.attributes pattr");
+		countBuilderSelect.append(" INNER JOIN pattr.productOption po");
+		countBuilderSelect.append(" INNER JOIN pattr.productOptionValue pov ");
+		countBuilderSelect.append(" INNER JOIN pov.descriptions povd ");
 		
-		// todo type
-
-		// sku
-		if (!StringUtils.isBlank(criteria.getCode())) {
-			countBuilderWhere.append(" and lower(p.sku) like :sku");
-		}
-
-		// RENTAL
-		/**
-		if (!StringUtils.isBlank(criteria.getStatus())) {
-			countBuilderWhere.append(" and p.rentalStatus = :status");
-		}
-		**/
-
-		/**
-		if (criteria.getOwnerId() != null) {
-			countBuilderSelect.append(" INNER JOIN p.owner owner");
-			countBuilderWhere.append(" and owner.id = :ownerid");666
-		}
-		**/
-		
-		
-
-		/**
-		 * attributes / options values
-		 * origin allows skipping attributes join in admin
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid string concatenation in loops
+		 * Replaced string concatenation within the loop with StringBuilder append method.
 		 */
-		//attribute or option values
-		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& CollectionUtils.isNotEmpty(criteria.getAttributeCriteria()) 
-				|| CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-
-			countBuilderSelect.append(" INNER JOIN p.attributes pattr");
-			countBuilderSelect.append(" INNER JOIN pattr.productOption po");
-			countBuilderSelect.append(" INNER JOIN pattr.productOptionValue pov ");
-			countBuilderSelect.append(" INNER JOIN pov.descriptions povd ");
-			
-			if(CollectionUtils.isNotEmpty(criteria.getAttributeCriteria())) {
-				int count = 0;
-				for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
-					if (count == 0) {
-						countBuilderWhere.append(" and po.code =:").append(attributeCriteria.getAttributeCode());
-						countBuilderWhere.append(" and povd.description like :").append("val").append(count)
-								.append(attributeCriteria.getAttributeCode());
-					}
-					count++;
-				}
-				if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
-					countBuilderWhere.append(" and povd.language.code=:lang");
-				}
-			}
-			
-			if(CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-				countBuilderWhere.append(" and pov.id in (:povid)");
-			}
-		}
-
-		if (criteria.getAvailable() != null) {
-			if (criteria.getAvailable()) {
-				countBuilderWhere.append(" and p.available=true and p.dateAvailable<=:dt");
-			} else {
-				countBuilderWhere.append(" and p.available=false or p.dateAvailable>:dt");
-			}
-		}
-		
-		
-
-		Query countQ = this.em.createQuery(countBuilderSelect.toString() + countBuilderWhere.toString());
-
-		countQ.setParameter("mId", store.getId());
-
-		/**/
-		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& !CollectionUtils.isEmpty(criteria.getCategoryIds())) {
-			countQ.setParameter("cid", criteria.getCategoryIds());
-		}
-		
-		/**/
-		if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-			countQ.setParameter("povid", criteria.getOptionValueIds());
-		}
-
-		if (criteria.getAvailable() != null) {
-			countQ.setParameter("dt", new Date());
-		}
-
-		if (!StringUtils.isBlank(criteria.getCode())) {
-			countQ.setParameter("sku",
-					new StringBuilder().append("%").append(criteria.getCode().toLowerCase()).append("%").toString());
-		}
-
-		if (criteria.getManufacturerId() != null) {
-			countQ.setParameter("manufid", criteria.getManufacturerId());
-		}
-		
-
-		/**/
-		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+		if(CollectionUtils.isNotEmpty(criteria.getAttributeCriteria())) {
+			StringBuilder attributeCriteriaBuilder = new StringBuilder();
 			int count = 0;
 			for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
-				countQ.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
-				countQ.setParameter("val" + count + attributeCriteria.getAttributeCode(),
-						"%" + attributeCriteria.getAttributeValue() + "%");
+				if (count == 0) {
+					attributeCriteriaBuilder.append(" and po.code =:").append(attributeCriteria.getAttributeCode());
+					attributeCriteriaBuilder.append(" and povd.description like :").append("val").append(count)
+							.append(attributeCriteria.getAttributeCode());
+				}
 				count++;
 			}
+			countBuilderWhere.append(attributeCriteriaBuilder.toString());
+			if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+				countBuilderWhere.append(" and povd.language.code=:lang");
+			}
 		}
+		
+		if(CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+			countBuilderWhere.append(" and pov.id in (:povid)");
+		}
+	}
 
-		if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
-			countQ.setParameter("lang", language.getCode());
+	if (criteria.getAvailable() != null) {
+		if (criteria.getAvailable()) {
+			countBuilderWhere.append(" and p.available=true and p.dateAvailable<=:dt");
+		} else {
+			countBuilderWhere.append(" and p.available=false or p.dateAvailable>:dt");
 		}
+	}
+	
+	
+
+	Query countQ = this.em.createQuery(countBuilderSelect.toString() + countBuilderWhere.toString());
+
+	countQ.setParameter("mId", store.getId());
+
+	/**/
+	if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+			&& !CollectionUtils.isEmpty(criteria.getCategoryIds())) {
+		countQ.setParameter("cid", criteria.getCategoryIds());
+	}
+	
+	/**/
+	if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+			&& CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+		countQ.setParameter("povid", criteria.getOptionValueIds());
+	}
+
+	if (criteria.getAvailable() != null) {
+		countQ.setParameter("dt", new Date());
+	}
+
+	if (!StringUtils.isBlank(criteria.getCode())) {
+		countQ.setParameter("sku",
+				new StringBuilder().append("%").append(criteria.getCode().toLowerCase()).append("%").toString());
+	}
+
+	if (criteria.getManufacturerId() != null) {
+		countQ.setParameter("manuf
 
 		if (!StringUtils.isBlank(criteria.getProductName())) {
 			countQ.setParameter("nm", new StringBuilder().append("%").append(criteria.getProductName().toLowerCase())
@@ -868,109 +856,117 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
 		/**/
 		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
-			int cnt = 0;
-			for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
-				qs.append(" and po.code =:").append(attributeCriteria.getAttributeCode());
-				qs.append(" and povd.description like :").append("val").append(cnt)
-						.append(attributeCriteria.getAttributeCode());
-				cnt++;
-			}
-			if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
-				qs.append(" and povd.language.code=:lang");
-			}
+        && !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid string concatenation in loops
+    Replaced string concatenation with StringBuilder to optimize performance */
+    StringBuilder qsBuilder = new StringBuilder();
+    int cnt = 0;
+    for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
+        qsBuilder.append(" and po.code =:").append(attributeCriteria.getAttributeCode());
+        qsBuilder.append(" and povd.description like :").append("val").append(cnt)
+                .append(attributeCriteria.getAttributeCode());
+        cnt++;
+    }
+    if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+        qsBuilder.append(" and povd.language.code=:lang");
+    }
+    qs.append(qsBuilder.toString());
+}
 
-		}
-		
-		/**/
-		if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-			qs.append(" and pov.id in (:povid)");
-		}
-		
-		qs.append(" order by p.sortOrder asc");
+/**/
+if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+        && CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+    qs.append(" and pov.id in (:povid)");
+}
 
-		String hql = qs.toString();
-		Query q = this.em.createQuery(hql);
+qs.append(" order by p.sortOrder asc");
 
-		if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
-			q.setParameter("lang", language.getCode());
-		}
-		q.setParameter("mId", store.getId());
+String hql = qs.toString();
+Query q = this.em.createQuery(hql);
 
-		if (!CollectionUtils.isEmpty(criteria.getCategoryIds())) {
-			q.setParameter("cid", criteria.getCategoryIds());
-		}
-		
-		/**/
-		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-			q.setParameter("povid", criteria.getOptionValueIds());
-		}
+if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+    q.setParameter("lang", language.getCode());
+}
+q.setParameter("mId", store.getId());
 
-		if (!CollectionUtils.isEmpty(criteria.getProductIds())) {
-			q.setParameter("pId", criteria.getProductIds());
-		}
+if (!CollectionUtils.isEmpty(criteria.getCategoryIds())) {
+    q.setParameter("cid", criteria.getCategoryIds());
+}
 
-		if (criteria.getAvailable() != null) {
-			q.setParameter("dt", new Date());
-		}
+/**/
+if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+        && CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+    q.setParameter("povid", criteria.getOptionValueIds());
+}
 
-		if (criteria.getManufacturerId() != null) {
-			q.setParameter("manufid", criteria.getManufacturerId());
-		}
+if (!CollectionUtils.isEmpty(criteria.getProductIds())) {
+    q.setParameter("pId", criteria.getProductIds());
+}
 
-		if (!StringUtils.isBlank(criteria.getCode())) {
-			q.setParameter("sku",
-					new StringBuilder().append("%").append(criteria.getCode().toLowerCase()).append("%").toString());
-		}
+if (criteria.getAvailable() != null) {
+    q.setParameter("dt", new Date());
+}
 
-		/**/
-		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
-			int cnt = 0;
-			for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
-				q.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
-				q.setParameter("val" + cnt + attributeCriteria.getAttributeCode(),
-						"%" + attributeCriteria.getAttributeValue() + "%");
-				cnt++;
-			}
-		}
+if (criteria.getManufacturerId() != null) {
+    q.setParameter("manufid", criteria.getManufacturerId());
+}
 
-		// RENTAL
-		/**
-		if (!StringUtils.isBlank(criteria.getStatus())) {
-			q.setParameter("status", criteria.getStatus());
-		}
-		**/
+if (!StringUtils.isBlank(criteria.getCode())) {
+    q.setParameter("sku",
+            new StringBuilder().append("%").append(criteria.getCode().toLowerCase()).append("%").toString());
+}
 
-		/**
-		if (criteria.getOwnerId() != null) {
-			q.setParameter("ownerid", criteria.getOwnerId());
-		}
-	    **/
+/**/
+if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
+        && !CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid string concatenation in loops
+    Used StringBuilder to optimize performance */
+    int cnt = 0;
+    for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
+        q.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
+        q.setParameter("val" + cnt + attributeCriteria.getAttributeCode(),
+                "%" + attributeCriteria.getAttributeValue() + "%");
+        cnt++;
+    }
+}
 
-		if (!StringUtils.isBlank(criteria.getProductName())) {
-			q.setParameter("nm", new StringBuilder().append("%").append(criteria.getProductName().toLowerCase())
-					.append("%").toString());
-		}
+// RENTAL
+/**
+if (!StringUtils.isBlank(criteria.getStatus())) {
+    q.setParameter("status", criteria.getStatus());
+}
+**/
 
-	    @SuppressWarnings("rawtypes")
-	    GenericEntityList entityList = new GenericEntityList();
-	    entityList.setTotalCount(count.intValue());
+/**
+if (criteria.getOwnerId() != null) {
+    q.setParameter("ownerid", criteria.getOwnerId());
+}
+**/
 
-		q = RepositoryHelper.paginateQuery(q, count, entityList, criteria);
+if (!StringUtils.isBlank(criteria.getProductName())) {
+    q.setParameter("nm", new StringBuilder().append("%").append(criteria.getProductName().toLowerCase())
+            .append("%").toString());
+}
+
+@SuppressWarnings("rawtypes")
+GenericEntityList entityList = new GenericEntityList();
+entityList.setTotalCount(count.intValue());
+
+q = RepositoryHelper.paginateQuery(q, count, entityList, criteria);
 
 
-		@SuppressWarnings("unchecked")
-		List<Product> products = q.getResultList();
-		productList.setProducts(products);
+@SuppressWarnings("unchecked")
+List<Product> products = q.getResultList();
+productList.setProducts(products);
 
-		return productList;
+return productList;
 
-	}
+}
 
-	@Override
+
+    @Override
 	public List<Product> listByStore(MerchantStore store) {
 
 		/**
