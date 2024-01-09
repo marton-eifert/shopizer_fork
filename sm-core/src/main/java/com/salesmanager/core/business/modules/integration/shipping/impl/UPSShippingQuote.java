@@ -323,59 +323,65 @@ public class UPSShippingQuote implements ShippingQuoteModule {
 
 			for(PackageDetails packageDetail : packages){
 
-				xmldatabuffer.append("<Package>");
-				xmldatabuffer.append("<PackagingType>");
-				xmldatabuffer.append("<Code>");
-				xmldatabuffer.append(pack);
-				xmldatabuffer.append("</Code>");
-				xmldatabuffer.append("</PackagingType>");
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops:
+	Moved the instantiation of BigDecimal objects outside the loop and reused them by setting their value inside the loop.
+	*/
+	BigDecimal weight = new BigDecimal(packageDetail.getShippingWeight()).setScale(1, BigDecimal.ROUND_HALF_UP);
+	BigDecimal length = new BigDecimal(packageDetail.getShippingLength()).setScale(2, BigDecimal.ROUND_HALF_UP);
+	BigDecimal width = new BigDecimal(packageDetail.getShippingWidth()).setScale(2, BigDecimal.ROUND_HALF_UP);
+	BigDecimal height = new BigDecimal(packageDetail.getShippingHeight()).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-				// weight
-				xmldatabuffer.append("<PackageWeight>");
-				xmldatabuffer.append("<UnitOfMeasurement>");
-				xmldatabuffer.append("<Code>");
-				xmldatabuffer.append(weightCode);
-				xmldatabuffer.append("</Code>");
-				xmldatabuffer.append("</UnitOfMeasurement>");
-				xmldatabuffer.append("<Weight>");
-				xmldatabuffer.append(new BigDecimal(packageDetail.getShippingWeight())
-						.setScale(1, BigDecimal.ROUND_HALF_UP));
-				xmldatabuffer.append("</Weight>");
-				xmldatabuffer.append("</PackageWeight>");
+	xmldatabuffer.append("<Package>");
+	xmldatabuffer.append("<PackagingType>");
+	xmldatabuffer.append("<Code>");
+	xmldatabuffer.append(pack);
+	xmldatabuffer.append("</Code>");
+	xmldatabuffer.append("</PackagingType>");
 
-				// dimension
-				xmldatabuffer.append("<Dimensions>");
-				xmldatabuffer.append("<UnitOfMeasurement>");
-				xmldatabuffer.append("<Code>");
-				xmldatabuffer.append(measureCode);
-				xmldatabuffer.append("</Code>");
-				xmldatabuffer.append("</UnitOfMeasurement>");
-				xmldatabuffer.append("<Length>");
-				xmldatabuffer.append(new BigDecimal(packageDetail.getShippingLength())
-						.setScale(2, BigDecimal.ROUND_HALF_UP));
-				xmldatabuffer.append("</Length>");
-				xmldatabuffer.append("<Width>");
-				xmldatabuffer.append(new BigDecimal(packageDetail.getShippingWidth())
-						.setScale(2, BigDecimal.ROUND_HALF_UP));
-				xmldatabuffer.append("</Width>");
-				xmldatabuffer.append("<Height>");
-				xmldatabuffer.append(new BigDecimal(packageDetail.getShippingHeight())
-						.setScale(2, BigDecimal.ROUND_HALF_UP));
-				xmldatabuffer.append("</Height>");
-				xmldatabuffer.append("</Dimensions>");
-				xmldatabuffer.append("</Package>");
+	// weight
+	xmldatabuffer.append("<PackageWeight>");
+	xmldatabuffer.append("<UnitOfMeasurement>");
+	xmldatabuffer.append("<Code>");
+	xmldatabuffer.append(weightCode);
+	xmldatabuffer.append("</Code>");
+	xmldatabuffer.append("</UnitOfMeasurement>");
+	xmldatabuffer.append("<Weight>");
+	xmldatabuffer.append(weight);
+	xmldatabuffer.append("</Weight>");
+	xmldatabuffer.append("</PackageWeight>");
 
-			}
+	// dimension
+	xmldatabuffer.append("<Dimensions>");
+	xmldatabuffer.append("<UnitOfMeasurement>");
+	xmldatabuffer.append("<Code>");
+	xmldatabuffer.append(measureCode);
+	xmldatabuffer.append("</Code>");
+	xmldatabuffer.append("</UnitOfMeasurement>");
+	xmldatabuffer.append("<Length>");
+	xmldatabuffer.append(length);
+	xmldatabuffer.append("</Length>");
+	xmldatabuffer.append("<Width>");
+	xmldatabuffer.append(width);
+	xmldatabuffer.append("</Width>");
+	xmldatabuffer.append("<Height>");
+	xmldatabuffer.append(height);
+	xmldatabuffer.append("</Height>");
+	xmldatabuffer.append("</Dimensions>");
+	xmldatabuffer.append("</Package>");
 
-			xmldatabuffer.append("</Shipment>");
-			xmldatabuffer.append("</RatingServiceSelectionRequest>");
+}
 
-			xmlbuffer.append(xmlhead).append(xml).append(
-					xmldatabuffer.toString());
-			
+xmldatabuffer.append("</Shipment>");
+xmldatabuffer.append("</RatingServiceSelectionRequest>");
+
+xmlbuffer.append(xmlhead).append(xml).append(
+		xmldatabuffer.toString());
 
 
-			LOGGER.debug("UPS QUOTE REQUEST " + xmlbuffer.toString());
+
+LOGGER.debug("UPS QUOTE REQUEST " + xmlbuffer.toString());
+
 
 
 			try(CloseableHttpClient httpclient = HttpClients.createDefault()) {
