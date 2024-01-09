@@ -958,7 +958,7 @@ public ShippingMetaData getShippingMetaData(MerchantStore store)
 }
 
 @Override
-public boolean hasTaxOnShipping(Merchant Store store) throws ServiceException {
+public boolean hasTaxOnShipping(MerchantStore store) throws ServiceException {
 	ShippingConfiguration shippingConfiguration = getShippingConfiguration(store);
 	return shippingConfiguration.isTaxOnShipping();
 }
