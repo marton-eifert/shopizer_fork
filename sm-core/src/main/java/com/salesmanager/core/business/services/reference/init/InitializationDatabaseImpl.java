@@ -416,7 +416,7 @@ private void createMerchant() throws ServiceException {
     taxClassService.create(taxclass);
     
     //create default manufacturer
-    Manufacturer defaultManufacturer = a new Manufacturer();
+    Manufacturer defaultManufacturer = new Manufacturer();
     defaultManufacturer.setCode("DEFAULT");
     defaultManufacturer.setMerchantStore(store);
     
