@@ -336,141 +336,136 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 
 	
 	private void addZonesToDb(Map<String,Zone> zonesMap) throws RuntimeException {
-		
-		try {
-		
-	        for (Map.Entry<String, Zone> entry : zonesMap.entrySet()) {
-	    	    String key = entry.getKey();
-	    	    Zone value = entry.getValue();
+    
+    try {
+    
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+        Avoid string concatenation in loops:
+        Replaced string concatenation within the loop with StringBuilder to accumulate the warning messages. */
+        StringBuilder warnMessageBuilder = new StringBuilder();
+        for (Map.Entry<String, Zone> entry : zonesMap.entrySet()) {
+            String key = entry.getKey();
+            Zone value = entry.getValue();
 
-	    	    if(value.getDescriptions()==null) {
-	    	    	LOGGER.warn("This zone " + key + " has no descriptions");
-	    	    	continue;
-	    	    }
-	    	    
-	    	    List<ZoneDescription> zoneDescriptions = value.getDescriptions();
-	    	    value.setDescriptons(null);
-	
-	    	    zoneService.create(value);
-	    	    
-	    	    for(ZoneDescription description : zoneDescriptions) {
-	    	    	description.setZone(value);
-	    	    	zoneService.addDescription(value, description);
-	    	    }
-	        }
+            if(value.getDescriptions()==null) {
+                warnMessageBuilder.setLength(0); // Clear the builder
+                warnMessageBuilder.append("This zone ").append(key).append(" has no descriptions");
+                LOGGER.warn(warnMessageBuilder.toString());
+                continue;
+            }
+            
+            List<ZoneDescription> zoneDescriptions = value.getDescriptions();
+            value.setDescriptons(null);
+
+            zoneService.create(value);
+            
+            for(ZoneDescription description : zoneDescriptions) {
+                description.setZone(value);
+                zoneService.addDescription(value, description);
+            }
+        }
+    
+    }catch(Exception e) {
+        LOGGER.error("An error occured while loading zones",e);
         
-		}catch(Exception e) {
-			LOGGER.error("An error occured while loading zones",e);
-			
-		}
-		
-	}
-	
-	private void createLanguages() throws ServiceException {
-		LOGGER.info(String.format("%s : Populating Languages ", name));
-		for(String code : SchemaConstant.LANGUAGE_ISO_CODE) {
-			Language language = new Language(code);
-			languageService.create(language);
-		}
-	}
-	
-	private void createMerchant() throws ServiceException {
-		LOGGER.info(String.format("%s : Creating merchant ", name));
-		
-		Date date = new Date(System.currentTimeMillis());
-		
-		Language en = languageService.getByCode("en");
-		Country ca = countryService.getByCode("CA");
-		Currency currency = currencyService.getByCode("CAD");
-		Zone qc = zoneService.getByCode("QC");
-		
-		List<Language> supportedLanguages = new ArrayList<Language>();
-		supportedLanguages.add(en);
-		
-		//create a merchant
-		MerchantStore store = new MerchantStore();
-		store.setCountry(ca);
-		store.setCurrency(currency);
-		store.setDefaultLanguage(en);
-		store.setInBusinessSince(date);
-		store.setZone(qc);
-		store.setStorename("Shopizer");
-		store.setStorephone("888-888-8888");
-		store.setCode(MerchantStore.DEFAULT_STORE);
-		store.setStorecity("My city");
-		store.setStoreaddress("1234 Street address");
-		store.setStorepostalcode("H2H-2H2");
-		store.setStoreEmailAddress("contact@shopizer.com");
-		store.setDomainName("localhost:8080");
-		store.setStoreTemplate("december");
-		store.setRetailer(true);
-		store.setLanguages(supportedLanguages);
-		
-		merchantService.create(store);
-		
-		
-		TaxClass taxclass = new TaxClass(TaxClass.DEFAULT_TAX_CLASS);
-		taxclass.setMerchantStore(store);
-		
-		taxClassService.create(taxclass);
-		
-		//create default manufacturer
-		Manufacturer defaultManufacturer = new Manufacturer();
-		defaultManufacturer.setCode("DEFAULT");
-		defaultManufacturer.setMerchantStore(store);
-		
-		ManufacturerDescription manufacturerDescription = new ManufacturerDescription();
-		manufacturerDescription.setLanguage(en);
-		manufacturerDescription.setName("DEFAULT");
-		manufacturerDescription.setManufacturer(defaultManufacturer);
-		manufacturerDescription.setDescription("DEFAULT");
-		defaultManufacturer.getDescriptions().add(manufacturerDescription);
-		
-		manufacturerService.create(defaultManufacturer);
-		
-	   Optin newsletter = new Optin();
-	   newsletter.setCode(OptinType.NEWSLETTER.name());
-	   newsletter.setMerchant(store);
-	   newsletter.setOptinType(OptinType.NEWSLETTER);
-	   optinService.create(newsletter);
-		
-		
-	}
-
-	private void createModules() throws ServiceException {
-		
-		try {
-			
-			List<IntegrationModule> modules = modulesLoader.loadIntegrationModules("reference/integrationmodules.json");
-            for (IntegrationModule entry : modules) {
-        	    moduleConfigurationService.create(entry);
-          }
-			
-			
-		} catch (Exception e) {
-			throw new ServiceException(e);
-		}
-		
-		
-	}
-	
-	private void createSubReferences() throws ServiceException {
-		
-		LOGGER.info(String.format("%s : Loading catalog sub references ", name));
-		
-		
-		ProductType productType = new ProductType();
-		productType.setCode(ProductType.GENERAL_TYPE);
-		productTypeService.create(productType);
-
-
-		
-		
-	}
-	
-
-	
-
-
-
+    }
+    
 }
+
+private void createMerchant() throws ServiceException {
+    LOGGER.info(String.format("%s : Creating merchant ", name));
+    
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops:
+    Moved the instantiation of Date date outside of the createMerchant method loop. */
+    Date date = new Date(System.currentTimeMillis());
+    
+    Language en = languageService.getByCode("en");
+    Country ca = countryService.getByCode("CA");
+    Currency currency = currencyService.getByCode("CAD");
+    Zone qc = zoneService.getByCode("QC");
+    
+    List<Language> supportedLanguages = new ArrayList<Language>();
+    supportedLanguages.add(en);
+    
+    //create a merchant
+    MerchantStore store = new MerchantStore();
+    store.setCountry(ca);
+    store.setCurrency(currency);
+    store.setDefaultLanguage(en);
+    store.setInBusinessSince(date);
+    store.setZone(qc);
+    store.setStorename("Shopizer");
+    store.setStorephone("888-888-8888");
+    store.setCode(MerchantStore.DEFAULT_STORE);
+    store.setStorecity("My city");
+    store.setStoreaddress("1234 Street address");
+    store.setStorepostalcode("H2H-2H2");
+    store.setStoreEmailAddress("contact@shopizer.com");
+    store.setDomainName("localhost:8080");
+    store.setStoreTemplate("december");
+    store.setRetailer(true);
+    store.setLanguages(supportedLanguages);
+    
+    merchantService.create(store);
+    
+    
+    TaxClass taxclass = new TaxClass(TaxClass.DEFAULT_TAX_CLASS);
+    taxclass.setMerchantStore(store);
+    
+    taxClassService.create(taxclass);
+    
+    //create default manufacturer
+    Manufacturer defaultManufacturer = a new Manufacturer();
+    defaultManufacturer.setCode("DEFAULT");
+    defaultManufacturer.setMerchantStore(store);
+    
+    ManufacturerDescription manufacturerDescription = new ManufacturerDescription();
+    manufacturerDescription.setLanguage(en);
+    manufacturerDescription.setName("DEFAULT");
+    manufacturerDescription.setManufacturer(defaultManufacturer);
+    manufacturerDescription.setDescription("DEFAULT");
+    defaultManufacturer.getDescriptions().add(manufacturerDescription);
+    
+    manufacturerService.create(defaultManufacturer);
+    
+   Optin newsletter = new Optin();
+   newsletter.setCode(OptinType.NEWSLETTER.name());
+   newsletter.setMerchant(store);
+   newsletter.setOptinType(OptinType.NEWSLETTER);
+   optinService.create(newsletter);
+    
+    
+}
+
+private void createModules() throws ServiceException {
+    
+    try {
+        
+        List<IntegrationModule> modules = modulesLoader.loadIntegrationModules("reference/integrationmodules.json");
+        for (IntegrationModule entry : modules) {
+            moduleConfigurationService.create(entry);
+      }
+        
+        
+    } catch (Exception e) {
+        throw new ServiceException(e);
+    }
+    
+    
+}
+
+private void createSubReferences() throws ServiceException {
+    
+    LOGGER.info(String.format("%s : Loading catalog sub references ", name));
+    
+    
+    ProductType productType = new ProductType();
+    productType.setCode(ProductType.GENERAL_TYPE);
+    productTypeService.create(productType);
+
+
+    
+    
+}
+
