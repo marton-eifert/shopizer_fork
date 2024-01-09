@@ -47,10 +47,11 @@ public class CustomerOptionSet extends SalesManagerEntity<Long, CustomerOptionSe
 	@JoinColumn(name="CUSTOMER_OPTION_VALUE_ID", nullable=false)
 	private CustomerOptionValue customerOptionValue = null;
 	
-
-
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid primitive type wrapper instantiation:
+	Replaced the instantiation of Integer using the constructor with an integer literal to avoid unnecessary object creation. */
 	@Column(name="SORT_ORDER")
-	private Integer sortOrder = new Integer(0);
+	private Integer sortOrder = 0;
 	
 
 
@@ -90,3 +91,4 @@ public class CustomerOptionSet extends SalesManagerEntity<Long, CustomerOptionSe
 
 
 }
+
