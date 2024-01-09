@@ -19,11 +19,6 @@ import com.salesmanager.core.business.services.system.ModuleConfigurationService
 import com.salesmanager.core.model.system.IntegrationModule;
 import com.salesmanager.test.configuration.ConfigurationTest;
 
-
-
-
-
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {ConfigurationTest.class})
 @Ignore
@@ -49,7 +44,10 @@ public class ImportIntegrationModule  {
 			ObjectMapper mapper = new ObjectMapper();
 			File file = new File(" /Users/carlsamson/Documents/dev/workspaces/shopizer-master/shopizer/sm-core/src/main/resources/reference/integrationmodules.json");
 
-
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+		 * Wrapped the FileInputStream in a try-with-resources statement to ensure the stream is closed properly.
+		 */
 		try (InputStream in = new FileInputStream(file)) {
 
 			@SuppressWarnings("rawtypes")
@@ -93,7 +91,10 @@ public class ImportIntegrationModule  {
 			ObjectMapper mapper = new ObjectMapper();
 			File file = new File("/Users/carlsamson/Documents/dev/workspaces/shopizer-master/shopizer/sm-core/src/main/resources/reference/integrationmodules.json");
 
-
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+		 * Wrapped the FileInputStream in a try-with-resources statement to ensure the stream is closed properly.
+		 */
 		try (InputStream in = new FileInputStream(file)) {
 
 			@SuppressWarnings("rawtypes")
@@ -122,3 +123,4 @@ public class ImportIntegrationModule  {
 	}
 
 }
+
