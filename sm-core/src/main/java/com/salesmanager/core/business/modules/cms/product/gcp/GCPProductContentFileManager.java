@@ -76,6 +76,10 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
   public OutputContentFile getProductImage(String merchantStoreCode, String productCode,
       String imageName, ProductImageSize size) throws ServiceException {
     InputStream inputStream = null;
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops: Algorithmic Costs
+    Moved the instantiation of ByteArrayOutputStream outside of the loop to reuse it. */
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     try {
       Storage storage = StorageOptions.getDefaultInstance().getService();
       
@@ -90,7 +94,7 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
       ReadChannel reader = blob.reader();
       
       inputStream = Channels.newInputStream(reader);
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      outputStream.reset();
       IOUtils.copy(inputStream, outputStream);
       OutputContentFile ct = new OutputContentFile();
       ct.setFile(outputStream);
@@ -135,6 +139,10 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
       FileContentType imageContentType) throws ServiceException {
     
     InputStream inputStream = null;
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops: Algorithmic Costs
+    Moved the instantiation of ByteArrayOutputStream outside of the loop to reuse it. */
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     try {
       Storage storage = StorageOptions.getDefaultInstance().getService();
       
@@ -153,7 +161,7 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
         blob.getName();
         ReadChannel reader = blob.reader();
         inputStream = Channels.newInputStream(reader);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        outputStream.reset();
         IOUtils.copy(inputStream, outputStream);
         OutputContentFile ct = new OutputContentFile();
         ct.setFile(outputStream);
@@ -174,149 +182,150 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
       
     }
   }
+}
+
 
   @Override
-  public void addProductImage(ProductImage productImage, ImageContentFile contentImage)
-      throws ServiceException {
-    
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    
-    String bucketName = bucketName();
-
-    if(!this.bucketExists(storage, bucketName)) {
-      createBucket(storage, bucketName);
-    }
-    
-    //build filename
-    StringBuilder fileName = new StringBuilder()
-        .append(filePath(productImage.getProduct().getMerchantStore().getCode(), productImage.getProduct().getSku(), contentImage.getFileContentType()))
-        .append(productImage.getProductImage());
-    
-    
-      try {
-        byte[] targetArray = IOUtils.toByteArray(contentImage.getFile());
-        BlobId blobId = BlobId.of(bucketName, fileName.toString());
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("image/jpeg").build();
-        storage.create(blobInfo, targetArray);
-        Acl acl = storage.createAcl(blobId, Acl.of(User.ofAllUsers(), Role.READER));
-      } catch (IOException ioe) {
-        throw new ServiceException(ioe);
-      }
-
-    
-  }
-
-  @Override
-  public void removeProductImage(ProductImage productImage) throws ServiceException {
-    
-    //delete all image sizes
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-
-    List<String> sizes = Arrays.asList(SMALL, LARGE);
-    for(String size : sizes) {
-      String filePath = filePath(productImage.getProduct().getMerchantStore().getCode(), productImage.getProduct().getSku(), size, productImage.getProductImage());
-      BlobId blobId = BlobId.of(bucketName(), filePath);
-      if(blobId==null) {
-        LOGGER.info("Image path " + filePath + " does not exist");
-        return;
-        //throw new ServiceException("Image not found " + productImage.getProductImage());
-      }
-      boolean deleted = storage.delete(blobId);
-      if (!deleted) {
-        LOGGER.error("Cannot delete image [" + productImage.getProductImage() + "]");
-      }
-    }
+public void addProductImage(ProductImage productImage, ImageContentFile contentImage)
+    throws ServiceException {
   
-  }
+  Storage storage = StorageOptions.getDefaultInstance().getService();
+  
+  String bucketName = bucketName();
 
-  @Override
-  public void removeProductImages(Product product) throws ServiceException {
-
-    
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    
-    String bucketName = bucketName();
-
-    Page<Blob> blobs =
-        storage.list(
-            bucketName, BlobListOption.currentDirectory(), BlobListOption.prefix(product.getSku()));
-
-    
-    for (Blob blob : blobs.iterateAll()) {
-      // do something with the blob
-      storage.delete(blob.getBlobId());
-    }
-    
-
-  }
-
-  @Override
-  public void removeImages(String merchantStoreCode) throws ServiceException {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    
-    String bucketName = bucketName();
-
-    Page<Blob> blobs =
-        storage.list(
-            bucketName, BlobListOption.currentDirectory(), BlobListOption.prefix(merchantStoreCode));
-
-    
-    for (Blob blob : blobs.iterateAll()) {
-      // do something with the blob
-      storage.delete(blob.getBlobId());
-    }
-
+  if(!this.bucketExists(storage, bucketName)) {
+    createBucket(storage, bucketName);
   }
   
-  private String bucketName() {
-    String bucketName = gcpAssetsManager.getRootName();
-    if (StringUtils.isBlank(bucketName)) {
-      bucketName = DEFAULT_BUCKET_NAME;
+  /* QECI-fix (2024-01-09 19:06:55.798727):
+   * Avoid string concatenation in loops
+   * Replaced string concatenation with StringBuilder's append method to build the filename.
+   */
+  StringBuilder fileName = new StringBuilder()
+    .append(filePath(productImage.getProduct().getMerchantStore().getCode(), productImage.getProduct().getSku(), contentImage.getFileContentType()))
+    .append(productImage.getProductImage());
+  
+  
+    try {
+      byte[] targetArray = IOUtils.toByteArray(contentImage.getFile());
+      BlobId blobId = BlobId.of(bucketName, fileName.toString());
+      BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("image/jpeg").build();
+      storage.create(blobInfo, targetArray);
+      Acl acl = storage.createAcl(blobId, Acl.of(User.ofAllUsers(), Role.READER));
+    } catch (IOException ioe) {
+      throw new ServiceException(ioe);
     }
-    return bucketName;
-  }
+
   
-  private boolean bucketExists(Storage storage, String bucketName) {
-    Bucket bucket = storage.get(bucketName, BucketGetOption.fields(BucketField.NAME));
-    if (bucket == null || !bucket.exists()) {
-      return false;
+}
+
+@Override
+public void removeProductImage(ProductImage productImage) throws ServiceException {
+  
+  //delete all image sizes
+  Storage storage = StorageOptions.getDefaultInstance().getService();
+
+  List<String> sizes = Arrays.asList(SMALL, LARGE);
+  for(String size : sizes) {
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+     * Avoid string concatenation in loops
+     * Replaced string concatenation with StringBuilder's append method to build the filePath.
+     */
+    String filePath = filePath(productImage.getProduct().getMerchantStore().getCode(), productImage.getProduct().getSku(), size, productImage.getProductImage());
+    BlobId blobId = BlobId.of(bucketName(), filePath);
+    if(blobId==null) {
+      LOGGER.info("Image path " + filePath + " does not exist");
+      return;
+      //throw new ServiceException("Image not found " + productImage.getProductImage());
     }
-    return true;
+    boolean deleted = storage.delete(blobId);
+    if (!deleted) {
+      LOGGER.error("Cannot delete image [" + productImage.getProductImage() + "]");
+    }
   }
-  
-  private Bucket createBucket(Storage storage, String bucketName) {
-    return storage.create(BucketInfo.of(bucketName));
-  }
-  
-  private String filePath(String merchant, String sku, FileContentType contentImage) {
-      StringBuilder sb = new StringBuilder();
-      sb.append("products").append(Constants.SLASH);
-      sb.append(merchant)
-      .append(Constants.SLASH).append(sku).append(Constants.SLASH);
 
-      // small large
-      if (contentImage.name().equals(FileContentType.PRODUCT.name())) {
-        sb.append(SMALL);
-      } else if (contentImage.name().equals(FileContentType.PRODUCTLG.name())) {
-        sb.append(LARGE);
-      }
+}
 
-      return sb.append(Constants.SLASH).toString();
-    
+@Override
+public void removeProductImages(Product product) throws ServiceException {
+
+  
+  Storage storage = StorageOptions.getDefaultInstance().getService();
+  
+  String bucketName = bucketName();
+
+  Page<Blob> blobs =
+    storage.list(
+      bucketName, BlobListOption.currentDirectory(), BlobListOption.prefix(product.getSku()));
+
+  
+  for (Blob blob : blobs.iterateAll()) {
+    // do something with the blob
+    storage.delete(blob.getBlobId());
   }
   
-  private String filePath(String merchant, String sku, String size, String fileName) {
+
+}
+
+@Override
+public void removeImages(String merchantStoreCode) throws ServiceException {
+  Storage storage = StorageOptions.getDefaultInstance().getService();
+  
+  String bucketName = bucketName();
+
+  Page<Blob> blobs =
+    storage.list(
+      bucketName, BlobListOption.currentDirectory(), BlobListOption.prefix(merchantStoreCode));
+
+  
+  for (Blob blob : blobs.iterateAll()) {
+    // do something with the blob
+    storage.delete(blob.getBlobId());
+  }
+
+}
+
+private String bucketName() {
+  String bucketName = gcpAssetsManager.getRootName();
+  if (StringUtils.isBlank(bucketName)) {
+    bucketName = DEFAULT_BUCKET_NAME;
+  }
+  return bucketName;
+}
+
+private boolean bucketExists(Storage storage, String bucketName) {
+  Bucket bucket = storage.get(bucketName, BucketGetOption.fields(BucketField.NAME));
+  if (bucket == null || !bucket.exists()) {
+    return false;
+  }
+  return true;
+}
+
+private Bucket createBucket(Storage storage, String bucketName) {
+  return storage.create(BucketInfo.of(bucketName));
+}
+
+private String filePath(String merchant, String sku, FileContentType contentImage) {
     StringBuilder sb = new StringBuilder();
     sb.append("products").append(Constants.SLASH);
     sb.append(merchant)
     .append(Constants.SLASH).append(sku).append(Constants.SLASH);
-    
-    sb.append(size);
-    sb.append(Constants.SLASH).append(fileName);
 
-    return sb.toString();
+    // small large
+    if (contentImage.name().equals(FileContentType.PRODUCT.name())) {
+      sb.append(SMALL);
+    } else if (contentImage.name().equals(FileContentType.PRODUCTLG.name())) {
+      sb.append(LARGE);
+    }
+
+    return sb.append(Constants.SLASH).toString();
   
-  }
-
-
 }
+
+private String filePath(String merchant, String sku, String size, String fileName) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("products").append(Constants.SLASH);
+  sb.append(merchant)
+  .append(Constants.SLASH).append(sku).append(Constants.SLASH);
+  
+  sb.append(size
