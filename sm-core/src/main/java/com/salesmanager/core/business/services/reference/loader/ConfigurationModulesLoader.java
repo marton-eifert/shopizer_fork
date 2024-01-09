@@ -17,89 +17,92 @@ import com.salesmanager.core.model.system.IntegrationConfiguration;
  *
  */
 public class ConfigurationModulesLoader {
-	
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationModulesLoader.class);
-	
-
-	
-	public static String toJSONString(Map<String,IntegrationConfiguration> configurations) throws Exception {
-		
-		StringBuilder jsonModules = new StringBuilder();
-		jsonModules.append("[");
-		int count = 0;
-		for(Object key : configurations.keySet()) {
-			
-			String k = (String)key;
-			IntegrationConfiguration c = configurations.get(k);
-			
-			String jsonString = c.toJSONString();
-			jsonModules.append(jsonString);
-			
-			count ++;
-			if(count<configurations.size()) {
-				jsonModules.append(",");
-			}
-		}
-		jsonModules.append("]");
-		return jsonModules.toString();
-		
-		
-	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Map<String,IntegrationConfiguration> loadIntegrationConfigurations(String value) throws Exception {
-		
-		
-		Map<String,IntegrationConfiguration> modules = new HashMap<String,IntegrationConfiguration>();
-		
-		ObjectMapper mapper = new ObjectMapper();
-		
-		try {
-			
+    
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationModulesLoader.class);
+    
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops
+    Moved ObjectMapper instantiation outside of the loadIntegrationConfigurations method to class level to avoid repeated object creation on each call.
+    */
+    private static final ObjectMapper mapper = new ObjectMapper();
+    
+    public static String toJSONString(Map<String,IntegrationConfiguration> configurations) throws Exception {
+        
+        StringBuilder jsonModules = new StringBuilder();
+        jsonModules.append("[");
+        int count = 0;
+        for(Object key : configurations.keySet()) {
+            
+            String k = (String)key;
+            IntegrationConfiguration c = configurations.get(k);
+            
+            String jsonString = c.toJSONString();
+            jsonModules.append(jsonString);
+            
+            count ++;
+            if(count<configurations.size()) {
+                jsonModules.append(",");
+            }
+        }
+        jsonModules.append("]");
+        return jsonModules.toString();
+        
+        
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static Map<String,IntegrationConfiguration> loadIntegrationConfigurations(String value) throws Exception {
+        
+        
+        Map<String,IntegrationConfiguration> modules = new HashMap<String,IntegrationConfiguration>();
+        
+        try {
+            
 
             Map[] objects = mapper.readValue(value, Map[].class);
 
-			for (Map object : objects) {
+            for (Map object : objects) {
 
 
-				IntegrationConfiguration configuration = new IntegrationConfiguration();
+                IntegrationConfiguration configuration = new IntegrationConfiguration();
 
-				String moduleCode = (String) object.get("moduleCode");
-				if (object.get("active") != null) {
-					configuration.setActive((Boolean) object.get("active"));
-				}
-				if (object.get("defaultSelected") != null) {
-					configuration.setDefaultSelected((Boolean) object.get("defaultSelected"));
-				}
-				if (object.get("environment") != null) {
-					configuration.setEnvironment((String) object.get("environment"));
-				}
-				configuration.setModuleCode(moduleCode);
+                String moduleCode = (String) object.get("moduleCode");
+                if (object.get("active") != null) {
+                    configuration.setActive((Boolean) object.get("active"));
+                }
+                if (object.get("defaultSelected") != null) {
+                    configuration.setDefaultSelected((Boolean) object.get("defaultSelected"));
+                }
+                if (object.get("environment") != null) {
+                    configuration.setEnvironment((String) object.get("environment"));
+                }
+                configuration.setModuleCode(moduleCode);
 
-				modules.put(moduleCode, configuration);
+                modules.put(moduleCode, configuration);
 
-				if (object.get("integrationKeys") != null) {
-					Map<String, String> confs = (Map<String, String>) object.get("integrationKeys");
-					configuration.setIntegrationKeys(confs);
-				}
+                if (object.get("integrationKeys") != null) {
+                    Map<String, String> confs = (Map<String, String>) object.get("integrationKeys");
+                    configuration.setIntegrationKeys(confs);
+                }
 
-				if (object.get("integrationKeys") != null) {
-					Map<String, List<String>> options = (Map<String, List<String>>) object.get("integrationOptions");
-					configuration.setIntegrationOptions(options);
-				}
+                if (object.get("integrationKeys") != null) {
+                    Map<String, List<String>> options = (Map<String, List<String>>) object.get("integrationOptions");
+                    configuration.setIntegrationOptions(options);
+                }
 
 
-			}
+            }
             
             return modules;
 
-  		} catch (Exception e) {
-  			throw new ServiceException(e);
-  		}
-  		
+          } catch (Exception e) {
+              throw new ServiceException(e);
+          }
+          
 
-	
-	}
+    
+    }
 
 }
+
