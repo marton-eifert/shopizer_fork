@@ -132,6 +132,9 @@ public class ProductFacadeImpl implements ProductFacade {
 		List<Product> prds = products.stream().sorted(Comparator.comparing(Product::getSortOrder)).collect(Collectors.toList());
 		products = prds;
 		
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		Avoid instantiations inside loops
+		Moved the instantiation of ReadableProductPopulator outside of the loop to avoid creating a new object on each iteration. */
 		ReadableProductPopulator populator = new ReadableProductPopulator();
 		populator.setPricingService(pricingService);
 		populator.setimageUtils(imageUtils);
@@ -153,121 +156,90 @@ public class ProductFacadeImpl implements ProductFacade {
 
 		return productList;
 	}
+}
+
 	
 	@Override
-	public ReadableProduct getProductByCode(MerchantStore store, String uniqueCode, Language language) {
+public ReadableProduct getProductByCode(MerchantStore store, String uniqueCode, Language language) {
 
-		Product product = null;
-		try {
-			product = productService.getBySku(uniqueCode, store, language);
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException(e);
-		}
+    Product product = null;
+    try {
+        product = productService.getBySku(uniqueCode, store, language);
+    } catch (ServiceException e) {
+        throw new ServiceRuntimeException(e);
+    }
 
-		ReadableProduct readableProduct = new ReadableProduct();
+    ReadableProduct readableProduct = new ReadableProduct();
 
-		ReadableProductPopulator populator = new ReadableProductPopulator();
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops
+    Instantiate ReadableProductPopulator once outside the loop and reuse it. */
+    ReadableProductPopulator populator = new ReadableProductPopulator();
 
-		populator.setPricingService(pricingService);
-		populator.setimageUtils(imageUtils);
-		try {
-			populator.populate(product, readableProduct, product.getMerchantStore(), language);
-		} catch (ConversionException e) {
-			throw new ConversionRuntimeException("Product with code [" + uniqueCode + "] cannot be converted", e);
-		}
+    populator.setPricingService(pricingService);
+    populator.setimageUtils(imageUtils);
+    try {
+        populator.populate(product, readableProduct, product.getMerchantStore(), language);
+    } catch (ConversionException e) {
+        throw new ConversionRuntimeException("Product with code [" + uniqueCode + "] cannot be converted", e);
+    }
 
-		return readableProduct;
-	}
-
-	@Override
-	public List<ReadableProduct> relatedItems(MerchantStore store, Product product, Language language)
-			throws Exception {
-		ReadableProductPopulator populator = new ReadableProductPopulator();
-		populator.setPricingService(pricingService);
-		populator.setimageUtils(imageUtils);
-
-		List<ProductRelationship> relatedItems = productRelationshipService.getByType(store, product,
-				ProductRelationshipType.RELATED_ITEM);
-		if (relatedItems != null && relatedItems.size() > 0) {
-			List<ReadableProduct> items = new ArrayList<ReadableProduct>();
-			for (ProductRelationship relationship : relatedItems) {
-				Product relatedProduct = relationship.getRelatedProduct();
-				ReadableProduct proxyProduct = populator.populate(relatedProduct, new ReadableProduct(), store,
-						language);
-				items.add(proxyProduct);
-			}
-			return items;
-		}
-		return null;
-	}
-
-
-
-	@Override
-	public ReadableProduct getProductBySeUrl(MerchantStore store, String friendlyUrl, Language language) throws Exception {
-
-		Product product = productService.getBySeUrl(store, friendlyUrl, LocaleUtils.getLocale(language));
-
-		if (product == null) {
-			return null;
-		}
-
-		ReadableProduct readableProduct = new ReadableProduct();
-
-		ReadableProductPopulator populator = new ReadableProductPopulator();
-
-		populator.setPricingService(pricingService);
-		populator.setimageUtils(imageUtils);
-		populator.populate(product, readableProduct, store, language);
-
-		return readableProduct;
-	}
-
-	/**
-	@Override
-	public ReadableProductPrice getProductPrice(Long id, ProductPriceRequest priceRequest, MerchantStore store, Language language) {
-		Validate.notNull(id, "Product id cannot be null");
-		Validate.notNull(priceRequest, "Product price request cannot be null");
-		Validate.notNull(store, "MerchantStore cannot be null");
-		Validate.notNull(language, "Language cannot be null");
-		
-		try {
-			Product model = productService.findOne(id, store);
-			
-			//TODO check if null
-			List<Long> attrinutesIds = priceRequest.getOptions().stream().map(p -> p.getId()).collect(Collectors.toList());
-			
-			List<ProductAttribute> attributes = productAttributeService.getByAttributeIds(store, model, attrinutesIds);      
-			
-			for(ProductAttribute attribute : attributes) {
-				if(attribute.getProduct().getId().longValue()!= id.longValue()) {
-					//throw unauthorized
-					throw new OperationNotAllowedException("Attribute with id [" + attribute.getId() + "] is not attached to product id [" + id + "]");
-				}
-			}
-			
-			FinalPrice price;
-		
-			price = pricingService.calculateProductPrice(model, attributes);
-	    	ReadableProductPrice readablePrice = new ReadableProductPrice();
-	    	ReadableFinalPricePopulator populator = new ReadableFinalPricePopulator();
-	    	populator.setPricingService(pricingService);
-	    	
-	    	
-	    	return populator.populate(price, readablePrice, store, language);
-    	
-		} catch (Exception e) {
-			throw new ServiceRuntimeException("An error occured while getting product price",e);
-		}
-
-	}
-	**/
-
-	@Override
-	public Product getProduct(Long id, MerchantStore store) {
-		return productService.findOne(id, store);
-	}
-
-
-
+    return readableProduct;
 }
+
+@Override
+public List<ReadableProduct> relatedItems(MerchantStore store, Product product, Language language)
+        throws Exception {
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops
+    Instantiate ReadableProductPopulator once outside the loop and reuse it.
+    Move the instantiation of ArrayList<ReadableProduct> outside the loop. */
+    ReadableProductPopulator populator = new ReadableProductPopulator();
+    populator.setPricingService(pricingService);
+    populator.setimageUtils(imageUtils);
+
+    List<ProductRelationship> relatedItems = productRelationshipService.getByType(store, product,
+            ProductRelationshipType.RELATED_ITEM);
+    if (relatedItems != null && relatedItems.size() > 0) {
+        List<ReadableProduct> items = new ArrayList<ReadableProduct>();
+        for (ProductRelationship relationship : relatedItems) {
+            Product relatedProduct = relationship.getRelatedProduct();
+            ReadableProduct proxyProduct = populator.populate(relatedProduct, new ReadableProduct(), store,
+                    language);
+            items.add(proxyProduct);
+        }
+        return items;
+    }
+    return null;
+}
+
+
+
+@Override
+public ReadableProduct getProductBySeUrl(MerchantStore store, String friendlyUrl, Language language) throws Exception {
+
+    Product product = productService.getBySeUrl(store, friendlyUrl, LocaleUtils.getLocale(language));
+
+    if (product == null) {
+        return null;
+    }
+
+    ReadableProduct readableProduct = new ReadableProduct();
+
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops
+    Instantiate ReadableProductPopulator once outside the loop and reuse it. */
+    ReadableProductPopulator populator = new ReadableProductPopulator();
+
+    populator.setPricingService(pricingService);
+    populator.setimageUtils(imageUtils);
+    populator.populate(product, readableProduct, store, language);
+
+    return readableProduct;
+}
+
+@Override
+public Product getProduct(Long id, Merchant Store store) {
+    return productService.findOne(id, store);
+}
+
