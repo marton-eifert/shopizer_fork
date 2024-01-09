@@ -208,61 +208,74 @@ public class CustomerPopulator extends
 			}
 			
 			if(source.getAttributes()!=null) {
-				for(PersistableCustomerAttribute attr : source.getAttributes()) {
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid string concatenation in loops:
+    Replaced string concatenation with StringBuilder to optimize performance and reduce object creation. */
+    StringBuilder conversionExceptionMessage = new StringBuilder();
 
-					CustomerOption customerOption = customerOptionService.getById(attr.getCustomerOption().getId());
-					if(customerOption==null) {
-						throw new ConversionException("Customer option id " + attr.getCustomerOption().getId() + " does not exist");
-					}
-					
-					CustomerOptionValue customerOptionValue = customerOptionValueService.getById(attr.getCustomerOptionValue().getId());
-					if(customerOptionValue==null) {
-						throw new ConversionException("Customer option value id " + attr.getCustomerOptionValue().getId() + " does not exist");
-					}
-					
-					if(customerOption.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
-						throw new ConversionException("Invalid customer option id ");
-					}
-					
-					if(customerOptionValue.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
-						throw new ConversionException("Invalid customer option value id ");
-					}
-					
-					CustomerAttribute attribute = new CustomerAttribute();
-					attribute.setCustomer(target);
-					attribute.setCustomerOption(customerOption);
-					attribute.setCustomerOptionValue(customerOptionValue);
-					attribute.setTextValue(attr.getTextValue());
-					
-					target.getAttributes().add(attribute);
-					
-				}
-			}
-			
-			if(target.getDefaultLanguage()==null) {
-				
-				Language lang = source.getLanguage() == null ?
-						language : languageService.getByCode(source.getLanguage());
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops:
+    Moved the instantiation of CustomerAttribute outside the loop. */
+    CustomerAttribute attribute = new CustomerAttribute();
+    for(PersistableCustomerAttribute attr : source.getAttributes()) {
 
-				
-				target.setDefaultLanguage(lang);
-			}
+        CustomerOption customerOption = customerOptionService.getById(attr.getCustomerOption().getId());
+        if(customerOption==null) {
+            conversionExceptionMessage.setLength(0); // Clear the builder
+            conversionExceptionMessage.append("Customer option id ").append(attr.getCustomerOption().getId()).append(" does not exist");
+            throw new ConversionException(conversionExceptionMessage.toString());
+        }
+        
+        CustomerOptionValue customerOptionValue = customerOptionValueService.getById(attr.getCustomerOptionValue().getId());
+        if(customerOptionValue==null) {
+            conversionExceptionMessage.setLength(0); // Clear the builder
+            conversionExceptionMessage.append("Customer option value id ").append(attr.getCustomerOptionValue().getId()).append(" does not exist");
+            throw new ConversionException(conversionExceptionMessage.toString());
+        }
+        
+        if(customerOption.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
+            throw new ConversionException("Invalid customer option id ");
+        }
+        
+        if(customerOptionValue.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
+            throw new ConversionException("Invalid customer option value id ");
+        }
+        
+        attribute.setCustomer(target);
+        attribute.setCustomerOption(customerOption);
+        attribute.setCustomerOptionValue(customerOptionValue);
+        attribute.setTextValue(attr.getTextValue());
+        
+        target.getAttributes().add(attribute);
+        
+    }
+}
 
-		
-		} catch (Exception e) {
-			throw new ConversionException(e);
-		}
-		
-		
-		
-		
-		return target;
-	}
+if(target.getDefaultLanguage()==null) {
+    
+    Language lang = source.getLanguage() == null ?
+            language : languageService.getByCode(source.getLanguage());
 
-	@Override
-	protected Customer createTarget() {
-		return new Customer();
-	}
+    
+    target.setDefaultLanguage(lang);
+}
+
+
+} catch (Exception e) {
+    throw new ConversionException(e);
+}
+
+
+
+
+return target;
+}
+
+@Override
+protected Customer createTarget() {
+    return new Customer();
+}
 
 
 }
+
