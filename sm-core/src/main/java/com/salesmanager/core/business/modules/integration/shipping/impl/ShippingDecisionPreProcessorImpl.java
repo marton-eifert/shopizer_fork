@@ -155,4 +155,36 @@ public class ShippingDecisionPreProcessorImpl implements ShippingQuotePrePostPro
          */
         DecisionResponse resp = new DecisionResponse();
         
-        kieSession
+        kieSession.insert(inputParameters);
+        kieSession.setGlobal("decision",resp);
+        kieSession.fireAllRules();
+        //System.out.println(resp.getModuleName());
+        inputParameters.setModuleName(resp.getModuleName());
+
+		LOGGER.debug("Using shipping nodule " + inputParameters.getModuleName());
+
+		if(!StringUtils.isBlank(inputParameters.getModuleName())) {
+			for(IntegrationModule toBeUsed : allModules) {
+				if(toBeUsed.getCode().equals(inputParameters.getModuleName())) {
+					quote.setCurrentShippingModule(toBeUsed);
+					break;
+				}
+			}
+		}
+
+	}
+
+
+	@Override
+	public String getModuleCode() {
+		return MODULE_CODE;
+	}
+
+
+
+
+
+
+
+
+}
