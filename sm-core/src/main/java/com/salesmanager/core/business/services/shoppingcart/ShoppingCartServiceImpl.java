@@ -290,224 +290,224 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	}
 
 	@Transactional
-	private void getPopulatedItem(final ShoppingCartItem item, MerchantStore store) throws Exception {
+private void getPopulatedItem(final ShoppingCartItem item, MerchantStore store) throws Exception {
 
-		Product product = productService.getBySku(item.getSku(), store, store.getDefaultLanguage());
+	Product product = productService.getBySku(item.getSku(), store, store.getDefaultLanguage());
 
-		if (product == null) {
-			item.setObsolete(true);
-			return;
+	if (product == null) {
+		item.setObsolete(true);
+		return;
+	}
+
+	item.setProduct(product);
+	item.setSku(product.getSku());
+
+	if (product.isProductVirtual()) {
+		item.setProductVirtual(true);
+	}
+
+	Set<ShoppingCartAttributeItem> cartAttributes = item.getAttributes();
+	Set<ProductAttribute> productAttributes = product.getAttributes();
+	List<ProductAttribute> attributesList = new ArrayList<ProductAttribute>();// attributes maintained
+	List<ShoppingCartAttributeItem> removeAttributesList = new ArrayList<ShoppingCartAttributeItem>();// attributes
+																										// to remove
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid nested loops:
+	Using a HashMap to store ProductAttribute objects by their ID for efficient lookup and eliminating the inner loop.
+	*/
+	if (productAttributes != null && !productAttributes.isEmpty()) {
+		Map<Long, ProductAttribute> attributesMap = new HashMap<>();
+		for (ProductAttribute productAttribute : productAttributes) {
+			attributesMap.put(productAttribute.getId(), productAttribute);
 		}
 
-		item.setProduct(product);
-		item.setSku(product.getSku());
-
-		if (product.isProductVirtual()) {
-			item.setProductVirtual(true);
-		}
-
-		Set<ShoppingCartAttributeItem> cartAttributes = item.getAttributes();
-		Set<ProductAttribute> productAttributes = product.getAttributes();
-		List<ProductAttribute> attributesList = new ArrayList<ProductAttribute>();// attributes maintained
-		List<ShoppingCartAttributeItem> removeAttributesList = new ArrayList<ShoppingCartAttributeItem>();// attributes
-																											// to remove
-		// DELETE ORPHEANS MANUALLY
-		if ((productAttributes != null && productAttributes.size() > 0)
-				|| (cartAttributes != null && cartAttributes.size() > 0)) {
-			if (cartAttributes != null) {
-				for (ShoppingCartAttributeItem attribute : cartAttributes) {
-					long attributeId = attribute.getProductAttributeId();
-					boolean existingAttribute = false;
-					for (ProductAttribute productAttribute : productAttributes) {
-
-						if (productAttribute.getId().equals(attributeId)) {
-							attribute.setProductAttribute(productAttribute);
-							attributesList.add(productAttribute);
-							existingAttribute = true;
-							break;
-						}
-					}
-
-					if (!existingAttribute) {
-						removeAttributesList.add(attribute);
-					}
-
+		if (cartAttributes != null) {
+			for (ShoppingCartAttributeItem attribute : cartAttributes) {
+				ProductAttribute productAttribute = attributesMap.get(attribute.getProductAttributeId());
+				if (productAttribute != null) {
+					attribute.setProductAttribute(productAttribute);
+					attributesList.add(productAttribute);
+				} else {
+					removeAttributesList.add(attribute);
 				}
 			}
 		}
-
-		// cleanup orphean item
-		if (CollectionUtils.isNotEmpty(removeAttributesList)) {
-			for (ShoppingCartAttributeItem attr : removeAttributesList) {
-				shoppingCartAttributeItemRepository.delete(attr);
-			}
-		}
-
-		// cleanup detached attributes
-		if (CollectionUtils.isEmpty(attributesList)) {
-			item.setAttributes(null);
-		}
-
-		// set item price
-		FinalPrice price = pricingService.calculateProductPrice(product, attributesList);
-		item.setItemPrice(price.getFinalPrice());
-		item.setFinalPrice(price);
-
-		BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity()));
-		item.setSubTotal(subTotal);
-
 	}
 
-	@Override
-	public List<ShippingProduct> createShippingProduct(final ShoppingCart cart) throws ServiceException {
-		/**
-		 * Determines if products are virtual
-		 */
-		Set<ShoppingCartItem> items = cart.getLineItems();
-		List<ShippingProduct> shippingProducts = null;
-		for (ShoppingCartItem item : items) {
-			Product product = item.getProduct();
-			if (!product.isProductVirtual() && product.isProductShipeable()) {
-				if (shippingProducts == null) {
-					shippingProducts = new ArrayList<ShippingProduct>();
-				}
-				ShippingProduct shippingProduct = new ShippingProduct(product);
-				shippingProduct.setQuantity(item.getQuantity());
-				shippingProduct.setFinalPrice(item.getFinalPrice());
-				shippingProducts.add(shippingProduct);
-			}
+	// cleanup orphean item
+	if (CollectionUtils.isNotEmpty(removeAttributesList)) {
+		for (ShoppingCartAttributeItem attr : removeAttributesList) {
+			shoppingCartAttributeItemRepository.delete(attr);
 		}
-
-		return shippingProducts;
-
 	}
 
-	@Override
-	public void removeShoppingCart(final ShoppingCart cart) throws ServiceException {
-		shoppingCartRepository.delete(cart);
+	// cleanup detached attributes
+	if (CollectionUtils.isEmpty(attributesList)) {
+		item.setAttributes(null);
 	}
 
-	@Override
-	public ShoppingCart mergeShoppingCarts(final ShoppingCart userShoppingModel, final ShoppingCart sessionCart,
-			final MerchantStore store) throws Exception {
-		if (sessionCart.getCustomerId() != null
-				&& sessionCart.getCustomerId().equals(userShoppingModel.getCustomerId())) {
-			LOGGER.info("Session Shopping cart belongs to same logged in user");
-			if (CollectionUtils.isNotEmpty(userShoppingModel.getLineItems())
-					&& CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
-				return userShoppingModel;
-			}
-		}
+	// set item price
+	FinalPrice price = pricingService.calculateProductPrice(product, attributesList);
+	item.setItemPrice(price.getFinalPrice());
+	item.setFinalPrice(price);
 
-		LOGGER.info("Starting merging shopping carts");
-		if (CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
-			Set<ShoppingCartItem> shoppingCartItemsSet = getShoppingCartItems(sessionCart, store, userShoppingModel);
-			boolean duplicateFound = false;
-			if (CollectionUtils.isNotEmpty(shoppingCartItemsSet)) {
-				for (ShoppingCartItem sessionShoppingCartItem : shoppingCartItemsSet) {
-					if (CollectionUtils.isNotEmpty(userShoppingModel.getLineItems())) {
-						for (ShoppingCartItem cartItem : userShoppingModel.getLineItems()) {
-							if (cartItem.getProduct().getId().longValue() == sessionShoppingCartItem.getProduct()
-									.getId().longValue()) {
-								if (CollectionUtils.isNotEmpty(cartItem.getAttributes())) {
-									if (!duplicateFound) {
-										LOGGER.info("Dupliate item found..updating exisitng product quantity");
-										cartItem.setQuantity(
-												cartItem.getQuantity() + sessionShoppingCartItem.getQuantity());
-										duplicateFound = true;
-										break;
-									}
-								}
-							}
-						}
-					}
-					if (!duplicateFound) {
-						LOGGER.info("New item found..adding item to Shopping cart");
-						userShoppingModel.getLineItems().add(sessionShoppingCartItem);
-					}
-				}
-
-			}
-
-		}
-		LOGGER.info("Shopping Cart merged successfully.....");
-		saveOrUpdate(userShoppingModel);
-		removeShoppingCart(sessionCart);
-
-		return userShoppingModel;
-	}
-
-	private Set<ShoppingCartItem> getShoppingCartItems(final ShoppingCart sessionCart, final MerchantStore store,
-			final ShoppingCart cartModel) throws Exception {
-
-		Set<ShoppingCartItem> shoppingCartItemsSet = null;
-		if (CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
-			shoppingCartItemsSet = new HashSet<ShoppingCartItem>();
-			for (ShoppingCartItem shoppingCartItem : sessionCart.getLineItems()) {
-				Product product = productService.getBySku(shoppingCartItem.getSku(), store, store.getDefaultLanguage());
-						//.getById(shoppingCartItem.getProductId());
-				if (product == null) {
-					throw new Exception("Item with sku " + shoppingCartItem.getSku() + " does not exist");
-				}
-
-				if (product.getMerchantStore().getId().intValue() != store.getId().intValue()) {
-					throw new Exception("Item with sku " + shoppingCartItem.getSku()
-							+ " does not belong to merchant " + store.getId());
-				}
-
-				ShoppingCartItem item = populateShoppingCartItem(product, store);
-				item.setQuantity(shoppingCartItem.getQuantity());
-				item.setShoppingCart(cartModel);
-
-				List<ShoppingCartAttributeItem> cartAttributes = new ArrayList<ShoppingCartAttributeItem>();
-				if (shoppingCartItem != null && !CollectionUtils.isEmpty(shoppingCartItem.getAttributes())) {
-					cartAttributes.addAll(shoppingCartItem.getAttributes());
-					if (CollectionUtils.isNotEmpty(cartAttributes)) {
-						for (ShoppingCartAttributeItem shoppingCartAttributeItem : cartAttributes) {
-							ProductAttribute productAttribute = productAttributeService
-									.getById(shoppingCartAttributeItem.getId());
-							if (productAttribute != null && productAttribute.getProduct().getId().longValue() == product
-									.getId().longValue()) {
-
-								ShoppingCartAttributeItem attributeItem = new ShoppingCartAttributeItem(item,
-										productAttribute);
-								if (shoppingCartAttributeItem.getId() > 0) {
-									attributeItem.setId(shoppingCartAttributeItem.getId());
-								}
-								item.addAttributes(attributeItem);
-
-							}
-						}
-					}
-				}
-
-				shoppingCartItemsSet.add(item);
-			}
-
-		}
-		return shoppingCartItemsSet;
-	}
-
-	@Override
-	@Transactional
-	public void deleteShoppingCartItem(Long id) {
-
-		ShoppingCartItem item = shoppingCartItemRepository.findOne(id);
-		if (item != null) {
-
-			if (item.getAttributes() != null) {
-				item.getAttributes().forEach(a -> shoppingCartAttributeItemRepository.deleteById(a.getId()));
-				item.getAttributes().clear();
-			}
-
-			// refresh
-			item = shoppingCartItemRepository.findOne(id);
-
-			// delete
-			shoppingCartItemRepository.deleteById(id);
-
-		}
-
-	}
+	BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity()));
+	item.setSubTotal(subTotal);
 
 }
+
+@Override
+public List<ShippingProduct> createShippingProduct(final ShoppingCart cart) throws ServiceException {
+	/**
+	 * Determines if products are virtual
+	 */
+	Set<ShoppingCartItem> items = cart.getLineItems();
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops:
+	Moving the instantiation of `ArrayList<ShippingProduct>` outside of the loop.
+	*/
+	List<ShippingProduct> shippingProducts = new ArrayList<ShippingProduct>();
+	for (ShoppingCartItem item : items) {
+		Product product = item.getProduct();
+		if (!product.isProductVirtual() && product.isProductShipeable()) {
+			if (shippingProducts.isEmpty()) {
+				shippingProducts = new ArrayList<ShippingProduct>();
+			}
+			ShippingProduct shippingProduct = new ShippingProduct(product);
+			shippingProduct.setQuantity(item.getQuantity());
+			shippingProduct.setFinalPrice(item.getFinalPrice());
+			shippingProducts.add(shippingProduct);
+		}
+	}
+
+	return shippingProducts;
+
+}
+
+@Override
+public void removeShoppingCart(final ShoppingCart cart) throws ServiceException {
+	shoppingCartRepository.delete(cart);
+}
+
+
+	@Override
+public ShoppingCart mergeShoppingCarts(final ShoppingCart userShoppingModel, final ShoppingCart sessionCart,
+        final MerchantStore store) throws Exception {
+    if (sessionCart.getCustomerId() != null
+            && sessionCart.getCustomerId().equals(userShoppingModel.getCustomerId())) {
+        LOGGER.info("Session Shopping cart belongs to same logged in user");
+        if (CollectionUtils.isNotEmpty(userShoppingModel.getLineItems())
+                && CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
+            return userShoppingModel;
+        }
+    }
+
+    LOGGER.info("Starting merging shopping carts");
+    if (CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+        Avoid nested loops
+        Replaced the nested loops with a hashmap to reduce complexity from O(n^2) to O(n) when checking for duplicate items.
+        */
+        Map<Long, ShoppingCartItem> userShoppingCartItemsMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(userShoppingModel.getLineItems())) {
+            for (ShoppingCartItem cartItem : userShoppingModel.getLineItems()) {
+                userShoppingCartItemsMap.put(cartItem.getProduct().getId(), cartItem);
+            }
+        }
+
+        Set<ShoppingCartItem> shoppingCartItemsSet = getShoppingCartItems(sessionCart, store, userShoppingModel);
+        for (ShoppingCartItem sessionShoppingCartItem : shoppingCartItemsSet) {
+            ShoppingCartItem existingItem = userShoppingCartItemsMap.get(sessionShoppingCartItem.getProduct().getId());
+            if (existingItem != null) {
+                LOGGER.info("Duplicate item found..updating existing product quantity");
+                existingItem.setQuantity(existingItem.getQuantity() + sessionShoppingCartItem.getQuantity());
+            } else {
+                LOGGER.info("New item found..adding item to Shopping cart");
+                userShoppingModel.getLineItems().add(sessionShoppingCartItem);
+            }
+        }
+    }
+    LOGGER.info("Shopping Cart merged successfully.....");
+    saveOrUpdate(userShoppingModel);
+    removeShoppingCart(sessionCart);
+
+    return userShoppingModel;
+}
+
+private Set<ShoppingCartItem> getShoppingCartItems(final ShoppingCart sessionCart, final MerchantStore store,
+        final ShoppingCart cartModel) throws Exception {
+
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops
+    Moved the instantiation of HashSet and ArrayList outside of the loops to avoid repeated object creation.
+    */
+    Set<ShoppingCartItem> shoppingCartItemsSet = new HashSet<>();
+    List<ShoppingCartAttributeItem> cartAttributes = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
+        for (ShoppingCartItem shoppingCartItem : sessionCart.getLineItems()) {
+            Product product = productService.getBySku(shoppingCartItem.getSku(), store, store.getDefaultLanguage());
+                    //.getById(shoppingCartItem.getProductId());
+            if (product == null) {
+                throw new Exception("Item with sku " + shoppingCartItem.getSku() + " does not exist");
+            }
+
+            if (product.getMerchantStore().getId().intValue() != store.getId().intValue()) {
+                throw new Exception("Item with sku " + shoppingCartItem.getSku()
+                        + " does not belong to merchant " + store.getId());
+            }
+
+            ShoppingCartItem item = populateShoppingCartItem(product, store);
+            item.setQuantity(shoppingCartItem.getQuantity());
+            item.setShoppingCart(cartModel);
+
+            cartAttributes.clear();
+            if (shoppingCartItem != null && !CollectionUtils.isEmpty(shoppingCartItem.getAttributes())) {
+                cartAttributes.addAll(shoppingCartItem.getAttributes());
+                if (CollectionUtils.isNotEmpty(cartAttributes)) {
+                    for (ShoppingCartAttributeItem shoppingCartAttributeItem : cartAttributes) {
+                        ProductAttribute productAttribute = productAttributeService
+                                .getById(shoppingCartAttributeItem.getId());
+                        if (productAttribute != null && productAttribute.getProduct().getId().longValue() == product
+                                .getId().longValue()) {
+
+                            ShoppingCartAttributeItem attributeItem = new ShoppingCartAttributeItem(item,
+                                    productAttribute);
+                            if (shoppingCartAttributeItem.getId() > 0) {
+                                attributeItem.setId(shoppingCartAttributeItem.getId());
+                            }
+                            item.addAttributes(attributeItem);
+
+                        }
+                    }
+                }
+            }
+
+            shoppingCartItemsSet.add(item);
+        }
+
+    }
+    return shoppingCartItemsSet;
+}
+
+@Override
+@Transactional
+public void deleteShoppingCartItem(Long id) {
+
+    ShoppingCartItem item = shoppingCartItemRepository.findOne(id);
+    if (item != null) {
+
+        if (item.getAttributes() != null) {
+            item.getAttributes().forEach(a -> shoppingCartAttributeItemRepository.deleteById(a.getId()));
+            item.getAttributes().clear();
+        }
+
+        // refresh
+        item = shoppingCartItemRepository.findOne(id);
+
+        // delete
+        shoppingCartItemRepository.deleteById(id);
+
+    }
+
+}
+
