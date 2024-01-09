@@ -48,6 +48,11 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 	@Inject
 	private ProductRelationshipService productRelationshipService;
 
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops
+	Moved the instantiation of ReadableProductPopulator populator outside of the loops in listItemsByManufacturer and listItemsByIds methods. */
+	private ReadableProductPopulator populator = new ReadableProductPopulator();
+
 	@Override
 	public ReadableProductList listItemsByManufacturer(MerchantStore store,
 			Language language, Long manufacturerId, int startCount, int maxCount) throws Exception {
@@ -62,7 +67,6 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 		com.salesmanager.core.model.catalog.product.ProductList products = productService.listByStore(store, language, productCriteria);
 
 		
-		ReadableProductPopulator populator = new ReadableProductPopulator();
 		populator.setPricingService(pricingService);
 		populator.setimageUtils(imageUtils);
 		
@@ -100,7 +104,6 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 		com.salesmanager.core.model.catalog.product.ProductList products = productService.listByStore(store, language, productCriteria);
 
 		
-		ReadableProductPopulator populator = new ReadableProductPopulator();
 		populator.setPricingService(pricingService);
 		populator.setimageUtils(imageUtils);
 		
@@ -135,14 +138,7 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 			}
 			
 			ReadableProductList list = listItemsByIds(store, language, ids, 0, 0);
-			List<ReadableProduct> prds = list.getProducts().stream().sorted(Comparator.comparing(ReadableProduct::getSortOrder)).collect(Collectors.toList());
-			list.setProducts(prds);
-			list.setTotalPages(1);//no paging
-			return list;
-		}
-		
-		return null;
-	}
+			List<ReadableProduct> prds = list.getProducts().stream
 
 	@Override
 	public ReadableProductList addItemToGroup(Product product, String group, MerchantStore store, Language language) {
