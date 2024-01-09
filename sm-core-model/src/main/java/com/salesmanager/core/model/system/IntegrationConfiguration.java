@@ -75,8 +75,8 @@ public class IntegrationConfiguration implements JSONAware {
 
 
   @SuppressWarnings("unchecked")
-  @Override
-  public String toJSONString() {
+@Override
+public String toJSONString() {
 
 
     StringBuilder returnString = new StringBuilder();
@@ -113,14 +113,21 @@ public class IntegrationConfiguration implements JSONAware {
         }
       }
 
+      /* QECI-fix (2024-01-09 19:06:55.798727):
+       * Avoid instantiations inside loops:
+       * Moved the instantiation of StringBuilder `optionsEntries` and `dataEntries` outside of the loops.
+       */
+      StringBuilder optionsEntries = new StringBuilder();
+      StringBuilder dataEntries = new StringBuilder();
+
       for (String key : keys) {
 
         List<String> values = this.getIntegrationOptions().get(key);
         if (values == null) {
           continue;
         }
-        StringBuilder optionsEntries = new StringBuilder();
-        StringBuilder dataEntries = new StringBuilder();
+
+        dataEntries.setLength(0); // Clear the StringBuilder for reuse
 
         int count = 0;
         for (String value : values) {
@@ -132,6 +139,7 @@ public class IntegrationConfiguration implements JSONAware {
           count++;
         }
 
+        optionsEntries.setLength(0); // Clear the StringBuilder for reuse
         optionsEntries.append("[").append(dataEntries.toString()).append("]");
 
         optionDataEntries.append("\"").append(key).append("\":").append(optionsEntries.toString());
@@ -185,3 +193,4 @@ public class IntegrationConfiguration implements JSONAware {
 
 
 }
+
