@@ -11,13 +11,15 @@ public class ProductUtils {
 		
 		String pName = orderProduct.getProductName();
 		Set<OrderProductAttribute> oAttributes = orderProduct.getOrderAttributes();
-		StringBuilder attributeName = null;
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		Avoid instantiations inside loops
+		Moved the instantiation of StringBuilder attributeName outside of the loop and initialized it with an empty StringBuilder. */
+		StringBuilder attributeName = new StringBuilder();
 		for(OrderProductAttribute oProductAttribute : oAttributes) {
-			if(attributeName == null) {
-				attributeName = new StringBuilder();
-				attributeName.append("[");
-			} else {
+			if(attributeName.length() > 0) {
 				attributeName.append(", ");
+			} else {
+				attributeName.append("[");
 			}
 			attributeName.append(oProductAttribute.getProductAttributeName())
 			.append(": ")
@@ -29,7 +31,7 @@ public class ProductUtils {
 		StringBuilder productName = new StringBuilder();
 		productName.append(pName);
 		
-		if(attributeName!=null) {
+		if(attributeName.length() > 0) {
 			attributeName.append("]");
 			productName.append(" ").append(attributeName.toString());
 		}
@@ -40,3 +42,4 @@ public class ProductUtils {
 	}
 
 }
+
