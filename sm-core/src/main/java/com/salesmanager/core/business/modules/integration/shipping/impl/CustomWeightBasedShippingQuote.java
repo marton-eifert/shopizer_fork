@@ -43,6 +43,11 @@ public class CustomWeightBasedShippingQuote implements ShippingQuoteModule {
 	@Inject
 	private ProductPriceUtils productPriceUtils;
 
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops:
+	Move ObjectMapper instantiation outside of the method to avoid repeated object creation within method calls.
+	*/
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	@Override
 	public void validateModuleConfiguration(
@@ -65,7 +70,6 @@ public class CustomWeightBasedShippingQuote implements ShippingQuoteModule {
 	
 			if(configuration!=null) {
 				String value = configuration.getValue();
-				ObjectMapper mapper = new ObjectMapper();
 				try {
 					return mapper.readValue(value, CustomShippingQuotesConfiguration.class);
 				} catch(Exception e) {
@@ -101,44 +105,41 @@ public class CustomWeightBasedShippingQuote implements ShippingQuoteModule {
 		//get configuration
 		CustomShippingQuotesConfiguration customConfiguration = (CustomShippingQuotesConfiguration)this.getCustomModuleConfiguration(store);
 		
-		
-		List<CustomShippingQuotesRegion> regions = customConfiguration.getRegions();
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		Avoid nested loops:
+		Use a hashmap to store countries and their corresponding regions to reduce the algorithmic complexity.
+		*/
+		HashMap<String, CustomShippingQuotesRegion> countryRegionMap = new HashMap<>();
+		for(CustomShippingQuotesRegion region : customConfiguration.getRegions()) {
+			for(String countryCode : region.getCountries()) {
+				countryRegionMap.put(countryCode, region);
+			}
+		}
 		
 		ShippingBasisType shippingType =  shippingConfiguration.getShippingBasisType();
 		ShippingOption shippingOption = null;
 		try {
 			
-
-			for(CustomShippingQuotesRegion region : customConfiguration.getRegions()) {
-	
-				for(String countryCode : region.getCountries()) {
-					if(countryCode.equals(delivery.getCountry().getIsoCode())) {
-						
-						
-						//determine shipping weight
-						double weight = 0;
-						for(PackageDetails packageDetail : packages) {
-							weight = weight + packageDetail.getShippingWeight();
-						}
-						
-						//see the price associated with the width
-						List<CustomShippingQuoteWeightItem> quoteItems = region.getQuoteItems();
-						for(CustomShippingQuoteWeightItem quoteItem : quoteItems) {
-							if(weight<= quoteItem.getMaximumWeight()) {
-								shippingOption = new ShippingOption();
-								shippingOption.setOptionCode(new StringBuilder().append(CUSTOM_WEIGHT).toString());
-								shippingOption.setOptionId(new StringBuilder().append(CUSTOM_WEIGHT).append("_").append(region.getCustomRegionName()).toString());
-								shippingOption.setOptionPrice(quoteItem.getPrice());
-								shippingOption.setOptionPriceText(productPriceUtils.getStoreFormatedAmountWithCurrency(store, quoteItem.getPrice()));
-								break;
-							}
-						}
-						
-					}
-					
-					
+			CustomShippingQuotesRegion region = countryRegionMap.get(delivery.getCountry().getIsoCode());
+			if(region != null) {
+				//determine shipping weight
+				double weight = 0;
+				for(PackageDetails packageDetail : packages) {
+					weight = weight + packageDetail.getShippingWeight();
 				}
 				
+				//see the price associated with the width
+				List<CustomShippingQuoteWeightItem> quoteItems = region.getQuoteItems();
+				for(CustomShippingQuoteWeightItem quoteItem : quoteItems) {
+					if(weight<= quoteItem.getMaximumWeight()) {
+						shippingOption = new ShippingOption();
+						shippingOption.setOptionCode(new StringBuilder().append(CUSTOM_WEIGHT).toString());
+						shippingOption.setOptionId(new StringBuilder().append(CUSTOM_WEIGHT).append("_").append(region.getCustomRegionName()).toString());
+						shippingOption.setOptionPrice(quoteItem.getPrice());
+						shippingOption.setOptionPriceText(productPriceUtils.getStoreFormatedAmountWithCurrency(store, quoteItem.getPrice()));
+						break;
+					}
+				}
 			}
 			
 			if(shippingOption!=null) {
@@ -158,3 +159,4 @@ public class CustomWeightBasedShippingQuote implements ShippingQuoteModule {
 
 
 }
+
