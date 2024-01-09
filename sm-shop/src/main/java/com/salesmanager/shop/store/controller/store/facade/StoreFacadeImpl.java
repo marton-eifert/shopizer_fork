@@ -385,7 +385,29 @@ public class StoreFacadeImpl implements StoreFacade {
     }
 
     @Override
+	public void addStoreLogo(String code, InputContentFile cmsContentImage) {
+		MerchantStore store = getByCode(code);
+		store.setStoreLogo(cmsContentImage.getFileName());
+		saveMerchantStore(store);
+		addLogoToStore(code, cmsContentImage);
+	}
 
+	private void addLogoToStore(String code, InputContentFile cmsContentImage) {
+		try {
+			contentService.addLogo(code, cmsContentImage);
+		} catch (ServiceException e) {
+			throw new ServiceRuntimeException(e);
+		}
+	}
+
+	private void saveMerchantStore(MerchantStore store) {
+		try {
+			merchantStoreService.save(store);
+		} catch (ServiceException e) {
+			throw new ServiceRuntimeException(e);
+		}
+
+	}
 
     @Override
 	public void createBrand(String merchantStoreCode, PersistableBrand brand) {

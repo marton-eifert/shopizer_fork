@@ -780,3 +780,4 @@ public Transaction initTransaction(Customer customer, Payment payment, MerchantS
 	return transaction;
 }
 
+}

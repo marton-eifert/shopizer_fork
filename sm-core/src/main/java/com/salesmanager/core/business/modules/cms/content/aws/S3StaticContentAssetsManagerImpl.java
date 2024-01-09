@@ -112,7 +112,7 @@ public class S3StaticContentAssetsManagerImpl implements ContentAssetsManager {
 
 		}
 	}
-}
+
 
 
 	@Override
