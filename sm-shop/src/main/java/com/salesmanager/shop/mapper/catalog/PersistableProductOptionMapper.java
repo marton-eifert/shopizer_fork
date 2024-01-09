@@ -14,6 +14,9 @@ import com.salesmanager.shop.mapper.Mapper;
 import com.salesmanager.shop.model.catalog.product.attribute.api.PersistableProductOptionEntity;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 public class PersistableProductOptionMapper implements Mapper<PersistableProductOptionEntity, ProductOption> {
 
@@ -53,25 +56,28 @@ public class PersistableProductOptionMapper implements Mapper<PersistableProduct
     }
     
     try {
+      /* QECI-fix (2024-01-09 19:06:55.798727):
+       * Avoid nested loops: Algorithmic Costs
+       * Replaced the nested loops with a hashmap to store descriptions by language code for efficient lookup.
+       */
+      Map<String, ProductOptionDescription> descriptionsMap = new HashMap<>();
+      if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
+        for(ProductOptionDescription d : destination.getDescriptions()) {
+          descriptionsMap.put(d.getLanguage().getCode(), d);
+        }
+      }
 
       if(!CollectionUtils.isEmpty(source.getDescriptions())) {
         for(com.salesmanager.shop.model.catalog.product.attribute.ProductOptionDescription desc : source.getDescriptions()) {
-          ProductOptionDescription description = null;
-          if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
-            for(ProductOptionDescription d : destination.getDescriptions()) {
-              if(!StringUtils.isBlank(desc.getLanguage()) && desc.getLanguage().equals(d.getLanguage().getCode())) {
-            	  d.setDescription(desc.getDescription());
-            	  d.setName(desc.getName());
-            	  d.setTitle(desc.getTitle());
-            	  description = d;
-            	  break;
-              } 
-            }
-          } 
-          if(description == null) {
-	          description = description(desc);
-	          description.setProductOption(destination);
-	          destination.getDescriptions().add(description);
+          ProductOptionDescription description = descriptionsMap.get(desc.getLanguage());
+          if(description != null) {
+              description.setDescription(desc.getDescription());
+              description.setName(desc.getName());
+              description.setTitle(desc.getTitle());
+          } else {
+              description = description(desc);
+              description.setProductOption(destination);
+              destination.getDescriptions().add(description);
           }
         }
       }
@@ -90,3 +96,4 @@ public class PersistableProductOptionMapper implements Mapper<PersistableProduct
   }
 
 }
+
