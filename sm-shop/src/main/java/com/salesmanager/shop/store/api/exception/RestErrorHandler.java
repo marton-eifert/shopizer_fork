@@ -27,12 +27,18 @@ public class RestErrorHandler {
     public @ResponseBody ErrorEntity handleServiceException(Exception exception) {
         log.error(exception.getMessage(), exception);
         Objects.requireNonNull(exception.getCause());
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid calling a function in a condition loop
+         Store the result of getCause() in a temporary variable before the loop and use this variable for the condition check.
+        */
         Throwable rootCause = exception.getCause();
-        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-            rootCause = rootCause.getCause();
+        Throwable cause = rootCause;
+        while (cause != null && cause != rootCause) {
+            rootCause = cause;
+            cause = cause.getCause();
         }
         ErrorEntity errorEntity = createErrorEntity("500", exception.getMessage(),
-        		rootCause.getMessage());
+                rootCause.getMessage());
         return errorEntity;
     }
 
@@ -45,12 +51,18 @@ public class RestErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public @ResponseBody ErrorEntity handleServiceException(ServiceRuntimeException exception) {
         log.error(exception.getErrorMessage(), exception);
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid calling a function in a condition loop
+         Store the result of getCause() in a temporary variable before the loop and use this variable for the condition check.
+        */
         Throwable rootCause = exception.getCause();
-        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-            rootCause = rootCause.getCause();
+        Throwable cause = rootCause;
+        while (cause != null && cause != rootCause) {
+            rootCause = cause;
+            cause = cause.getCause();
         }
         ErrorEntity errorEntity = createErrorEntity(exception.getErrorCode()!=null?exception.getErrorCode():"500", exception.getErrorMessage(),
-        		rootCause.getMessage());
+                rootCause.getMessage());
         return errorEntity;
     }
 
@@ -104,10 +116,11 @@ public class RestErrorHandler {
 
         String resultMessage = (message != null && detailMessage !=null)  ? new StringBuilder().append(message).append(", ").append(detailMessage).toString() : detailMessage;
         if(StringUtils.isBlank(resultMessage)) {
-        	resultMessage = message;
+            resultMessage = message;
         }
         Optional.ofNullable(resultMessage)
                 .ifPresent(errorEntity::setMessage);
         return errorEntity;
     }
 }
+
