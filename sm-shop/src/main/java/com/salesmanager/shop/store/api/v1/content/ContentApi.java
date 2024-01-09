@@ -410,111 +410,113 @@ public class ContentApi {
 	 * @param file
 	 */
 	@PostMapping(value = "/private/file")
-	@ResponseStatus(HttpStatus.CREATED)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	public void upload(@RequestParam("file") MultipartFile file, @ApiIgnore MerchantStore merchantStore,
-			@ApiIgnore Language language) {
+@ResponseStatus(HttpStatus.CREATED)
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+        @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+public void upload(@RequestParam("file") MultipartFile file, @ApiIgnore MerchantStore merchantStore,
+        @ApiIgnore Language language) {
 
-		ContentFile f = new ContentFile();
-		f.setContentType(file.getContentType());
-		f.setName(file.getOriginalFilename());
-		try {
-			f.setFile(file.getBytes());
-		} catch (IOException e) {
-			throw new ServiceRuntimeException("Error while getting file bytes");
-		}
+    ContentFile f = new ContentFile();
+    f.setContentType(file.getContentType());
+    f.setName(file.getOriginalFilename());
+    try {
+        f.setFile(file.getBytes());
+    } catch (IOException e) {
+        throw new ServiceRuntimeException("Error while getting file bytes");
+    }
 
-		contentFacade.addContentFile(f, merchantStore.getCode());
-
-	}
-
-	@PostMapping(value = "/private/files", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-	@ResponseStatus(HttpStatus.CREATED)
-	@ApiImplicitParams({
-			// @ApiImplicitParam(name = "file[]", value = "File stream object",
-			// required = true,dataType = "MultipartFile",allowMultiple = true),
-			@ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	public void uploadMultipleFiles(@RequestParam(value = "file[]", required = true) MultipartFile[] files,
-			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language) {
-
-		for (MultipartFile f : files) {
-			ContentFile cf = new ContentFile();
-			cf.setContentType(f.getContentType());
-			cf.setName(f.getName());
-			try {
-				cf.setFile(f.getBytes());
-				contentFacade.addContentFile(cf, merchantStore.getCode());
-			} catch (IOException e) {
-				throw new ServiceRuntimeException("Error while getting file bytes");
-			}
-		}
-
-	}
-
-	
-	@Deprecated
-	@PutMapping(value = "/private/content/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	@ApiOperation(httpMethod = "PUT", value = "Update content page", notes = "Updates a content page",
-
-			response = Void.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-
-	public void updatePage(@PathVariable Long id, @RequestBody @Valid PersistableContentEntity page,
-			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language) {
-		page.setId(id);
-		//contentFacade.saveContentPage(page, merchantStore, language);
-	}
-
-	/**
-	 * Deletes a content from CMS
-	 *
-	 * @param name
-	 */
-	@Deprecated
-	@DeleteMapping(value = "/private/content/{id}")
-	@ApiOperation(httpMethod = "DELETE", value = "Deletes a content from CMS", notes = "Delete a content box or page", response = Void.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT") })
-	public void deleteContent(Long id, @ApiIgnore MerchantStore merchantStore) {
-		contentFacade.delete(merchantStore, id);
-	}
-
-	/*  *//**
-			 * Deletes a content from CMS
-			 *
-			 * @param name
-			 *//*
-			 * @DeleteMapping(value = "/private/content/page/{id}")
-			 * 
-			 * @ApiOperation(httpMethod = "DELETE", value =
-			 * "Deletes a file from CMS", notes = "Delete a file from server",
-			 * response = Void.class)
-			 * 
-			 * @ApiImplicitParams({
-			 * 
-			 * @ApiImplicitParam(name = "store", dataType = "String",
-			 * defaultValue = "DEFAULT")}) public void deleteFile( Long id,
-			 * 
-			 * @ApiIgnore MerchantStore merchantStore) {
-			 * contentFacade.deletePage(merchantStore, id); }
-			 */
-
-	/**
-	 * Deletes a file from CMS
-	 *
-	 * @param name
-	 */
-	@DeleteMapping(value = "/private/content/")
-	@ApiOperation(httpMethod = "DELETE", value = "Deletes a file from CMS", notes = "Delete a file from server", response = Void.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
-			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
-	public void deleteFile(@Valid ContentName name, @ApiIgnore MerchantStore merchantStore,
-			@ApiIgnore Language language) {
-		contentFacade.delete(merchantStore, name.getName(), name.getContentType());
-	}
-
+    contentFacade.addContentFile(f, merchantStore.getCode());
 
 }
+
+@PostMapping(value = "/private/files", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+@ResponseStatus(HttpStatus.CREATED)
+@ApiImplicitParams({
+        // @ApiImplicitParam(name = "file[]", value = "File stream object",
+        // required = true,dataType = "MultipartFile",allowMultiple = true),
+        @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+        @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+public void uploadMultipleFiles(@RequestParam(value = "file[]", required = true) MultipartFile[] files,
+        @ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language) {
+
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops
+    Moved the instantiation of the ContentFile object outside of the loop and added a method to reset its properties. */
+    ContentFile cf = new ContentFile();
+    for (MultipartFile f : files) {
+        resetContentFile(cf, f);
+        contentFacade.addContentFile(cf, merchantStore.getCode());
+    }
+
+}
+
+private void resetContentFile(ContentFile cf, MultipartFile f) {
+    cf.setContentType(f.getContentType());
+    cf.setName(f.getName());
+    try {
+        cf.setFile(f.getBytes());
+    } catch (IOException e) {
+        throw new ServiceRuntimeException("Error while getting file bytes");
+    }
+}
+
+@Deprecated
+@PutMapping(value = "/private/content/{id}")
+@ResponseStatus(HttpStatus.OK)
+@ApiOperation(httpMethod = "PUT", value = "Update content page", notes = "Updates a content page",
+
+        response = Void.class)
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+        @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+
+public void updatePage(@PathVariable Long id, @RequestBody @Valid PersistableContentEntity page,
+        @ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language) {
+    page.setId(id);
+    //contentFacade.saveContentPage(page, merchantStore, language);
+}
+
+/**
+ * Deletes a content from CMS
+ *
+ * @param name
+ */
+@Deprecated
+@DeleteMapping(value = "/private/content/{id}")
+@ApiOperation(httpMethod = "DELETE", value = "Deletes a content from CMS", notes = "Delete a content box or page", response = Void.class)
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT") })
+public void deleteContent(Long id, @ApiIgnore MerchantStore merchantStore) {
+    contentFacade.delete(merchantStore, id);
+}
+
+/*  *//**
+         * Deletes a content from CMS
+         *
+         * @param name
+         *//*
+         * @DeleteMapping(value = "/private/content/page/{id}")
+         * 
+         * @ApiOperation(httpMethod = "DELETE", value =
+         * "Deletes a file from CMS", notes = "Delete a file from server",
+         * response = Void.class)
+         * 
+         * @ApiImplicitParams({
+         * 
+         * @ApiImplicitParam(name = "store", dataType = "String",
+         * defaultValue = "DEFAULT")}) public void deleteFile( Long id,
+         * 
+         * @ApiIgnore MerchantStore merchantStore) {
+         * contentFacade.deletePage(merchantStore, id); }
+         */
+
+/**
+ * Deletes a file from CMS
+ *
+ * @param name
+ */
+@DeleteMapping(value = "/private/content/")
+@ApiOperation(httpMethod = "DELETE", value = "Deletes a file from CMS", notes = "Delete a file from server", response = Void.class)
+@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+        @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+public void deleteFile(@Valid ContentName name, @ApiIgnore MerchantStore merchantStore,
+        @ApiIgnore Language language) {
+    contentFacade.delete(merchantStore, name.getName(),
