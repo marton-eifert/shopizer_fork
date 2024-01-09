@@ -39,7 +39,11 @@ public class OrderTotalServiceImpl implements OrderTotalService {
 	
 		RebatesOrderTotalVariation variation = new RebatesOrderTotalVariation();
 		
-		List<OrderTotal> totals = null;
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid instantiations inside loops:
+		 * Moved the instantiation of the ArrayList<OrderTotal> outside of the nested loops.
+		 */
+		List<OrderTotal> totals = new ArrayList<OrderTotal>();
 		
 		if(orderTotalPostProcessors != null) {
 			for(OrderTotalPostProcessorModule module : orderTotalPostProcessors) {
@@ -55,14 +59,13 @@ public class OrderTotalServiceImpl implements OrderTotalService {
 					if(orderTotal==null) {
 						continue;
 					}
-					if(totals==null) {
-						totals = new ArrayList<OrderTotal>();
+					if(totals.isEmpty()) {
 						variation.setVariations(totals);
 					}
 					
 					//if product is null it will be catched when invoking the module
 					orderTotal.setText(StringUtils.isNoneBlank(orderTotal.getText())?orderTotal.getText():product.getProductDescription().getName());
-					variation.getVariations().add(orderTotal);	
+					totals.add(orderTotal);	
 				}
 			}
 		}
@@ -72,3 +75,4 @@ public class OrderTotalServiceImpl implements OrderTotalService {
 	}
 
 }
+
