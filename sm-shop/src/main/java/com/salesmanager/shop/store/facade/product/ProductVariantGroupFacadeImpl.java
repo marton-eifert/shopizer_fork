@@ -94,125 +94,134 @@ public class ProductVariantGroupFacadeImpl implements ProductVariantGroupFacade 
 	}
 
 	@Override
-	public void delete(Long productVariantGroup, Long productId, MerchantStore store) {
+public void delete(Long productVariantGroup, Long productId, MerchantStore store) {
 
-		ProductVariantGroup group = this.group(productVariantGroup, store);
-		
-		if(group == null) {
-			throw new ResourceNotFoundException("Product instance group [" + group.getId() + " not found for store [" + store.getCode() + "]");
-		}
-		
-		try {
-		
-			//null all group from instances
-			for(ProductVariant instance : group.getProductVariants()) {
-				Optional<ProductVariant> p = productVariantService.getById(instance.getId(), store);
-				if(p.isEmpty()) {
-					throw new ResourceNotFoundException("Product instance [" + instance.getId() + " not found for store [" + store.getCode() + "]");
-				}
-				instance.setProductVariantGroup(null);
-				productVariantService.save(instance);
-			}
+    ProductVariantGroup group = this.group(productVariantGroup, store);
+    
+    if(group == null) {
+        throw new ResourceNotFoundException("Product instance group [" + group.getId() + " not found for store [" + store.getCode() + "]");
+    }
+    
+    try {
+    
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         * Avoid instantiations inside loops:
+         * Moved StringBuilder instantiation outside the loop to avoid repeated object creation.
+         */
+        StringBuilder pathBuilder = new StringBuilder().append("group").append(Constants.SLASH);
+        
+        //null all group from instances
+        for(ProductVariant instance : group.getProductVariants()) {
+            Optional<ProductVariant> p = productVariantService.getById(instance.getId(), store);
+            if(p.isEmpty()) {
+                throw new ResourceNotFoundException("Product instance [" + instance.getId() + " not found for store [" + store.getCode() + "]");
+            }
+            instance.setProductVariantGroup(null);
+            productVariantService.save(instance);
+        }
 
-			//now delete
-			productVariantGroupService.delete(group);
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException("Cannot remove product instance group [" + productVariantGroup + "] for store [" + store.getCode() + "]");
-		}
-
-	}
-
-	@Override
-	public ReadableEntityList<ReadableProductVariantGroup> list(Long productId, MerchantStore store, Language language,
-			int page, int count) {
-		
-		
-		Page<ProductVariantGroup> groups = productVariantGroupService.getByProductId(store, productId, language, page, count);
-		
-		List<ReadableProductVariantGroup> readableInstances = groups.stream()
-				.map(rp -> this.readableProductVariantGroupMapper.convert(rp, store, language)).collect(Collectors.toList());
-
-	    return createReadableList(groups, readableInstances);
-
-	}
-	
-	
-	private ProductVariantGroup group(Long productOptionGroupId,MerchantStore store) {
-		Optional<ProductVariantGroup> group = productVariantGroupService.getById(productOptionGroupId, store);
-		if(group.isEmpty()) {
-			throw new ResourceNotFoundException("Product instance group [" + productOptionGroupId + "] not found");
-		}
-		
-		return group.get();
-	}
-	
-	@Override
-	public void addImage(MultipartFile image, Long instanceGroupId,
-			MerchantStore store, Language language) {
-		
-		
-		Validate.notNull(instanceGroupId,"productVariantGroupId must not be null");
-		Validate.notNull(image,"Image must not be null");
-		Validate.notNull(store,"MerchantStore must not be null");
-		//get option group
-		
-		ProductVariantGroup group = this.group(instanceGroupId, store);
-		ProductVariantImage instanceImage = new ProductVariantImage();
-		
-		try {
-			
-			String path = new StringBuilder().append("group").append(Constants.SLASH).append(instanceGroupId).toString();
-			
-			
-			
-			instanceImage.setProductImage(image.getOriginalFilename());
-			instanceImage.setProductVariantGroup(group);
-			String imageName = image.getOriginalFilename();
-			InputStream inputStream = image.getInputStream();
-			InputContentFile cmsContentImage = new InputContentFile();
-			cmsContentImage.setFileName(imageName);
-			cmsContentImage.setMimeType(image.getContentType());
-			cmsContentImage.setFile(inputStream);
-			cmsContentImage.setPath(path);
-			cmsContentImage.setFileContentType(FileContentType.VARIANT);
-
-			contentService.addContentFile(store.getCode(), cmsContentImage);
-
-			group.getImages().add(instanceImage);
-			
-			productVariantGroupService.saveOrUpdate(group);
-		} catch (Exception e) {
-			throw new ServiceRuntimeException("Exception while adding instance group image", e);
-		}
-
-
-		return;
-	}
-
-	@Override
-	public void removeImage(Long imageId, Long productVariantGroupId, MerchantStore store) {
-		
-		Validate.notNull(productVariantGroupId,"productVariantGroupId must not be null");
-		Validate.notNull(store,"MerchantStore must not be null");
-		
-		ProductVariantImage image = productVariantImageService.getById(imageId);
-		
-		if(image == null) {
-			throw new ResourceNotFoundException("productVariantImage [" + imageId + "] was not found");
-		}
-		
-		ProductVariantGroup group = this.group(productVariantGroupId, store);
-
-		
-		try {
-			contentService.removeFile(Constants.SLASH + store.getCode() + Constants.SLASH + productVariantGroupId, FileContentType.VARIANT, image.getProductImage());
-			group.getImages().removeIf(i -> (i.getId() == image.getId()));
-			//update productVariantroup
-			productVariantGroupService.update(group);
-		} catch (ServiceException e) {
-			throw new ServiceRuntimeException("An exception occured while removing instance image [" + imageId + "]",e);
-		}
-			
-	}
+        //now delete
+        productVariantGroupService.delete(group);
+    } catch (ServiceException e) {
+        throw new ServiceRuntimeException("Cannot remove product instance group [" + productVariantGroup + "] for store [" + store.getCode() + "]");
+    }
 
 }
+
+@Override
+public ReadableEntityList<ReadableProductVariantGroup> list(Long productId, MerchantStore store, Language language,
+        int page, int count) {
+    
+    
+    Page<ProductVariantGroup> groups = productVariantGroupService.getByProductId(store, productId, language, page, count);
+    
+    List<ReadableProductVariantGroup> readableInstances = groups.stream()
+            .map(rp -> this.readableProductVariantGroupMapper.convert(rp, store, language)).collect(Collectors.toList());
+
+    return createReadableList(groups, readableInstances);
+
+}
+
+
+private ProductVariantGroup group(Long productOptionGroupId,MerchantStore store) {
+    Optional<ProductVariantGroup> group = productVariantGroupService.getById(productOptionGroupId, store);
+    if(group.isEmpty()) {
+        throw new ResourceNotFoundException("Product instance group [" + productOptionGroupId + "] not found");
+    }
+    
+    return group.get();
+}
+
+@Override
+public void addImage(MultipartFile image, Long instanceGroupId,
+        MerchantStore store, Language language) {
+    
+    
+    Validate.notNull(instanceGroupId,"productVariantGroupId must not be null");
+    Validate.notNull(image,"Image must not be null");
+    Validate.notNull(store,"MerchantStore must not be null");
+    //get option group
+    
+    ProductVariantGroup group = this.group(instanceGroupId, store);
+    ProductVariantImage instanceImage = new ProductVariantImage();
+    
+    try {
+        
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         * Avoid string concatenation in loops:
+         * Replaced string concatenation with StringBuilder usage.
+         */
+        StringBuilder pathBuilder = new StringBuilder().append("group").append(Constants.SLASH).append(instanceGroupId);
+        String path = pathBuilder.toString();
+        
+        
+        instanceImage.setProductImage(image.getOriginalFilename());
+        instanceImage.setProductVariantGroup(group);
+        String imageName = image.getOriginalFilename();
+        InputStream inputStream = image.getInputStream();
+        InputContentFile cmsContentImage = new InputContentFile();
+        cmsContentImage.setFileName(imageName);
+        cmsContentImage.setMimeType(image.getContentType());
+        cmsContentImage.setFile(inputStream);
+        cmsContentImage.setPath(path);
+        cmsContentImage.setFileContentType(FileContentType.VARIANT);
+
+        contentService.addContentFile(store.getCode(), cmsContentImage);
+
+        group.getImages().add(instanceImage);
+        
+        productVariantGroupService.saveOrUpdate(group);
+    } catch (Exception e) {
+        throw new ServiceRuntimeException("Exception while adding instance group image", e);
+    }
+
+
+    return;
+}
+
+@Override
+public void removeImage(Long imageId, Long productVariantGroupId, MerchantStore store) {
+    
+    Validate.notNull(productVariantGroupId,"productVariantGroupId must not be null");
+    Validate.notNull(store,"MerchantStore must not be null");
+    
+    ProductVariantImage image = productVariantImageService.getById(imageId);
+    
+    if(image == null) {
+        throw a new ResourceNotFoundException("productVariantImage [" + imageId + "] was not found");
+    }
+    
+    ProductVariantGroup group = this.group(productVariantGroupId, store);
+
+    
+    try {
+        contentService.removeFile(Constants.SLASH + store.getCode() + Constants.SLASH + productVariantGroupId, FileContentType.VARIANT, image.getProductImage());
+        group.getImages().removeIf(i -> (i.getId() == image.getId()));
+        //update productVariantroup
+        productVariantGroupService.update(group);
+    } catch (ServiceException e) {
+        throw new ServiceRuntimeException("An exception occured while removing instance image [" + imageId + "]",e);
+    }
+        
+}
+
