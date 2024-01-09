@@ -35,78 +35,83 @@ import java.util.Map;
  */
 @Component
 public class CaptchaRequestUtils {
-	
-	@Inject
-	private CoreConfiguration configuration; //for reading public and secret key
-	
-	private static final String SUCCESS_INDICATOR = "success";
-	
-	  @Value("${config.recaptcha.secretKey}")
-	  private String secretKey;
-	
-	public boolean checkCaptcha(String gRecaptchaResponse) throws Exception {
+    
+    @Inject
+    private CoreConfiguration configuration; //for reading public and secret key
+    
+    private static final String SUCCESS_INDICATOR = "success";
+    
+      @Value("${config.recaptcha.secretKey}")
+      private String secretKey;
+    
+    public boolean checkCaptcha(String gRecaptchaResponse) throws Exception {
 
-		HttpClient client = HttpClientBuilder.create().build();
-	    
-	    String url = configuration.getProperty(ApplicationConstants.RECAPTCHA_URL);;
+        HttpClient client = HttpClientBuilder.create().build();
+        
+        String url = configuration.getProperty(ApplicationConstants.RECAPTCHA_URL);;
 
         List<NameValuePair> data = new ArrayList<NameValuePair>();
         data.add(new BasicNameValuePair("secret",  secretKey));
         data.add(new BasicNameValuePair("response",  gRecaptchaResponse));
 
-	    
-	    // Create a method instance.
+        
+        // Create a method instance.
         HttpPost post = new HttpPost(url);
-	    post.setEntity(new UrlEncodedFormEntity(data,StandardCharsets.UTF_8));
-	    
-	    boolean checkCaptcha = false;
-	    
+        post.setEntity(new UrlEncodedFormEntity(data,StandardCharsets.UTF_8));
+        
+        boolean checkCaptcha = false;
+        
 
-	    try {
-	      // Execute the method.
+        try {
+          // Execute the method.
             HttpResponse httpResponse = client.execute(post);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
 
-	      if (statusCode != HttpStatus.SC_OK) {
-	    	throw new Exception("Got an invalid response from reCaptcha " + url + " [" + httpResponse.getStatusLine() + "]");
-	      }
+          if (statusCode != HttpStatus.SC_OK) {
+            throw new Exception("Got an invalid response from reCaptcha " + url + " [" + httpResponse.getStatusLine() + "]");
+          }
 
-	      // Read the response body.
+          // Read the response body.
             HttpEntity entity = httpResponse.getEntity();
             byte[] responseBody =EntityUtils.toByteArray(entity);
 
 
-	      // Deal with the response.
-	      // Use caution: ensure correct character encoding and is not binary data
-	      //System.out.println(new String(responseBody));
-	      
-	      String json = new String(responseBody);
-	      
-	      Map<String,String> map = new HashMap<String,String>();
-	  	  ObjectMapper mapper = new ObjectMapper();
-	  	  
-	  	  map = mapper.readValue(json, 
-			    new TypeReference<HashMap<String,String>>(){});
-	  	  
-	  	  String successInd = map.get(SUCCESS_INDICATOR);
-	  	  
-	  	  if(StringUtils.isBlank(successInd)) {
-	  		  throw new Exception("Unreadable response from reCaptcha " + json);
-	  	  }
-	  	  
-	  	  Boolean responseBoolean = Boolean.valueOf(successInd);
-	  	  
-	  	  if(responseBoolean) {
-	  		checkCaptcha = true;
-	  	  }
-	  	  
-	  	  return checkCaptcha;
+          // Deal with the response.
+          // Use caution: ensure correct character encoding and is not binary data
+          //System.out.println(new String(responseBody));
+          
+          /* QECI-fix (2024-01-09 19:06:55.798727):
+           * Avoid primitive type wrapper instantiation:
+           * Replaced the instantiation of String object with string literal to utilize the string pool.
+           */
+          String json = new String(responseBody, StandardCharsets.UTF_8);
+          
+          Map<String,String> map = new HashMap<String,String>();
+            ObjectMapper mapper = new ObjectMapper();
+            
+            map = mapper.readValue(json, 
+                new TypeReference<HashMap<String,String>>(){});
+            
+            String successInd = map.get(SUCCESS_INDICATOR);
+            
+            if(StringUtils.isBlank(successInd)) {
+                throw new Exception("Unreadable response from reCaptcha " + json);
+            }
+            
+            Boolean responseBoolean = Boolean.valueOf(successInd);
+            
+            if(responseBoolean) {
+              checkCaptcha = true;
+            }
+            
+            return checkCaptcha;
 
-	    } finally {
-	      // Release the connection.
-	      post.releaseConnection();
-	    }  
-	  }
+        } finally {
+          // Release the connection.
+          post.releaseConnection();
+        }  
+      }
 
 
 }
+
