@@ -316,7 +316,24 @@ public class CmsStaticContentFileManagerImpl
     @Override
     public void removeFiles(final String merchantStoreCode, Optional<String> path) throws ServiceException {
 
-        LOGGER.info("Removing all images
+        LOGGER.info("Removing all images for {} merchant ", merchantStoreCode);
+		if (cacheManager.getTreeCache() == null) {
+			LOGGER.error("Unable to find cacheManager.getTreeCache() in Infinispan..");
+			throw new ServiceException("CmsImageFileManagerInfinispan has a null cacheManager.getTreeCache()");
+		}
+
+		try {
+
+			final StringBuilder merchantPath = new StringBuilder();
+			merchantPath.append(getRootName()).append(merchantStoreCode);
+			cacheManager.getTreeCache().getRoot().remove(merchantPath.toString());
+
+		} catch (final Exception e) {
+			LOGGER.error("Error while deleting content image for {} merchant ", merchantStoreCode);
+			throw new ServiceException(e);
+		}
+
+	}
 
     @SuppressWarnings({ "unchecked" })
 	private Node<String, Object> getNode(final String node) {
