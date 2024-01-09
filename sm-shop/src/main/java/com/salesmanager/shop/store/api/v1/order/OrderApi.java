@@ -127,11 +127,14 @@ public class OrderApi {
 			return null;
 		}
 
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		Avoid primitive type wrapper instantiation
+		Replaced the instantiation of Integer objects using the `new Integer()` constructor with integer literals. */
 		if (start == null) {
-			start = new Integer(0);
+			start = 0;
 		}
 		if (count == null) {
-			count = new Integer(100);
+			count = 100;
 		}
 
 		ReadableCustomer readableCustomer = new ReadableCustomer();
@@ -151,6 +154,8 @@ public class OrderApi {
 
 		return returnList;
 	}
+}
+
 
 	/**
 	 * List orders for authenticated customers
@@ -181,11 +186,15 @@ public class OrderApi {
 			return null;
 		}
 
+		/* QECI-fix (2024-01-09 19:06:55.798727):
+		 * Avoid primitive type wrapper instantiation:
+		 * Replaced wrapper type instantiations with primitive type literals.
+		 */
 		if (page == null) {
-			page = new Integer(0);
+			page = 0;
 		}
 		if (count == null) {
-			count = new Integer(100);
+			count = 100;
 		}
 
 		ReadableCustomer readableCustomer = new ReadableCustomer();
@@ -271,24 +280,7 @@ public class OrderApi {
 			@ApiIgnore Language language) {
 
 		String user = authorizationUtils.authenticatedUser();
-		authorizationUtils.authorizeUser(user, Stream.of(Constants.GROUP_SUPERADMIN, Constants.GROUP_ADMIN,
-				Constants.GROUP_ADMIN_ORDER, Constants.GROUP_ADMIN_RETAIL).collect(Collectors.toList()), merchantStore);
-
-
-		ReadableOrder order = orderFacade.getReadableOrder(id, merchantStore, language);
-
-		return order;
-	}
-
-	/**
-	 * Get a given order by id
-	 *
-	 * @param id
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws Exception
-	 */
+		authorizationUtils.authorizeUser(user, Stream.of(Constants.G
 	@RequestMapping(value = { "/auth/orders/{id}" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
