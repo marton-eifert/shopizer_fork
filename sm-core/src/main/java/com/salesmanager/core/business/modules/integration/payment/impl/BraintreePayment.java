@@ -116,354 +116,372 @@ public class BraintreePayment implements PaymentModule {
 	}
 
 	@Override
-	public Transaction authorize(MerchantStore store, Customer customer, List<ShoppingCartItem> items,
-			BigDecimal amount, Payment payment, IntegrationConfiguration configuration, IntegrationModule module)
-			throws IntegrationException {
+public Transaction authorize(MerchantStore store, Customer customer, List<ShoppingCartItem> items,
+        BigDecimal amount, Payment payment, IntegrationConfiguration configuration, IntegrationModule module)
+        throws IntegrationException {
 
 
-		Validate.notNull(configuration,"Configuration cannot be null");
-		
-		String merchantId = configuration.getIntegrationKeys().get("merchant_id");
-		String publicKey = configuration.getIntegrationKeys().get("public_key");
-		String privateKey = configuration.getIntegrationKeys().get("private_key");
-		
-		Validate.notNull(merchantId,"merchant_id cannot be null");
-		Validate.notNull(publicKey,"public_key cannot be null");
-		Validate.notNull(privateKey,"private_key cannot be null");
-		
-		String nonce = payment.getPaymentMetaData().get("paymentToken");
-		
-	    if(StringUtils.isBlank(nonce)) {
-			IntegrationException te = new IntegrationException(
-						"Can't process Braintree, missing authorization nounce");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-	    }
-		
-		Environment environment= Environment.PRODUCTION;
-		if (configuration.getEnvironment().equals("TEST")) {// sandbox
-			environment= Environment.SANDBOX;
-		}
-		
-	    BraintreeGateway gateway = new BraintreeGateway(
-	    		   environment,
-	    		   merchantId,
-	    		   publicKey,
-	    		   privateKey
-				);
-	    
-	   
+    Validate.notNull(configuration,"Configuration cannot be null");
+    
+    String merchantId = configuration.getIntegrationKeys().get("merchant_id");
+    String publicKey = configuration.getIntegrationKeys().get("public_key");
+    String privateKey = configuration.getIntegrationKeys().get("private_key");
+    
+    Validate.notNull(merchantId,"merchant_id cannot be null");
+    Validate.notNull(publicKey,"public_key cannot be null");
+    Validate.notNull(privateKey,"private_key cannot be null");
+    
+    String nonce = payment.getPaymentMetaData().get("paymentToken");
+    
+    if(StringUtils.isBlank(nonce)) {
+        IntegrationException te = new IntegrationException(
+                    "Can't process Braintree, missing authorization nounce");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Environment environment= Environment.PRODUCTION;
+    if (configuration.getEnvironment().equals("TEST")) {// sandbox
+        environment= Environment.SANDBOX;
+    }
+    
+    BraintreeGateway gateway = new BraintreeGateway(
+               environment,
+               merchantId,
+               publicKey,
+               privateKey
+            );
+    
+   
 
-        TransactionRequest request = new TransactionRequest()
-            .amount(amount)
-            .paymentMethodNonce(nonce);
+    TransactionRequest request = new TransactionRequest()
+        .amount(amount)
+        .paymentMethodNonce(nonce);
 
-        Result<com.braintreegateway.Transaction> result = gateway.transaction().sale(request);
+    Result<com.braintreegateway.Transaction> result = gateway.transaction().sale(request);
 
-        String authorizationId = null;
-        
-        if (result.isSuccess()) {
-        	com.braintreegateway.Transaction transaction = result.getTarget();
-        	authorizationId  = transaction.getId();
-        } else if (result.getTransaction() != null) {
-        	com.braintreegateway.Transaction transaction = result.getTransaction();
-        	authorizationId = transaction.getAuthorizedTransactionId();
-        } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
-            
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree authorization " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-
+    String authorizationId = null;
+    
+    if (result.isSuccess()) {
+        com.braintreegateway.Transaction transaction = result.getTarget();
+        authorizationId  = transaction.getId();
+    } else if (result.getTransaction() != null) {
+        com.braintreegateway.Transaction transaction = result.getTransaction();
+        authorizationId = transaction.getAuthorizedTransactionId();
+    } else {
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid string concatenation in loops
+         Replaced string concatenation with StringBuilder to accumulate error messages efficiently. */
+        StringBuilder errorStringBuilder = new StringBuilder();
+        for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+           errorStringBuilder.append("Error: ").append(error.getCode()).append(": ").append(error.getMessage()).append("\n");
         }
         
-        if(StringUtils.isBlank(authorizationId)) {
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree, missing authorizationId");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree authorization " + errorStringBuilder.toString());
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+
+    }
+    
+    if(StringUtils.isBlank(authorizationId)) {
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree, missing authorizationId");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Transaction trx = new Transaction();
+    trx.setAmount(amount);
+    trx.setTransactionDate(new Date());
+    trx.setTransactionType(TransactionType.AUTHORIZE);
+    trx.setPaymentType(PaymentType.CREDITCARD);
+    trx.getTransactionDetails().put("TRANSACTIONID", authorizationId);
+    trx.getTransactionDetails().put("TRNAPPROVED", null);
+    trx.getTransactionDetails().put("TRNORDERNUMBER", authorizationId);
+    trx.getTransactionDetails().put("MESSAGETEXT", null);
+    
+    return trx;
+    
+}
+
+
+    @Override
+public Transaction capture(MerchantStore store, Customer customer, Order order, Transaction capturableTransaction,
+        IntegrationConfiguration configuration, IntegrationModule module) throws IntegrationException {
+    Validate.notNull(configuration,"Configuration cannot be null");
+    
+    String merchantId = configuration.getIntegrationKeys().get("merchant_id");
+    String publicKey = configuration.getIntegrationKeys().get("public_key");
+    String privateKey = configuration.getIntegrationKeys().get("private_key");
+    
+    Validate.notNull(merchantId,"merchant_id cannot be null");
+    Validate.notNull(publicKey,"public_key cannot be null");
+    Validate.notNull(privateKey,"private_key cannot be null");
+    
+    String auth = capturableTransaction.getTransactionDetails().get("TRANSACTIONID");
+    
+    if(StringUtils.isBlank(auth)) {
+        IntegrationException te = new IntegrationException(
+                    "Can't process Braintree, missing authorization id");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Environment environment= Environment.PRODUCTION;
+    if (configuration.getEnvironment().equals("TEST")) {// sandbox
+        environment= Environment.SANDBOX;
+    }
+    
+    BraintreeGateway gateway = new BraintreeGateway(
+               environment,
+               merchantId,
+               publicKey,
+               privateKey
+            );
+    
+   
+    BigDecimal amount = order.getTotal();
+
+    Result<com.braintreegateway.Transaction> result = gateway.transaction().submitForSettlement(auth, amount);
+
+    String trxId = null;
+    
+    if (result.isSuccess()) {
+        com.braintreegateway.Transaction settledTransaction = result.getTarget();
+        trxId = settledTransaction.getId();
+    } else {
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid string concatenation in loops
+         Using StringBuilder to accumulate error messages instead of string concatenation in the loop.
+        */
+        StringBuilder errorStringBuilder = new StringBuilder();
+        for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+           errorStringBuilder.append("Error: ").append(error.getCode()).append(": ").append(error.getMessage()).append("\n");
         }
         
-        Transaction trx = new Transaction();
-        trx.setAmount(amount);
-        trx.setTransactionDate(new Date());
-        trx.setTransactionType(TransactionType.AUTHORIZE);
-        trx.setPaymentType(PaymentType.CREDITCARD);
-        trx.getTransactionDetails().put("TRANSACTIONID", authorizationId);
-        trx.getTransactionDetails().put("TRNAPPROVED", null);
-        trx.getTransactionDetails().put("TRNORDERNUMBER", authorizationId);
-        trx.getTransactionDetails().put("MESSAGETEXT", null);
-        
-        return trx;
-		
-	}
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree refund " + errorStringBuilder.toString());
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
 
-	@Override
-	public Transaction capture(MerchantStore store, Customer customer, Order order, Transaction capturableTransaction,
-			IntegrationConfiguration configuration, IntegrationModule module) throws IntegrationException {
-		Validate.notNull(configuration,"Configuration cannot be null");
-		
-		String merchantId = configuration.getIntegrationKeys().get("merchant_id");
-		String publicKey = configuration.getIntegrationKeys().get("public_key");
-		String privateKey = configuration.getIntegrationKeys().get("private_key");
-		
-		Validate.notNull(merchantId,"merchant_id cannot be null");
-		Validate.notNull(publicKey,"public_key cannot be null");
-		Validate.notNull(privateKey,"private_key cannot be null");
-		
-		String auth = capturableTransaction.getTransactionDetails().get("TRANSACTIONID");
-		
-	    if(StringUtils.isBlank(auth)) {
-			IntegrationException te = new IntegrationException(
-						"Can't process Braintree, missing authorization id");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-	    }
-		
-		Environment environment= Environment.PRODUCTION;
-		if (configuration.getEnvironment().equals("TEST")) {// sandbox
-			environment= Environment.SANDBOX;
-		}
-		
-	    BraintreeGateway gateway = new BraintreeGateway(
-	    		   environment,
-	    		   merchantId,
-	    		   publicKey,
-	    		   privateKey
-				);
-	    
-	   
-	    BigDecimal amount = order.getTotal();
+    }
+    
+    if(StringUtils.isBlank(trxId)) {
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree, missing original transaction");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Transaction trx = new Transaction();
+    trx.setAmount(amount);
+    trx.setTransactionDate(new Date());
+    trx.setTransactionType(TransactionType.CAPTURE);
+    trx.setPaymentType(PaymentType.CREDITCARD);
+    trx.getTransactionDetails().put("TRANSACTIONID", trxId);
+    trx.getTransactionDetails().put("TRNAPPROVED", null);
+    trx.getTransactionDetails().put("TRNORDERNUMBER", trxId);
+    trx.getTransactionDetails().put("MESSAGETEXT", null);
+    
+    return trx;
+    
+    
+}
 
-        Result<com.braintreegateway.Transaction> result = gateway.transaction().submitForSettlement(auth, amount);
 
-        String trxId = null;
-        
-        if (result.isSuccess()) {
-        	com.braintreegateway.Transaction settledTransaction = result.getTarget();
-        	trxId = settledTransaction.getId();
-        } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
-            
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree refund " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+    @Override
+public Transaction authorizeAndCapture(MerchantStore store, Customer customer, List<ShoppingCartItem> items,
+        BigDecimal amount, Payment payment, IntegrationConfiguration configuration, IntegrationModule module)
+        throws IntegrationException {
 
+    Validate.notNull(configuration,"Configuration cannot be null");
+    
+    String merchantId = configuration.getIntegrationKeys().get("merchant_id");
+    String publicKey = configuration.getIntegrationKeys().get("public_key");
+    String privateKey = configuration.getIntegrationKeys().get("private_key");
+    
+    Validate.notNull(merchantId,"merchant_id cannot be null");
+    Validate.notNull(publicKey,"public_key cannot be null");
+    Validate.notNull(privateKey,"private_key cannot be null");
+    
+    String nonce = payment.getPaymentMetaData().get("paymentToken");//paymentToken
+    
+    if(StringUtils.isBlank(nonce)) {
+        IntegrationException te = new IntegrationException(
+                    "Can't process Braintree, missing authorization nounce");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Environment environment= Environment.PRODUCTION;
+    if (configuration.getEnvironment().equals("TEST")) {// sandbox
+        environment= Environment.SANDBOX;
+    }
+    
+    BraintreeGateway gateway = new BraintreeGateway(
+               environment,
+               merchantId,
+               publicKey,
+               privateKey
+            );
+    
+   
+
+    TransactionRequest request = new TransactionRequest()
+        .amount(amount)
+        .paymentMethodNonce(nonce);
+
+    Result<com.braintreegateway.Transaction> result = gateway.transaction().sale(request);
+
+    String trxId = null;
+    
+    if (result.isSuccess()) {
+        com.braintreegateway.Transaction transaction = result.getTarget();
+        trxId  = transaction.getId();
+    } else {
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+         Avoid string concatenation in loops
+         Replaced string concatenation with StringBuilder for efficient error message accumulation */
+        StringBuilder errorStringBuilder = new StringBuilder();
+        for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+           errorStringBuilder.append("Error: ").append(error.getCode()).append(": ").append(error.getMessage()).append("\n");
         }
         
-        if(StringUtils.isBlank(trxId)) {
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree, missing original transaction");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree auth + capture " + errorStringBuilder.toString());
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+
+    }
+    
+    if(StringUtils.isBlank(trxId)) {
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree, missing trxId");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Transaction trx = new Transaction();
+    trx.setAmount(amount);
+    trx.setTransactionDate(new Date());
+    trx.setTransactionType(TransactionType.AUTHORIZECAPTURE);
+    trx.setPaymentType(PaymentType.CREDITCARD);
+    trx.getTransactionDetails().put("TRANSACTIONID", trxId);
+    trx.getTransactionDetails().put("TRNAPPROVED", null);
+    trx.getTransactionDetails().put("TRNORDERNUMBER", trxId);
+    trx.getTransactionDetails().put("MESSAGETEXT", null);
+    
+    return trx;
+    
+    
+}
+
+
+    @Override
+public Transaction refund(boolean partial, MerchantStore store, Transaction transaction, Order order,
+        BigDecimal amount, IntegrationConfiguration configuration, IntegrationModule module)
+        throws IntegrationException {
+
+    
+    String merchantId = configuration.getIntegrationKeys().get("merchant_id");
+    String publicKey = configuration.getIntegrationKeys().get("public_key");
+    String privateKey = configuration.getIntegrationKeys().get("private_key");
+    
+    Validate.notNull(merchantId,"merchant_id cannot be null");
+    Validate.notNull(publicKey,"public_key cannot be null");
+    Validate.notNull(privateKey,"private_key cannot be null");
+    
+    String auth = transaction.getTransactionDetails().get("TRANSACTIONID");
+    
+    if(StringUtils.isBlank(auth)) {
+        IntegrationException te = new IntegrationException(
+                    "Can't process Braintree refund, missing transaction id");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Environment environment= Environment.PRODUCTION;
+    if (configuration.getEnvironment().equals("TEST")) {// sandbox
+        environment= Environment.SANDBOX;
+    }
+    
+    BraintreeGateway gateway = new BraintreeGateway(
+               environment,
+               merchantId,
+               publicKey,
+               privateKey
+            );
+    
+
+    Result<com.braintreegateway.Transaction> result = gateway.transaction().refund(auth, amount);
+
+    String trxId = null;
+    
+    if (result.isSuccess()) {
+        com.braintreegateway.Transaction settledTransaction = result.getTarget();
+        trxId = settledTransaction.getId();
+    } else {
+        /* QECI-fix (2024-01-09 19:06:55.798727):
+        Avoid string concatenation in loops
+        Replaced string concatenation within the loop with StringBuilder to accumulate error messages.
+        */
+        StringBuilder errorStringBuilder = new StringBuilder();
+        for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+           errorStringBuilder.append("Error: ").append(error.getCode()).append(": ").append(error.getMessage()).append("\n");
         }
         
-        Transaction trx = new Transaction();
-        trx.setAmount(amount);
-        trx.setTransactionDate(new Date());
-        trx.setTransactionType(TransactionType.CAPTURE);
-        trx.setPaymentType(PaymentType.CREDITCARD);
-        trx.getTransactionDetails().put("TRANSACTIONID", trxId);
-        trx.getTransactionDetails().put("TRNAPPROVED", null);
-        trx.getTransactionDetails().put("TRNORDERNUMBER", trxId);
-        trx.getTransactionDetails().put("MESSAGETEXT", null);
-        
-        return trx;
-		
-		
-	}
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree refund " + errorStringBuilder.toString());
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
 
-	@Override
-	public Transaction authorizeAndCapture(MerchantStore store, Customer customer, List<ShoppingCartItem> items,
-			BigDecimal amount, Payment payment, IntegrationConfiguration configuration, IntegrationModule module)
-			throws IntegrationException {
-
-		Validate.notNull(configuration,"Configuration cannot be null");
-		
-		String merchantId = configuration.getIntegrationKeys().get("merchant_id");
-		String publicKey = configuration.getIntegrationKeys().get("public_key");
-		String privateKey = configuration.getIntegrationKeys().get("private_key");
-		
-		Validate.notNull(merchantId,"merchant_id cannot be null");
-		Validate.notNull(publicKey,"public_key cannot be null");
-		Validate.notNull(privateKey,"private_key cannot be null");
-		
-		String nonce = payment.getPaymentMetaData().get("paymentToken");//paymentToken
-		
-	    if(StringUtils.isBlank(nonce)) {
-			IntegrationException te = new IntegrationException(
-						"Can't process Braintree, missing authorization nounce");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-	    }
-		
-		Environment environment= Environment.PRODUCTION;
-		if (configuration.getEnvironment().equals("TEST")) {// sandbox
-			environment= Environment.SANDBOX;
-		}
-		
-	    BraintreeGateway gateway = new BraintreeGateway(
-	    		   environment,
-	    		   merchantId,
-	    		   publicKey,
-	    		   privateKey
-				);
-	    
-	   
-
-        TransactionRequest request = new TransactionRequest()
-            .amount(amount)
-            .paymentMethodNonce(nonce);
-
-        Result<com.braintreegateway.Transaction> result = gateway.transaction().sale(request);
-
-        String trxId = null;
-        
-        if (result.isSuccess()) {
-        	com.braintreegateway.Transaction transaction = result.getTarget();
-        	trxId  = transaction.getId();
-        } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
-            
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree auth + capture " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-
-        }
-        
-        if(StringUtils.isBlank(trxId)) {
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree, missing trxId");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-        }
-        
-        Transaction trx = new Transaction();
-        trx.setAmount(amount);
-        trx.setTransactionDate(new Date());
-        trx.setTransactionType(TransactionType.AUTHORIZECAPTURE);
-        trx.setPaymentType(PaymentType.CREDITCARD);
-        trx.getTransactionDetails().put("TRANSACTIONID", trxId);
-        trx.getTransactionDetails().put("TRNAPPROVED", null);
-        trx.getTransactionDetails().put("TRNORDERNUMBER", trxId);
-        trx.getTransactionDetails().put("MESSAGETEXT", null);
-        
-        return trx;
-		
-		
-	}
-
-	@Override
-	public Transaction refund(boolean partial, MerchantStore store, Transaction transaction, Order order,
-			BigDecimal amount, IntegrationConfiguration configuration, IntegrationModule module)
-			throws IntegrationException {
-
-		
-		String merchantId = configuration.getIntegrationKeys().get("merchant_id");
-		String publicKey = configuration.getIntegrationKeys().get("public_key");
-		String privateKey = configuration.getIntegrationKeys().get("private_key");
-		
-		Validate.notNull(merchantId,"merchant_id cannot be null");
-		Validate.notNull(publicKey,"public_key cannot be null");
-		Validate.notNull(privateKey,"private_key cannot be null");
-		
-		String auth = transaction.getTransactionDetails().get("TRANSACTIONID");
-		
-	    if(StringUtils.isBlank(auth)) {
-			IntegrationException te = new IntegrationException(
-						"Can't process Braintree refund, missing transaction id");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-	    }
-		
-		Environment environment= Environment.PRODUCTION;
-		if (configuration.getEnvironment().equals("TEST")) {// sandbox
-			environment= Environment.SANDBOX;
-		}
-		
-	    BraintreeGateway gateway = new BraintreeGateway(
-	    		   environment,
-	    		   merchantId,
-	    		   publicKey,
-	    		   privateKey
-				);
-	    
-
-        Result<com.braintreegateway.Transaction> result = gateway.transaction().refund(auth, amount);
-
-        String trxId = null;
-        
-        if (result.isSuccess()) {
-        	com.braintreegateway.Transaction settledTransaction = result.getTarget();
-        	trxId = settledTransaction.getId();
-        } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
-            
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree refund " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-
-        }
-        
-        if(StringUtils.isBlank(trxId)) {
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree refund, missing original transaction");
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
-        }
-        
-        Transaction trx = new Transaction();
-        trx.setAmount(amount);
-        trx.setTransactionDate(new Date());
-        trx.setTransactionType(TransactionType.REFUND);
-        trx.setPaymentType(PaymentType.CREDITCARD);
-        trx.getTransactionDetails().put("TRANSACTIONID", trxId);
-        trx.getTransactionDetails().put("TRNAPPROVED", null);
-        trx.getTransactionDetails().put("TRNORDERNUMBER", trxId);
-        trx.getTransactionDetails().put("MESSAGETEXT", null);
-        
-        return trx;
-		
-	}
+    }
+    
+    if(StringUtils.isBlank(trxId)) {
+        IntegrationException te = new IntegrationException(
+                "Can't process Braintree refund, missing original transaction");
+        te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+        te.setMessageCode("message.payment.error");
+        te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+        throw te;
+    }
+    
+    Transaction trx = new Transaction();
+    trx.setAmount(amount);
+    trx.setTransactionDate(new Date());
+    trx.setTransactionType(TransactionType.REFUND);
+    trx.setPaymentType(PaymentType.CREDITCARD);
+    trx.getTransactionDetails().put("TRANSACTIONID", trxId);
+    trx.getTransactionDetails().put("TRNAPPROVED", null);
+    trx.getTransactionDetails().put("TRNORDERNUMBER", trxId);
+    trx.getTransactionDetails().put("MESSAGETEXT", null);
+    
+    return trx;
+    
+}
 
 }
+
