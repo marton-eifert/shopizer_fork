@@ -78,7 +78,7 @@ public class ProductImageServiceImpl extends SalesManagerEntityServiceImpl<Long,
 		}
 
 	}
-}
+
 
 
 	@Override
