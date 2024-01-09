@@ -182,7 +182,7 @@ public class GCPProductContentFileManager implements ProductAssetsManager {
       
     }
   }
-}
+
 
 
   @Override
