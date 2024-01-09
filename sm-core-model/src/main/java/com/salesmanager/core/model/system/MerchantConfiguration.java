@@ -62,8 +62,12 @@ public class MerchantConfiguration extends SalesManagerEntity<Long, MerchantConf
   /**
    * activate and deactivate configuration
    */
+  /* QECI-fix (2024-01-09 19:06:55.798727):
+   * Avoid primitive type wrapper instantiation
+   * Changed from 'private Boolean active = new Boolean(false);' to 'private boolean active = false;'
+   */
   @Column(name = "ACTIVE", nullable = true)
-  private Boolean active = new Boolean(false);
+  private boolean active = false;
 
 
   @Column(name = "VALUE")
@@ -137,3 +141,4 @@ public class MerchantConfiguration extends SalesManagerEntity<Long, MerchantConf
 
 
 }
+
