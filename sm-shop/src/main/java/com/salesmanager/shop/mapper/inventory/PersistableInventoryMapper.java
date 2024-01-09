@@ -201,56 +201,63 @@ public class PersistableInventoryMapper implements Mapper<PersistableInventory, 
 	}
 
 	private Set<ProductPriceDescription> getProductPriceDescriptions(ProductPrice price,
-			List<com.salesmanager.shop.model.catalog.product.ProductPriceDescription> descriptions)
-			throws ConversionException {
-		if (CollectionUtils.isEmpty(descriptions)) {
-			return Collections.emptySet();
-		}
-		Set<ProductPriceDescription> descs = new HashSet<ProductPriceDescription>();
-		for (com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc : descriptions) {
-			ProductPriceDescription description = null;
-			if (CollectionUtils.isNotEmpty(price.getDescriptions())) {
-				for (ProductPriceDescription d : price.getDescriptions()) {
-					if (isPositive(desc.getId()) && desc.getId().equals(d.getId())) {
-						desc.setId(d.getId());
-					}
-				}
-			}
-			description = getDescription(desc);
-			description.setProductPrice(price);
-			descs.add(description);
-		}
-		return descs;
-	}
+        List<com.salesmanager.shop.model.catalog.product.ProductPriceDescription> descriptions)
+        throws ConversionException {
+    if (CollectionUtils.isEmpty(descriptions)) {
+        return Collections.emptySet();
+    }
+    Set<ProductPriceDescription> descs = new HashSet<ProductPriceDescription>();
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid nested loops:
+    Replaced the nested loop with a HashMap to store the existing descriptions by their ID, reducing the complexity from O(n^2) to O(n).
+    */
+    Map<Long, ProductPriceDescription> existingDescriptionsMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(price.getDescriptions())) {
+        for (ProductPriceDescription d : price.getDescriptions()) {
+            existingDescriptionsMap.put(d.getId(), d);
+        }
+    }
+    for (com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc : descriptions) {
+        ProductPriceDescription description = null;
+        if (isPositive(desc.getId()) && existingDescriptionsMap.containsKey(desc.getId())) {
+            desc.setId(existingDescriptionsMap.get(desc.getId()).getId());
+        }
+        description = getDescription(desc);
+        description.setProductPrice(price);
+        descs.add(description);
+    }
+    return descs;
+}
 
-	private String getRegion(PersistableInventory source) {
-		return Optional.ofNullable(source.getRegion()).filter(StringUtils::isNotBlank).orElse(Constants.ALL_REGIONS);
-	}
+private String getRegion(PersistableInventory source) {
+    return Optional.ofNullable(source.getRegion()).filter(StringUtils::isNotBlank).orElse(Constants.ALL_REGIONS);
+}
 
-	private ProductPriceDescription getDescription(
-			com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc) throws ConversionException {
-		ProductPriceDescription target = new ProductPriceDescription();
-		target.setDescription(desc.getDescription());
-		target.setName(desc.getName());
-		target.setTitle(desc.getTitle());
-		target.setId(null);
-		if (isPositive(desc.getId())) {
-			target.setId(desc.getId());
-		}
-		Language lang = getLanguage(desc);
-		target.setLanguage(lang);
-		return target;
-
-	}
-
-	private Language getLanguage(com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc) {
-		try {
-			return Optional.ofNullable(languageService.getByCode(desc.getLanguage()))
-					.orElseThrow(() -> new ConversionRuntimeException(
-							"Language is null for code " + desc.getLanguage() + " use language ISO code [en, fr ...]"));
-		} catch (ServiceException e) {
-			throw new ConversionRuntimeException(e);
-		}
-	}
+private ProductPriceDescription getDescription(
+        com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc) throws ConversionException {
+    ProductPriceDescription target = new ProductPriceDescription();
+    target.setDescription(desc.getDescription());
+    target.setName(desc.getName());
+    target.setTitle(desc.getTitle());
+    target.setId(null);
+    if (isPositive(desc.getId())) {
+        target.setId(desc.getId());
+    }
+    Language lang = getLanguage(desc);
+    target.setLanguage(lang);
+    return target;
 
 }
+
+private Language getLanguage(com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc) {
+    try {
+        return Optional.ofNullable(languageService.getByCode(desc.getLanguage()))
+                .orElseThrow(() -> new ConversionRuntimeException(
+                        "Language is null for code " + desc.getLanguage() + " use language ISO code [en, fr ...]"));
+    } catch (ServiceException e) {
+        throw new ConversionRuntimeException(e);
+    }
+}
+
+}
+
