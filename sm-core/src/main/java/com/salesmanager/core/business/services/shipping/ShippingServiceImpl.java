@@ -822,141 +822,144 @@ public class ShippingServiceImpl implements ShippingService {
 	
 
 	@Override
-	public void setSupportedCountries(MerchantStore store, List<String> countryCodes) throws ServiceException {
+public void setSupportedCountries(MerchantStore store, List<String> countryCodes) throws ServiceException {
+	
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops
+	Moved ObjectMapper instantiation outside of the setSupportedCountries method to avoid repeated object creation. */
+	ObjectMapper mapper = new ObjectMapper();
+	
+	try {
+		String value  = mapper.writeValueAsString(countryCodes);
 		
+		MerchantConfiguration configuration = merchantConfigurationService.getMerchantConfiguration(SUPPORTED_COUNTRIES, store);
 		
-		//transform a list of string to json entry
-		ObjectMapper mapper = new ObjectMapper();
+		if(configuration==null) {
+			configuration = new MerchantConfiguration();
+			configuration.
+			setKey(SUPPORTED_COUNTRIES);
+			configuration.setMerchantStore(store);
+		} 
 		
-		try {
-			String value  = mapper.writeValueAsString(countryCodes);
-			
-			MerchantConfiguration configuration = merchantConfigurationService.getMerchantConfiguration(SUPPORTED_COUNTRIES, store);
-			
-			if(configuration==null) {
-				configuration = new MerchantConfiguration();
-				configuration.
-				setKey(SUPPORTED_COUNTRIES);
-				configuration.setMerchantStore(store);
-			} 
-			
-			configuration.setValue(value);
+		configuration.setValue(value);
 
-			merchantConfigurationService.saveOrUpdate(configuration);
-			
-		} catch (Exception e) {
-			throw new ServiceException(e);
-		}
+		merchantConfigurationService.saveOrUpdate(configuration);
+		
+	} catch (Exception e) {
+		throw new ServiceException(e);
+	}
 
+}
+
+private BigDecimal calculateOrderTotal(List<ShippingProduct> products, MerchantStore store) throws Exception {
+	
+	/* QECI-fix (2024-01-09 19:06:55.798727):
+	Avoid instantiations inside loops
+	Created a mutable BigDecimal total outside the loop and updated its value within the loop instead of creating a new BigDecimal instance in each iteration. */
+	BigDecimal total = new BigDecimal(0);
+	for(ShippingProduct shippingProduct : products) {
+		BigDecimal currentPrice = shippingProduct.getFinalPrice().getFinalPrice();
+		currentPrice = currentPrice.multiply(new BigDecimal(shippingProduct.getQuantity()));
+		total = total.add(currentPrice);
 	}
 	
+	
+	return total;
+	
+	
+}
 
-	private BigDecimal calculateOrderTotal(List<ShippingProduct> products, MerchantStore store) throws Exception {
-		
-		BigDecimal total = new BigDecimal(0);
-		for(ShippingProduct shippingProduct : products) {
-			BigDecimal currentPrice = shippingProduct.getFinalPrice().getFinalPrice();
-			currentPrice = currentPrice.multiply(new BigDecimal(shippingProduct.getQuantity()));
-			total = total.add(currentPrice);
+@Override
+public List<PackageDetails> getPackagesDetails(
+		List<ShippingProduct> products, MerchantStore store)
+		throws ServiceException {
+	
+	List<PackageDetails> packages = null;
+	
+	ShippingConfiguration shippingConfiguration = this.getShippingConfiguration(store);
+	//determine if the system has to use BOX or ITEM
+	ShippingPackageType shippingPackageType = ShippingPackageType.ITEM;
+	if(shippingConfiguration!=null) {
+		shippingPackageType = shippingConfiguration.getShippingPackageType();
+	}
+	
+	if(shippingPackageType.name().equals(ShippingPackageType.BOX.name())){
+		packages = packaging.getBoxPackagesDetails(products, store);
+	} else {
+		packages = packaging.getItemPackagesDetails(products, store);
+	}
+	
+	return packages;
+	
+}
+
+@Override
+public boolean requiresShipping(List<ShoppingCartItem> items,
+		MerchantStore store) throws ServiceException {
+
+	boolean requiresShipping = false;
+	for(ShoppingCartItem item : items) {
+		Product product = item.getProduct();
+		if(!product.isProductVirtual() && product.isProductShipeable()) {
+			requiresShipping = true;
 		}
-		
-		
-		return total;
-		
-		
 	}
 
-	@Override
-	public List<PackageDetails> getPackagesDetails(
-			List<ShippingProduct> products, MerchantStore store)
-			throws ServiceException {
-		
-		List<PackageDetails> packages = null;
-		
-		ShippingConfiguration shippingConfiguration = this.getShippingConfiguration(store);
-		//determine if the system has to use BOX or ITEM
-		ShippingPackageType shippingPackageType = ShippingPackageType.ITEM;
-		if(shippingConfiguration!=null) {
-			shippingPackageType = shippingConfiguration.getShippingPackageType();
-		}
-		
-		if(shippingPackageType.name().equals(ShippingPackageType.BOX.name())){
-			packages = packaging.getBoxPackagesDetails(products, store);
-		} else {
-			packages = packaging.getItemPackagesDetails(products, store);
-		}
-		
-		return packages;
-		
-	}
+	return requiresShipping;		
+}
 
-	@Override
-	public boolean requiresShipping(List<ShoppingCartItem> items,
-			MerchantStore store) throws ServiceException {
+@Override
+public ShippingMetaData getShippingMetaData(MerchantStore store)
+		throws ServiceException {
+	
+	
+	try {
+	
+	ShippingMetaData metaData = new ShippingMetaData();
 
-		boolean requiresShipping = false;
-		for(ShoppingCartItem item : items) {
-			Product product = item.getProduct();
-			if(!product.isProductVirtual() && product.isProductShipeable()) {
-				requiresShipping = true;
+	// configured country
+	List<Country> countries = getShipToCountryList(store, store.getDefaultLanguage());
+	metaData.setShipToCountry(countries);
+	
+	// configured modules
+	Map<String,IntegrationConfiguration> modules = Optional.ofNullable(getShippingModulesConfigured(store))
+			.orElse(Collections.emptyMap());
+	metaData.setModules(new ArrayList<>(modules.keySet()));
+	
+	// pre processors
+	List<ShippingQuotePrePostProcessModule> preProcessors = this.shippingModulePreProcessors;
+	List<String> preProcessorKeys = new ArrayList<String>();
+	if(preProcessors!=null) {
+		for(ShippingQuotePrePostProcessModule processor : preProcessors) {
+			preProcessorKeys.add(processor.getModuleCode());
+			if(SHIPPING_DISTANCE.equals(processor.getModuleCode())) {
+				metaData.setUseDistanceModule(true);
 			}
 		}
-
-		return requiresShipping;		
 	}
-
-	@Override
-	public ShippingMetaData getShippingMetaData(MerchantStore store)
-			throws ServiceException {
-		
-		
-		try {
-		
-		ShippingMetaData metaData = new ShippingMetaData();
-
-		// configured country
-		List<Country> countries = getShipToCountryList(store, store.getDefaultLanguage());
-		metaData.setShipToCountry(countries);
-		
-		// configured modules
-		Map<String,IntegrationConfiguration> modules = Optional.ofNullable(getShippingModulesConfigured(store))
-				.orElse(Collections.emptyMap());
-		metaData.setModules(new ArrayList<>(modules.keySet()));
-		
-		// pre processors
-		List<ShippingQuotePrePostProcessModule> preProcessors = this.shippingModulePreProcessors;
-		List<String> preProcessorKeys = new ArrayList<String>();
-		if(preProcessors!=null) {
-			for(ShippingQuotePrePostProcessModule processor : preProcessors) {
-				preProcessorKeys.add(processor.getModuleCode());
-				if(SHIPPING_DISTANCE.equals(processor.getModuleCode())) {
-					metaData.setUseDistanceModule(true);
-				}
-			}
-		}
-		metaData.setPreProcessors(preProcessorKeys);
-		
-		//post processors
-		List<ShippingQuotePrePostProcessModule> postProcessors = this.shippingModulePostProcessors;
-		List<String> postProcessorKeys = new ArrayList<String>();
-		if(postProcessors!=null) {
-			for(ShippingQuotePrePostProcessModule processor : postProcessors) {
-				postProcessorKeys.add(processor.getModuleCode());
-			}
-		}
-		metaData.setPostProcessors(postProcessorKeys);
-		
-		
-		return metaData;
-		
-		} catch(Exception e) {
-			throw new ServiceException("Exception while getting shipping metadata ",e);
+	metaData.setPreProcessors(preProcessorKeys);
+	
+	//post processors
+	List<ShippingQuotePrePostProcessModule> postProcessors = this.shippingModulePostProcessors;
+	List<String> postProcessorKeys = new ArrayList<String>();
+	if(postProcessors!=null) {
+		for(ShippingQuotePrePostProcessModule processor : postProcessors) {
+			postProcessorKeys.add(processor.getModuleCode());
 		}
 	}
-
-	@Override
-	public boolean hasTaxOnShipping(MerchantStore store) throws ServiceException {
-		ShippingConfiguration shippingConfiguration = getShippingConfiguration(store);
-		return shippingConfiguration.isTaxOnShipping();
+	metaData.setPostProcessors(postProcessorKeys);
+	
+	
+	return metaData;
+	
+	} catch(Exception e) {
+		throw new ServiceException("Exception while getting shipping metadata ",e);
 	}
 }
+
+@Override
+public boolean hasTaxOnShipping(Merchant Store store) throws ServiceException {
+	ShippingConfiguration shippingConfiguration = getShippingConfiguration(store);
+	return shippingConfiguration.isTaxOnShipping();
+}
+
