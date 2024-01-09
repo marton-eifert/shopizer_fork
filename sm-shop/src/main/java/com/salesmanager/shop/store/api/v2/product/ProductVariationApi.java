@@ -80,7 +80,7 @@ public class ProductVariationApi {
   @Inject private CategoryFacade categoryFacade;
   
   @Inject private ProductVariationFacade productVariationFacade;
-	
+    
 
 
   @Inject
@@ -137,17 +137,27 @@ public class ProductVariationApi {
     List<ReadableProductVariantValue> variants = options.getOptions();
     List<ProductAttribute> attributes = new ArrayList<ProductAttribute>();
     
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid nested loops: Algorithmic Costs
+    Replaced the nested loop with a hashmap to reduce the complexity from O(n^2) to O(n).
+    */
+    Map<Long, Map<Long, ProductAttribute>> attributeMap = new HashMap<>();
     Set<ProductAttribute> productAttributes = product.getAttributes();
     for(ProductAttribute attribute : productAttributes) {
-      Long option = attribute.getProductOption().getId();
-      Long optionValue = attribute.getProductOptionValue().getId();
-      for(ReadableProductVariantValue v : variants) {
-        if(v.getOption().longValue() == option.longValue()
-            && v.getValue().longValue() == optionValue.longValue()) {
-          attributes.add(attribute);
-        }
+      Long optionId = attribute.getProductOption().getId();
+      Long optionValueId = attribute.getProductOptionValue().getId();
+      if (!attributeMap.containsKey(optionId)) {
+        attributeMap.put(optionId, new HashMap<>());
       }
-      
+      attributeMap.get(optionId).put(optionValueId, attribute);
+    }
+    
+    for(ReadableProductVariantValue v : variants) {
+      Long optionId = v.getOption();
+      Long optionValueId = v.getValue();
+      if (attributeMap.containsKey(optionId) && attributeMap.get(optionId).containsKey(optionValueId)) {
+        attributes.add(attributeMap.get(optionId).get(optionValueId));
+      }
     }
 
     FinalPrice price = pricingService.calculateProductPrice(product, attributes);
@@ -157,6 +167,7 @@ public class ProductVariationApi {
     populator.populate(price, readablePrice, merchantStore, language);
     return readablePrice;
   }
+
 
   
   @RequestMapping(value = "/category/{id}/variations", method = RequestMethod.GET)
