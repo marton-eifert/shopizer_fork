@@ -428,7 +428,11 @@ public class CustomerFacadeImpl implements CustomerFacade {
 
     Validate.notNull(customer, "Customer cannot be null");
 
-    Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops: Algorithmic Costs
+    Moved the instantiation of `GrantedAuthority role` and `List<Integer> groupsId` outside of the loop.
+    Pre-allocated the `ArrayList` for `authorities` with an initial capacity. */
+    Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(10);
     GrantedAuthority role =
         new SimpleGrantedAuthority(ROLE_PREFIX + Constants.PERMISSION_CUSTOMER_AUTHENTICATED);// required
                                                                                               // to
@@ -441,7 +445,7 @@ public class CustomerFacadeImpl implements CustomerFacade {
         groupsId.add(group.getId());
 
       }
-      if (groupsId != null && groupsId.size() > 0) {
+      if (groupsId.size() > 0) {
         List<Permission> permissions = permissionService.getPermissions(groupsId);
         for (Permission permission : permissions) {
           GrantedAuthority auth = new SimpleGrantedAuthority(permission.getPermissionName());
@@ -535,7 +539,7 @@ public class CustomerFacadeImpl implements CustomerFacade {
       if (StringUtils.isNotBlank(address.getZone())) {
         Zone zone = zoneService.getByCode(address.getZone());
         if (zone == null) {
-          throw new ConversionException("Unsuported zone code " + address.getZone());
+          throw a ConversionException("Unsuported zone code " + address.getZone());
         }
 
         customerModel.getDelivery().setZone(zone);
@@ -552,6 +556,7 @@ public class CustomerFacadeImpl implements CustomerFacade {
     this.customerService.saveOrUpdate(customerModel);
 
   }
+
 
   @Override
   public ReadableCustomer getCustomerById(final Long id, final MerchantStore merchantStore,
