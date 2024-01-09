@@ -112,78 +112,95 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
   }
 
   @Override
-  public void deleteManufacturer(Manufacturer manufacturer, MerchantStore store, Language language)
-      throws Exception {
-    manufacturerService.delete(manufacturer);
+public ReadableManufacturerList getAllManufacturers(MerchantStore store, Language language, ListCriteria criteria, int page, int count) {
 
-  }
+  ReadableManufacturerList readableList = new ReadableManufacturerList();
+  try {
+    /**
+     * Is this a pageable request
+     */
 
-  @Override
-  public ReadableManufacturer getManufacturer(Long id, MerchantStore store, Language language)
-      throws Exception {
-    Manufacturer manufacturer = manufacturerService.getById(id);
-    
-    
-
-    if (manufacturer == null) {
-      throw new ResourceNotFoundException("Manufacturer [" + id + "] not found");
-    }
-    
-    if(manufacturer.getMerchantStore().getId() != store.getId()) {
-      throw new ResourceNotFoundException("Manufacturer [" + id + "] not found for store [" + store.getId() + "]");
-    }
-
-    ReadableManufacturer readableManufacturer = new ReadableManufacturer();
-
+    List<Manufacturer> manufacturers = null;
+    /* QECI-fix (2024-01-09 19:06:55.798727):
+    Avoid instantiations inside loops
+    Moved the instantiation of ReadableManufacturerPopulator outside of the loop to reuse the same instance. */
     ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator();
-    readableManufacturer = populator.populate(manufacturer, readableManufacturer, store, language);
+    if(page == 0 && count == 0) {
+      //need total count
+      int total = manufacturerService.count(store);
 
+      if(language != null) {
+        manufacturers = manufacturerService.listByStore(store, language);
+      } else {
+        manufacturers = manufacturerService.listByStore(store);
+      }
+      readableList.setRecordsTotal(total);
+      readableList.setNumber(manufacturers.size());
+    } else {
 
-    return readableManufacturer;
+      Page<Manufacturer> m = null;
+      if(language != null) {
+        m = manufacturerService.listByStore(store, language, criteria.getName(), page, count);
+      } else {
+        m = manufacturerService.listByStore(store, criteria.getName(), page, count);
+      }
+      manufacturers = m.getContent();
+      readableList.setTotalPages(m.getTotalPages());
+      readableList.setRecordsTotal(m.getTotalElements());
+      readableList.setNumber(m.getNumber());
+    }
+
+    
+    List<ReadableManufacturer> returnList = new ArrayList<ReadableManufacturer>();
+
+    for (Manufacturer m : manufacturers) {
+      ReadableManufacturer readableManufacturer = new ReadableManufacturer();
+      populator.populate(m, readableManufacturer, store, language);
+      returnList.add(readableManufacturer);
+    }
+
+    readableList.setManufacturers(returnList);
+    return readableList;
+    
+  } catch (Exception e) {
+    throw new ServiceRuntimeException("Error while get manufacturers",e);
   }
+}
 
-  @Override
-  public ReadableManufacturerList getAllManufacturers(MerchantStore store, Language language, ListCriteria criteria, int page, int count) {
+@Override
+public ReadableManufacturerList listByStore(MerchantStore store, Language language, ListCriteria criteria, int page,
+      int count) {
+  
+  ReadableManufacturerList readableList = new ReadableManufacturerList();
 
-    ReadableManufacturerList readableList = new ReadableManufacturerList();
-    try {
+  try {
       /**
        * Is this a pageable request
        */
 
       List<Manufacturer> manufacturers = null;
-      if(page == 0 && count == 0) {
-    	//need total count
-        int total = manufacturerService.count(store);
 
-        if(language != null) {
-          manufacturers = manufacturerService.listByStore(store, language);
-        } else {
-          manufacturers = manufacturerService.listByStore(store);
-        }
-        readableList.setRecordsTotal(total);
-        readableList.setNumber(manufacturers.size());
-      } else {
-
-        Page<Manufacturer> m = null;
-        if(language != null) {
+      Page<Manufacturer> m = null;
+      if(language != null) {
           m = manufacturerService.listByStore(store, language, criteria.getName(), page, count);
-        } else {
+      } else {
           m = manufacturerService.listByStore(store, criteria.getName(), page, count);
-        }
-        manufacturers = m.getContent();
-        readableList.setTotalPages(m.getTotalPages());
-        readableList.setRecordsTotal(m.getTotalElements());
-        readableList.setNumber(m.getNumber());
       }
-
       
+      manufacturers = m.getContent();
+      readableList.setTotalPages(m.getTotalPages());
+      readableList.setRecordsTotal(m.getTotalElements());
+      readableList.setNumber(m.getContent().size());
+
+      /* QECI-fix (2024-01-09 19:06:55.798727):
+      Avoid instantiations inside loops
+      Moved the instantiation of ReadableManufacturerPopulator outside of the loop to reuse the same instance. */
       ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator();
       List<ReadableManufacturer> returnList = new ArrayList<ReadableManufacturer>();
   
-      for (Manufacturer m : manufacturers) {
+      for (Manufacturer mf : manufacturers) {
         ReadableManufacturer readableManufacturer = new ReadableManufacturer();
-        populator.populate(m, readableManufacturer, store, language);
+        populator.populate(mf, readableManufacturer, store, language);
         returnList.add(readableManufacturer);
       }
 
@@ -193,65 +210,6 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
     } catch (Exception e) {
       throw new ServiceRuntimeException("Error while get manufacturers",e);
     }
-  }
-
-
-  @Override
-  public boolean manufacturerExist(MerchantStore store, String manufacturerCode) {
-    Validate.notNull(store,"Store must not be null");
-    Validate.notNull(manufacturerCode,"Manufacturer code must not be null");
-    boolean exists = false;
-    Manufacturer manufacturer = manufacturerService.getByCode(store, manufacturerCode);
-    if(manufacturer!=null) {
-      exists = true;
-    }
-    return exists;
-  }
-
-@Override
-public ReadableManufacturerList listByStore(MerchantStore store, Language language, ListCriteria criteria, int page,
-		int count) {
-	
-	ReadableManufacturerList readableList = new ReadableManufacturerList();
-
-    try {
-        /**
-         * Is this a pageable request
-         */
-
-        List<Manufacturer> manufacturers = null;
-
-        Page<Manufacturer> m = null;
-        if(language != null) {
-            m = manufacturerService.listByStore(store, language, criteria.getName(), page, count);
-        } else {
-            m = manufacturerService.listByStore(store, criteria.getName(), page, count);
-        }
-        
-        manufacturers = m.getContent();
-        readableList.setTotalPages(m.getTotalPages());
-        readableList.setRecordsTotal(m.getTotalElements());
-        readableList.setNumber(m.getContent().size());
-
-
-        
-        ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator();
-        List<ReadableManufacturer> returnList = new ArrayList<ReadableManufacturer>();
-    
-        for (Manufacturer mf : manufacturers) {
-          ReadableManufacturer readableManufacturer = new ReadableManufacturer();
-          populator.populate(mf, readableManufacturer, store, language);
-          returnList.add(readableManufacturer);
-        }
-
-        readableList.setManufacturers(returnList);
-        return readableList;
-        
-      } catch (Exception e) {
-        throw new ServiceRuntimeException("Error while get manufacturers",e);
-      }
-	
+  
 }
 
-
-}
