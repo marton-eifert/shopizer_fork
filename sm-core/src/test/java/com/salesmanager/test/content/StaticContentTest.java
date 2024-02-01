@@ -60,6 +60,19 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
             throw new ServiceException( "Can't read" + file1.getAbsolutePath() );
         }
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 22:00:05.895404):
+ * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+ * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
         final byte[] is = IOUtils.toByteArray( new FileInputStream( file1 ) );
         final ByteArrayInputStream inputStream = new ByteArrayInputStream( is );
         final InputContentFile cmsContentImage = new InputContentFile();
@@ -75,6 +88,19 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
 		OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());
 
         //print image
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 22:00:05.895525):
+ * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+ * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
    	 	OutputStream outputStream = new FileOutputStream (OUTPUT_FOLDER + image.getFileName()); 
 
    	 	ByteArrayOutputStream baos =  image.getFile();
