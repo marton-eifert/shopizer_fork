@@ -86,11 +86,37 @@ public class LanguageUtils {
             locale = languageService.toLocale(language, store);
             if (locale != null) {
               LocaleContextHolder.setLocale(locale);
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 23:42:48.888441):
+ * TITLE: Using stateful session (Servlet)
+ * DESCRIPTION: 
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
             }
             request.getSession().setAttribute(Constants.LANGUAGE, language);
           }
 
           if (language == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 23:42:48.888441):
+ * TITLE: Using stateful session (Servlet)
+ * DESCRIPTION: 
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
             language = languageService.toLanguage(locale);
             request.getSession().setAttribute(Constants.LANGUAGE, language);
           }
@@ -126,6 +152,19 @@ public class LanguageUtils {
     if (localeResolver != null) {
       localeResolver.setLocale(request, response, locale);
     }
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 23:42:48.888441):
+ * TITLE: Using stateful session (Servlet)
+ * DESCRIPTION: 
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
     response.setLocale(locale);
     request.getSession().setAttribute(Constants.LANGUAGE, language);
 
