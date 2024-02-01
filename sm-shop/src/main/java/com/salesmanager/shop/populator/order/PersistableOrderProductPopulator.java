@@ -125,8 +125,8 @@ public class PersistableOrderProductPopulator extends
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `target.setPrices(prices);` is most likely affected. - Reasoning: It is the first line after the 'CAST-Finding' comment block and it is a method call that could potentially be optimized. - Proposed solution: To address the finding, the instantiation of the OrderProductAttribute object inside the loop can be moved outside the loop to avoid unnecessary object creation at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -138,19 +138,17 @@ public class PersistableOrderProductPopulator extends
 					if(attr==null) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:52:18.616666):
  * TITLE: Avoid string concatenation in loops
  * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
  * OUTLINE: The code line `OrderProductAttribute orderProductAttribute = new OrderProductAttribute();` is most likely affected. - Reasoning: It instantiates a new object inside a loop, which can lead to unnecessary memory allocation and decreased performance. - Proposed solution: Move the instantiation of `OrderProductAttribute` outside of the loop if possible, to avoid unnecessary memory allocation.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
  **********************************/
  **********************************/
-
-
+ **********************************/
 
 
 /**********************************
@@ -158,8 +156,10 @@ public class PersistableOrderProductPopulator extends
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `throw new ConversionException("Attribute id " + id + " does not exists");` is most likely affected. - Reasoning: It involves string concatenation inside a loop, which is discouraged by the finding. - Proposed solution: Instead of concatenating the string inside the loop, you can create a list to store each substring and then join the list after the loop terminates.  The code line `if(attr.getProduct().getMerchantStore().getId().intValue()!=store.getId().intValue()) {` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which is discouraged by the finding. - Proposed solution: Instead of instantiating the object inside the loop, you can create the object once outside the loop and change its value at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -168,27 +168,28 @@ public class PersistableOrderProductPopulator extends
 
 						throw new ConversionException("Attribute id " + id + " does not exists");
 					}
-					
-					if(attr.getProduct().getMerchantStore().getId().intValue()!=store.getId().intValue()) {
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 22:52:18.616666):
  * TITLE: Avoid string concatenation in loops
  * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
  * OUTLINE: The code line `throw new ConversionException("Attribute id " + id + " does not exists");` is most likely affected. - Reasoning: It involves string concatenation inside a loop, which can result in quadratic running time and unnecessary temporary objects. - Proposed solution: Avoid string concatenation inside loops. Instead, each substring should be added to a list and joined after the loop terminates.
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
  * STATUS: OPEN
- * CAST-Finding END #4
- **********************************/
-
-
 /**********************************
  * CAST-Finding START #5 (2024-02-01 22:52:18.616666):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `throw new ConversionException("Attribute id " + id + " invalid for this store");` is most likely affected.  - Reasoning: It involves string concatenation inside a loop, which is discouraged by the finding.  - Proposed solution: Replace it with a solution that avoids string concatenation inside a loop, such as adding each substring to a list and joining the list after the loop terminates or writing each substring to a byte buffer.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #5
+ **********************************/
  * OUTLINE: The code line `throw new ConversionException("Attribute id " + id + " invalid for this store");` is most likely affected.  - Reasoning: It involves string concatenation inside a loop, which is discouraged by the finding.  - Proposed solution: Replace it with a solution that avoids string concatenation inside a loop, such as adding each substring to a list and joining the list after the loop terminates or writing each substring to a byte buffer.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
