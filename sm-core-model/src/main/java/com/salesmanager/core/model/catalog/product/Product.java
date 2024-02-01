@@ -190,7 +190,9 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
  * CAST-Finding START #1 (2024-02-01 20:44:07.556348):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
- * STATUS: OPEN
+ * OUTLINE: The code line `@Column(name = "SORT_ORDER") private Integer sortOrder = new Integer(0);` is most likely affected.  - Reasoning: The line unnecessarily instantiates a new Integer object, which can lead to resource waste.  - Proposed solution: Replace `private Integer sortOrder = new Integer(0);` with `private Integer sortOrder = 0;` to avoid unnecessary object instantiation.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
