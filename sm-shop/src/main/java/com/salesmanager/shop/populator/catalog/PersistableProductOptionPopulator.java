@@ -56,7 +56,9 @@ public class PersistableProductOptionPopulator extends
  * CAST-Finding START #1 (2024-02-01 22:32:22.062356):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `target.setMerchantStore(store);` is most likely affected. - Reasoning: It involves setting the `MerchantStore` for the `target` object, and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the instantiation of `com.salesmanager.core.model.catalog.product.attribute.ProductOptionDescription` outside the loop and reuse the same object for each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -67,16 +69,16 @@ public class PersistableProductOptionPopulator extends
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:32:22.062356):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `com.salesmanager.core.model.catalog.product.attribute.ProductOptionDescription description = new com.salesmanager.core.model.catalog.product.attribute.ProductOptionDescription();` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which can be a greedy operation and impact performance. - Proposed solution: Move the instantiation of `ProductOptionDescription` outside the loop and reuse it for each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
  **********************************/
-
-
+ **********************************/
 
 
 
@@ -85,7 +87,11 @@ public class PersistableProductOptionPopulator extends
  * CAST-Finding START #3 (2024-02-01 22:32:22.062356):
  * TITLE: Avoid string concatenation in loops
  * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
+ * OUTLINE: The code line `throw new ConversionException("Language is null for code " + description.getLanguage() + " use language ISO code [en, fr ...]");` is most likely affected.  - Reasoning: It instantiates a new `ConversionException` object inside a loop, which could hamper performance and increase resource usage.  - Proposed solution: Move the instantiation of the `ConversionException` object outside the loop and reuse it for each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
