@@ -66,8 +66,8 @@ public class PersistableProductAvailabilityMapper implements Mapper<PersistableP
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `price.setProductPriceSpecialStartDate(startDate);` is most likely affected. - Reasoning: It is inside the loop and sets the special start date of the product price. The finding suggests avoiding instantiations inside loops. - Proposed solution: Review the instantiation of `startDate` outside the loop and change its value at each iteration instead of creating a new object at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
