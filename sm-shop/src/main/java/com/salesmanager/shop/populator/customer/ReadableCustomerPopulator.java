@@ -110,12 +110,51 @@ public class ReadableCustomerPopulator extends
 
 			if(source.getAttributes()!=null) {
 				for(CustomerAttribute attribute : source.getAttributes()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 22:44:46.543030):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 					ReadableCustomerAttribute readableAttribute = new ReadableCustomerAttribute();
 					readableAttribute.setId(attribute.getId());
 					readableAttribute.setTextValue(attribute.getTextValue());
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 22:44:46.543030):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 					ReadableCustomerOption option = new ReadableCustomerOption();
 					option.setId(attribute.getCustomerOption().getId());
 					option.setCode(attribute.getCustomerOption().getCode());
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 22:44:46.543030):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
 
 					CustomerOptionDescription d = new CustomerOptionDescription();
 					d.setDescription(attribute.getCustomerOption().getDescriptionsSettoList().get(0).getDescription());
@@ -124,8 +163,34 @@ public class ReadableCustomerPopulator extends
 
 					readableAttribute.setCustomerOption(option);
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-01 22:44:46.543030):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 					ReadableCustomerOptionValue optionValue = new ReadableCustomerOptionValue();
 					optionValue.setId(attribute.getCustomerOptionValue().getId());
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-01 22:44:46.543030):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
 					CustomerOptionValueDescription vd = new CustomerOptionValueDescription();
 					vd.setDescription(attribute.getCustomerOptionValue().getDescriptionsSettoList().get(0).getDescription());
 					vd.setName(attribute.getCustomerOptionValue().getDescriptionsSettoList().get(0).getName());
@@ -139,6 +204,19 @@ public class ReadableCustomerPopulator extends
 
 				if(source.getGroups() != null) {
 					for(Group group : source.getGroups()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-01 22:44:46.543030):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
+
 						ReadableGroup readableGroup = new ReadableGroup();
 						readableGroup.setId(group.getId().longValue());
 						readableGroup.setName(group.getGroupName());
