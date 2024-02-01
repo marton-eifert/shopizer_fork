@@ -69,8 +69,8 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
  * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
  * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
  * OUTLINE: The code line `throw new ServiceException( "Can't read" + file1.getAbsolutePath() );` is most likely affected. - Reasoning: The line throws an exception when the file cannot be read, indicating that the file is not being properly closed. - Proposed solution: Modify the code to explicitly close the file after throwing the exception to ensure proper resource management.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -92,15 +92,15 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
         //print image
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:00:05.895525):
  * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
  * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
  * OUTLINE: The code line `contentService.addContentFile(store.getCode(), cmsContentImage);` is most likely affected. - Reasoning: It adds an image file to the content service, which may consume system resources if not handled properly. - Proposed solution: Ensure that the file is closed after it is added to the content service.  The code line `OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());` is most likely affected. - Reasoning: It retrieves an image file from the content service, which may consume system resources if not handled properly. - Proposed solution: Ensure that the file is closed after it is retrieved from the content service.  The code line `OutputStream outputStream = new FileOutputStream (OUTPUT_FOLDER + image.getFileName());` is most likely affected. - Reasoning: It opens an output stream to write the image file, which may consume system resources if not closed properly. - Proposed solution: Add explicit closing of the output stream using a try-with-resources block or by calling `outputStream.close()` after writing the image file.  The code line `ByteArrayOutputStream baos =  image.getFile();` is most likely affected. - Reasoning: It retrieves the image file as a byte array output stream, which may consume system resources if not handled properly. - Proposed solution: Add explicit closing of the byte array output stream using a try-with-resources block or by calling `baos.close()` after writing the image file.  The code line `baos.writeTo(outputStream);` is most likely affected. - Reasoning: It writes the image file to the output stream, which may consume system resources if not handled properly. - Proposed solution: Ensure that the output stream is properly closed after writing the image file.  The code line `contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());` is most likely affected. - Reasoning: It removes the image file from the content service, which may consume system resources if not
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
