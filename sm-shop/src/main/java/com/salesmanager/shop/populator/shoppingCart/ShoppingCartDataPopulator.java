@@ -108,7 +108,9 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
  * CAST-Finding START #1 (2024-02-01 22:58:03.467009):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `cart.setCode(shoppingCart.getShoppingCartCode());` is most likely affected. - Reasoning: The code sets the code of the `cart` object based on the `shoppingCartCode` of the `shoppingCart` object, which is likely to be affected by the finding. - Proposed solution: Replace `cart.setCode(shoppingCart.getShoppingCartCode());` with `cart.setCode(shoppingCartCode);` if `shoppingCartCode` is a local variable or a method parameter that can be accessed directly.  The code line `ShoppingCartItem shoppingCartItem = new ShoppingCartItem();` is most likely affected. - Reasoning: The code creates a new `ShoppingCartItem` object, which is likely to be affected by the finding. - Proposed solution: Move the instantiation of `ShoppingCartItem` outside the loop and reuse the same object for each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -125,13 +127,15 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:58:03.467009):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
- * STATUS: OPEN
+ * OUTLINE: The code line `shoppingCartItem.setCode(cart.getCode());` is most likely affected. - Reasoning: This line sets the code of the shopping cart item, which may be impacted by the finding. - Proposed solution: Not applicable. No solution proposed.  The code line `shoppingCartItem.setName(itemName);` is most likely affected. - Reasoning: This line sets the name of the shopping cart item, which may be impacted by the finding. - Proposed solution: Not applicable. No solution proposed.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
@@ -162,39 +166,45 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
                     if(attributes!=null) {
 
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 22:58:03.467009):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `List<ShoppingCartAttribute> cartAttributes = new ArrayList<ShoppingCartAttribute>();` is most likely affected.  - Reasoning: It instantiates a new `ArrayList` object inside a loop, which can be inefficient.  - Proposed solution: Replace the code line with `List<ShoppingCartAttribute> cartAttributes = new ArrayList<>(attributes.size());` to avoid instantiating a new `ArrayList` object inside the loop. This way, the `ArrayList` is created with an initial capacity equal to the size of `attributes`, reducing memory allocation and improving performance.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
 
                         List<ShoppingCartAttribute> cartAttributes = new ArrayList<ShoppingCartAttribute>();
 
-
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 22:58:03.467009):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * OUTLINE: The code line `List<ShoppingCartAttribute> cartAttributes = new ArrayList<ShoppingCartAttribute>();` is most likely affected. - Reasoning: It instantiates a new `ArrayList` object inside the loop, which can lead to unnecessary memory allocation and decreased performance. - Proposed solution: Move the instantiation of the `ArrayList` object outside the loop to avoid unnecessary memory allocation.  The code line `for(com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attribute : attributes) {` is most likely affected. - Reasoning: It is a loop that iterates over the `attributes` collection, and if any operations inside the loop involve object instantiation, it could lead to decreased performance. - Proposed solution: If possible, consider reusing objects instead of instantiating new ones inside the loop.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: OPEN
  * CAST-Finding END #4
  **********************************/
 
 
                         for(com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attribute : attributes) {
-
-
-
-
 /**********************************
  * CAST-Finding START #5 (2024-02-01 22:58:03.467009):
  * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `for(com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attribute : attributes) {` is most likely affected. - Reasoning: It is inside a loop and may be subject to the finding related to nested loops. - Proposed solution: Consider redesigning the data structure to avoid nested loops or use a hashmap to optimize the algorithm.  The code line `ShoppingCartAttribute cartAttribute = new ShoppingCartAttribute();` is most likely affected. - Reasoning: It is inside a loop and may be subject to the finding related to instantiations inside loops. - Proposed solution: Move the instantiation of `ShoppingCartAttribute` outside of the loop and reuse the same instance for each iteration.  The code line `cartAttribute.setId(attribute.getId());` is most likely affected. - Reasoning: It is inside a loop and may be subject to the finding related to instantiations inside loops. - Proposed solution: Move the method call `setId()` outside of the loop and change its implementation to update the value instead of creating a new instance.  The code line `cartAttribute.setAttributeId(attribute.getProductAttributeId());` is most likely affected. - Reasoning: It is inside a loop and may be subject to the finding related to instantiations inside loops. - Proposed solution: Move the method call `setAttributeId()` outside of the loop and change its implementation to update the value instead of creating a new instance.  The code line `cartAttribute.setOptionId(attribute.getProductAttribute().getProductOption().getId());` is most likely affected. - Reasoning: It is inside a loop and may be subject to the finding related to instantiations inside loops. - Proposed solution: Move the method call `setOptionId()` outside of the loop and change its implementation to update the value instead of creating a new instance.  The code line `cartAttribute.setOptionValueId(attribute.getProductAttribute().getProductOptionValue().getId());` is most likely affected. - Reasoning: It is inside a loop and
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #5
+ **********************************/
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * STATUS: OPEN
  * CAST-Finding END #5
@@ -212,13 +222,15 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
                             	
                             	String optionName = optionDescriptions.get(0).getName();
                             	String optionValue = optionValueDescriptions.get(0).getName();
-                            	
-
-
-
-
 /**********************************
  * CAST-Finding START #6 (2024-02-01 22:58:03.467009):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * OUTLINE: The code line `cartAttribute.setOptionValueId(attribute.getProductAttribute().getProductOptionValue().getId());` is most likely affected.  - Reasoning: The finding suggests avoiding nested loops, but this line does not contain any loops. However, it may still be affected if there are nested loops in the surrounding code that impact its performance indirectly.  - Proposed solution: NOT APPLICABLE. No code obviously affected.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #6
+ **********************************/
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
  * STATUS: OPEN
@@ -231,13 +243,15 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
                             			optionName = optionDescription.getName();
                             			break;
                             		}
-                            	}
-                            	
-
-
-
-
 /**********************************
+ * CAST-Finding START #7 (2024-02-01 22:58:03.467009):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * OUTLINE: The code line `if(optionDescription.getLanguage() != null && optionDescription.getLanguage().getId().intValue() == language.getId().intValue()) {` is most likely affected.  Reasoning: This line checks if the language of `optionDescription` matches the given `language`, which is a common condition in nested loops.  Proposed solution: Not affected - The code line is already optimized and does not require any changes.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #7
+ **********************************/
  * CAST-Finding START #7 (2024-02-01 22:58:03.467009):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
@@ -276,13 +290,15 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
             summary.setProducts(productsList.stream().filter(p -> p.getProduct().isAvailable()).collect(Collectors.toList()));
             OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,store, language );
 
-            if(CollectionUtils.isNotEmpty(orderSummary.getTotals())) {
-            	List<OrderTotal> totals = new ArrayList<OrderTotal>();
-            	for(com.salesmanager.core.model.order.OrderTotal t : orderSummary.getTotals()) {
-
-
-
-
+/**********************************
+ * CAST-Finding START #8 (2024-02-01 22:58:03.467009):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `List<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> productsList = new ArrayList<com.salesmanager.core.model.shoppingcart.ShoppingCartItem>();` is most likely affected. - Reasoning: Instantiating a new ArrayList inside the loop is a greedy operation that can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `productsList` outside the loop to avoid unnecessary object creation.  The code line `OrderTotal total = new OrderTotal();` is most likely affected. - Reasoning: Instantiating a new `OrderTotal` object inside the loop is a greedy operation that can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `total` outside the loop to avoid unnecessary object creation.  The code lines `productsList.addAll(shoppingCart.getLineItems());`, `summary.setProducts(productsList.stream().filter(p -> p.getProduct().isAvailable()).collect(Collectors.toList()));`, `OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,store, language );`, `if(CollectionUtils.isNotEmpty(orderSummary.getTotals())) {`, `List<OrderTotal> totals = new ArrayList<OrderTotal>();`, `for(com.salesmanager.core.model.order.OrderTotal t : orderSummary.getTotals()) {`, `total.setCode(t.getOrderTotalCode());`, `total.setText(t.getText());`, `total.setValue(t.getValue());`, `totals.add(total);`, and `cart.setTotals(totals);` are probably affected or not. - Reasoning: These code lines may or may not be affected depending on the implementation details and performance characteristics of the methods and objects involved. - Proposed solution: No specific solution proposed as the impact is uncertain.  Note: The code lines `total.setCode(t.getOrderTotalCode());`, `total.setText(t.getText());`, `total.setValue(t.getValue());`, `totals.add(total);`, and `cart.setTotals(totals);` could potentially benefit from using a mutable `OrderTotal` class
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #8
+ **********************************/
 /**********************************
  * CAST-Finding START #8 (2024-02-01 22:58:03.467009):
  * TITLE: Avoid instantiations inside loops
