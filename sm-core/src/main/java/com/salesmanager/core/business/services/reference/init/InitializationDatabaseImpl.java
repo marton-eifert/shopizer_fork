@@ -265,8 +265,8 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `java.util.Currency c = java.util.Currency.getInstance(code);` is most likely affected.  - Reasoning: This line is responsible for obtaining the currency instance based on the provided code, which is related to the finding about avoiding instantiations inside loops.  - Proposed solution: Replace `java.util.Currency c = java.util.Currency.getInstance(code);` with `java.util.Currency c = CurrencyCache.getInstance().getCurrency(code);` to retrieve the currency instance from a cache instead of creating a new instance each time.  The code line `Currency currency = new Currency();` is most likely affected.  - Reasoning: This line instantiates a new `Currency` object, which is related to the finding about avoiding instantiations inside loops.  - Proposed solution: Replace `Currency currency = new Currency();` with `Currency currency = CurrencyCache.getInstance().createCurrency();` to retrieve a pre-created currency object from a cache instead of instantiating a new object each time.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -291,15 +291,15 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 			if (locale != null) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 21:29:27.593359):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `Country country = new Country(code);` is most likely affected.  - Reasoning: It instantiates a new `Country` object inside a loop, which can lead to unnecessary memory allocation and decreased performance.  - Proposed solution: Move the instantiation of the `Country` object outside the loop and reuse the same object for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -307,29 +307,29 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 				Country country = new Country(code);
 				countryService.create(country);
 				
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 21:29:27.593359):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
- * OUTLINE: The code line `Country country = new Country(code);` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which can hamper performance and increase resource usage. - Proposed solution: Consider moving the object instantiation outside the loop if possible. If the object is immutable, create a mutable class and change its value at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * * OUTLINE: NOT APPLICABLE (WITHDRAWN).
+ * INSTRUCTION: NOT APPLICABLE.
+ * STATUS: REVIEWED
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
  **********************************/
-
-
-				for (Language language : languages) {
+ * CAST-Finding END #3
+ **********************************/
 
 /**********************************
  * CAST-Finding START #4 (2024-02-01 21:29:27.593359):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `String name = locale.getDisplayCountry(new Locale(language.getCode()));` is most likely affected.  - Reasoning: It involves object instantiation inside a loop, which can potentially hamper performance and increase resource usage.  - Proposed solution: Create the object once outside the loop and change its value at each iteration to avoid unnecessary instantiations.
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
@@ -337,14 +337,15 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
  * CAST-Finding END #4
  **********************************/
 
-
-					String name = locale.getDisplayCountry(new Locale(language.getCode()));
-					//byte[] ptext = value.getBytes(Constants.ISO_8859_1); 
-					//String name = new String(ptext, Constants.UTF_8); 
 /**********************************
  * CAST-Finding START #5 (2024-02-01 21:29:27.593359):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `String name = locale.getDisplayCountry(new Locale(language.getCode()));` is most likely affected.  - Reasoning: It involves the instantiation of a new `Locale` object and the method `getDisplayCountry()`, which could potentially be resource-intensive operations.  - Proposed solution: Move the instantiation of the `Locale` object and the method call outside of the loop to avoid unnecessary instantiations at each iteration.  The code lines `CountryDescription description = new CountryDescription(language, name);` and `countryService.addCountryDescription(country, description);` are not most likely affected.  Therefore, the summarized reasoning and solution are as follows: The code line `String name = locale.getDisplayCountry(new Locale(language.getCode()));` is most likely affected. - Reasoning: It involves resource-intensive operations. - Proposed solution: Move the instantiation of the `Locale` object and the method call outside of the loop.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #5
+ **********************************/
  * OUTLINE: The code line `String name = locale.getDisplayCountry(new Locale(language.getCode()));` is most likely affected.  - Reasoning: It involves the instantiation of a new `Locale` object and the method `getDisplayCountry()`, which could potentially be resource-intensive operations.  - Proposed solution: Move the instantiation of the `Locale` object and the method call outside of the loop to avoid unnecessary instantiations at each iteration.  The code lines `CountryDescription description = new CountryDescription(language, name);` and `countryService.addCountryDescription(country, description);` are not most likely affected.  Therefore, the summarized reasoning and solution are as follows: The code line `String name = locale.getDisplayCountry(new Locale(language.getCode()));` is most likely affected. - Reasoning: It involves resource-intensive operations. - Proposed solution: Move the instantiation of the `Locale` object and the method call outside of the loop.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
@@ -413,14 +414,15 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 	private void addZonesToDb(Map<String,Zone> zonesMap) throws RuntimeException {
 		
 		try {
-		
-	        for (Map.Entry<String, Zone> entry : zonesMap.entrySet()) {
-	    	    String key = entry.getKey();
-	    	    Zone value = entry.getValue();
-
 /**********************************
  * CAST-Finding START #6 (2024-02-01 21:29:27.593359):
  * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * OUTLINE: The code line `String key = entry.getKey();` is most likely affected.  - Reasoning: It is used in the log message in the line below, which concatenates the key with a string.  - Proposed solution: Instead of concatenating the key with a string, use string interpolation or a `StringBuilder` to improve performance and avoid unnecessary string concatenation.  The code line `if(value.getDescriptions()==null) {` is most likely affected.  - Reasoning: It checks if the descriptions of the zone are null, which is related to the finding.  - Proposed solution: Consider using a different approach to handle zones with no descriptions, such as setting a default description or skipping the zone altogether.  The code line `LOGGER.warn("This zone " + key + " has no descriptions");` is most likely affected.  - Reasoning: It concatenates the key with a string in the log message.  - Proposed solution: Use string interpolation or a `StringBuilder` to improve performance and avoid unnecessary string concatenation.  The code line `List<ZoneDescription> zoneDescriptions = value.getDescriptions();` is most likely affected.  - Reasoning: It retrieves the descriptions of the zone, which is related to the finding.  - Proposed solution: Consider using a different data structure or approach to store and retrieve the descriptions, such as a `Set` or a separate map.  The code line `value.setDescriptons(null);` is most likely affected.  - Reasoning: It sets the descriptions of the zone to null, which is related to the finding.  - Proposed solution: Consider removing this line if it is not necessary or find an alternative way to handle the descriptions of the zone.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #6
+ **********************************/
  * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
  * OUTLINE: The code line `String key = entry.getKey();` is most likely affected.  - Reasoning: It is used in the log message in the line below, which concatenates the key with a string.  - Proposed solution: Instead of concatenating the key with a string, use string interpolation or a `StringBuilder` to improve performance and avoid unnecessary string concatenation.  The code line `if(value.getDescriptions()==null) {` is most likely affected.  - Reasoning: It checks if the descriptions of the zone are null, which is related to the finding.  - Proposed solution: Consider using a different approach to handle zones with no descriptions, such as setting a default description or skipping the zone altogether.  The code line `LOGGER.warn("This zone " + key + " has no descriptions");` is most likely affected.  - Reasoning: It concatenates the key with a string in the log message.  - Proposed solution: Use string interpolation or a `StringBuilder` to improve performance and avoid unnecessary string concatenation.  The code line `List<ZoneDescription> zoneDescriptions = value.getDescriptions();` is most likely affected.  - Reasoning: It retrieves the descriptions of the zone, which is related to the finding.  - Proposed solution: Consider using a different data structure or approach to store and retrieve the descriptions, such as a `Set` or a separate map.  The code line `value.setDescriptons(null);` is most likely affected.  - Reasoning: It sets the descriptions of the zone to null, which is related to the finding.  - Proposed solution: Consider removing this line if it is not necessary or find an alternative way to handle the descriptions of the zone.
  * INSTRUCTION: {instruction}
@@ -435,14 +437,15 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 
 
 	    	    	LOGGER.warn("This zone " + key + " has no descriptions");
-	    	    	continue;
-	    	    }
-	    	    
-	    	    List<ZoneDescription> zoneDescriptions = value.getDescriptions();
-	    	    value.setDescriptons(null);
-	
 /**********************************
  * CAST-Finding START #7 (2024-02-01 21:29:27.593359):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * OUTLINE: The code line `List<ZoneDescription> zoneDescriptions = value.getDescriptions();` is most likely affected.  - Reasoning: It retrieves a list of `ZoneDescription` objects, which are used in the subsequent loop.  - Proposed solution: The code could potentially be optimized by using a hashmap to summarize the non-null interaction between elements of `value` and the `zoneDescriptions` list. This could reduce the complexity of the nested loop and improve efficiency.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #7
+ **********************************/
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
  * OUTLINE: The code line `List<ZoneDescription> zoneDescriptions = value.getDescriptions();` is most likely affected.  - Reasoning: It retrieves a list of `ZoneDescription` objects, which are used in the subsequent loop.  - Proposed solution: The code could potentially be optimized by using a hashmap to summarize the non-null interaction between elements of `value` and the `zoneDescriptions` list. This could reduce the complexity of the nested loop and improve efficiency.
@@ -464,14 +467,15 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 	    	    }
 	        }
         
-		}catch(Exception e) {
-			LOGGER.error("An error occured while loading zones",e);
-			
-		}
-		
-	}
-	
 /**********************************
+ * CAST-Finding START #8 (2024-02-01 21:29:27.593359):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `languageService.create(language);` is most likely affected. - Reasoning: The method call `languageService.create(language)` is inside a loop, which could potentially impact performance. - Proposed solution: Move the instantiation of the `Language` object outside the loop and reuse the same object for each iteration. This will avoid unnecessary object instantiations and improve performance.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #8
+ **********************************/
  * CAST-Finding START #8 (2024-02-01 21:29:27.593359):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
