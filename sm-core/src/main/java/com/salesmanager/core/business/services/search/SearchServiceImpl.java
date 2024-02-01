@@ -517,6 +517,19 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 		InputStream mappingstream = resource.getInputStream();
 		
 	    return new BufferedReader(
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 21:35:50.608248):
+ * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+ * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 	    	      new InputStreamReader(mappingstream, StandardCharsets.UTF_8))
 	    	        .lines()
 	    	        .collect(Collectors.joining("\n"));
