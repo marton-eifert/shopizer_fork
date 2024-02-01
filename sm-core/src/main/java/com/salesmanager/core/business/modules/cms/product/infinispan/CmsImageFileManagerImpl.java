@@ -199,8 +199,8 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `OutputContentFile contentImage = new OutputContentFile();` is most likely affected. - Reasoning: It involves object instantiation and memory allocation. - Proposed solution: Move the instantiation outside the loop to avoid instantiating the object at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -209,29 +209,29 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 20:52:40.641213):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `OutputContentFile contentImage = new OutputContentFile();` is most likely affected. - Reasoning: It instantiates a new object inside the code block, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `OutputContentFile` outside the loop and change its value at each iteration.  The code line `InputStream input = new ByteArrayInputStream(imageBytes);` is most likely affected. - Reasoning: It instantiates a new object inside the code block. - Proposed solution: Move the instantiation of `ByteArrayInputStream` outside the loop and change its value at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
 
         InputStream input = new ByteArrayInputStream(imageBytes);
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 20:52:40.641213):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `InputStream input = new ByteArrayInputStream(imageBytes);` is most likely affected. - Reasoning: It instantiates a new `ByteArrayInputStream` object inside the loop, which can be avoided by creating the object once outside the loop and changing its value at each iteration. - Proposed solution: Move the instantiation of `InputStream input` outside the loop and change its value at each iteration.  The code line `ByteArrayOutputStream output = new ByteArrayOutputStream();` is most likely affected. - Reasoning: It instantiates a new `ByteArrayOutputStream` object inside the loop, which can be avoided by creating the object once outside the loop and changing its value at each iteration. - Proposed solution: Move the instantiation of `ByteArrayOutputStream output` outside the loop and change its value at each iteration.  The code line `IOUtils.copy(input, output);` is most likely affected. - Reasoning: It uses the `input` and `output` objects that are instantiated inside the loop, which can be avoided by creating the objects once outside the loop and reusing them at each iteration. - Proposed solution: Move the `IOUtils.copy(input, output)` line outside the loop and reuse the `input` and `output` objects at each iteration.  The code line `String contentType = fileNameMap.getContentTypeFor(key);` is most likely affected. - Reasoning: It retrieves the content type for a given key inside the loop, which can be avoided by retrieving the content type once outside the loop and changing its value at each iteration. - Proposed solution: Retrieve the `contentType` value once outside the loop and change its value at each iteration.  The code line `contentImage.setFile(output);` is most likely affected. - Reasoning: It sets the `output` object as the file for the `contentImage` object inside the loop, which can be avoided by setting the file once outside the loop and changing its value at each iteration. - Proposed solution: Set the file for the
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -373,15 +373,15 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
       Set<Node<String, Object>> childs = merchantNode.getChildren();
 
       // TODO image sizes
-      for (Node<String, Object> node : childs) {
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 20:52:40.641213):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
  * OUTLINE: The code line `Node<String, Object> merchantNode = this.getNode(nodePath.toString());` is most likely affected. - Reasoning: This code line is the starting point of the code section where the finding is located. - Proposed solution: Not affected - This code line is not affected because it is just retrieving a node from a specific path and does not involve any nested loops.
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
@@ -391,14 +391,15 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
 
 
         for (String key : node.getKeys()) {
-
-
-          byte[] imageBytes = (byte[]) merchantNode.get(key);
-
 /**********************************
  * CAST-Finding START #5 (2024-02-01 20:52:40.641213):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `for (String key : node.getKeys()) {` is most likely affected. - Reasoning: It is inside the loop and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the instantiation of `OutputContentFile` outside the loop to avoid instantiating it at each iteration.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #5
+ **********************************/
  * OUTLINE: The code line `for (String key : node.getKeys()) {` is most likely affected. - Reasoning: It is inside the loop and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the instantiation of `OutputContentFile` outside the loop to avoid instantiating it at each iteration.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
@@ -406,28 +407,30 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
  **********************************/
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * STATUS: OPEN
- * CAST-Finding END #5
- **********************************/
-
-
-          OutputContentFile contentImage = new OutputContentFile();
 /**********************************
  * CAST-Finding START #6 (2024-02-01 20:52:40.641213):
  * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `OutputContentFile contentImage = new OutputContentFile();` is most likely affected. - Reasoning: It instantiates a new `OutputContentFile` object inside the code block, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `OutputContentFile` outside the loop and change its value at each iteration.  The code line `InputStream input = new ByteArrayInputStream(imageBytes);` is most likely affected. - Reasoning: It instantiates a new `ByteArrayInputStream` object inside the code block, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `ByteArrayInputStream` outside the loop and change its value at each iteration.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #6
+ **********************************/
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `OutputContentFile contentImage = new OutputContentFile();` is most likely affected. - Reasoning: It instantiates a new `OutputContentFile` object inside the code block, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `OutputContentFile` outside the loop and change its value at each iteration.  The code line `InputStream input = new ByteArrayInputStream(imageBytes);` is most likely affected. - Reasoning: It instantiates a new `ByteArrayInputStream` object inside the code block, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `ByteArrayInputStream` outside the loop and change its value at each iteration.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
  * CAST-Finding END #6
  **********************************/
- * TITLE: Avoid instantiations inside loops
- * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
- * CAST-Finding END #6
- **********************************/
-
 /**********************************
  * CAST-Finding START #7 (2024-02-01 20:52:40.641213):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code lines `InputStream input = new ByteArrayInputStream(imageBytes);`, `ByteArrayOutputStream output = new ByteArrayOutputStream();`, `IOUtils.copy(input, output);`, `String contentType = fileNameMap.getContentTypeFor(key);`, `contentImage.setFile(output);`, `contentImage.setMimeType(contentType);`, and `contentImage.setFileName(key);` are most likely affected.  Reasoning: These code lines instantiate objects or perform operations inside a loop, which can lead to unnecessary memory allocation and resource usage.  Proposed solution: Move the instantiation of `InputStream input` and `ByteArrayOutputStream output` outside the loop, retrieve the `contentType` value once outside the loop, and set the `output` object as a file, the `contentType` value, and the `key` value in the `contentImage` object once outside the loop.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #7
+ **********************************/
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code lines `InputStream input = new ByteArrayInputStream(imageBytes);`, `ByteArrayOutputStream output = new ByteArrayOutputStream();`, `IOUtils.copy(input, output);`, `String contentType = fileNameMap.getContentTypeFor(key);`, `contentImage.setFile(output);`, `contentImage.setMimeType(contentType);`, and `contentImage.setFileName(key);` are most likely affected.  Reasoning: These code lines instantiate objects or perform operations inside a loop, which can lead to unnecessary memory allocation and resource usage.  Proposed solution: Move the instantiation of `InputStream input` and `ByteArrayOutputStream output` outside the loop, retrieve the `contentType` value once outside the loop, and set the `output` object as a file, the `contentType` value, and the `key` value in the `contentImage` object once outside the loop.
