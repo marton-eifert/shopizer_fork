@@ -47,7 +47,33 @@ public class ImportIntegrationModule  {
 		
 
 			ObjectMapper mapper = new ObjectMapper();
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 22:01:15.257817):
+ * TITLE: Use a virtualised environment where possible
+ * DESCRIPTION: Footprint measurements clearly show that a virtual server is ten times more energy efficient than a physical server. The superfluous capacity of the server can be used by other applications. When creating the architecture of an application, bear in mind that all parts will be virtualized.  Cloud infrastructures comply with the ISO 50001 standard, which respects energy sobriety. Also "Cloudify" resources offers resource pooling.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 			File file = new File(" /Users/carlsamson/Documents/dev/workspaces/shopizer-master/shopizer/sm-core/src/main/resources/reference/integrationmodules.json");
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 22:01:15.257817):
+ * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+ * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
 
 
 		try (InputStream in = new FileInputStream(file)) {
@@ -91,7 +117,33 @@ public class ImportIntegrationModule  {
 		
 
 			ObjectMapper mapper = new ObjectMapper();
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 22:01:15.257817):
+ * TITLE: Use a virtualised environment where possible
+ * DESCRIPTION: Footprint measurements clearly show that a virtual server is ten times more energy efficient than a physical server. The superfluous capacity of the server can be used by other applications. When creating the architecture of an application, bear in mind that all parts will be virtualized.  Cloud infrastructures comply with the ISO 50001 standard, which respects energy sobriety. Also "Cloudify" resources offers resource pooling.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 			File file = new File("/Users/carlsamson/Documents/dev/workspaces/shopizer-master/shopizer/sm-core/src/main/resources/reference/integrationmodules.json");
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-01 22:01:15.257817):
+ * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+ * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
 
 
 		try (InputStream in = new FileInputStream(file)) {
