@@ -36,6 +36,19 @@ public class GeneratePasswordTest extends ServicesTestSupport {
   public void createPassword() throws Exception {
  
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 23:46:10.886618):
+ * TITLE: Use of an unsecured data string
+ * DESCRIPTION: 
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
       String password ="password";
       String encoded = passwordEncoder.encode(password);
       LOGGER.info(encoded);
