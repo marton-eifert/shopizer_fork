@@ -69,6 +69,19 @@ public class SecurityApi {
 		Set<Permission> permissions = g.getPermissions();
 		List<ReadablePermission> readablePermissions = new ArrayList<ReadablePermission>();
 		for (Permission permission : permissions) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 23:12:25.150066):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 			ReadablePermission readablePermission = new ReadablePermission();
 			readablePermission.setName(permission.getPermissionName());
 			readablePermission.setId(permission.getId());
@@ -89,6 +102,19 @@ public class SecurityApi {
 		List<Permission> permissions = permissionService.list();
 		List<ReadablePermission> readablePermissions = new ArrayList<ReadablePermission>();
 		for (Permission permission : permissions) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 23:12:25.150066):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 			ReadablePermission readablePermission = new ReadablePermission();
 			readablePermission.setName(permission.getPermissionName());
 			readablePermission.setId(permission.getId());
@@ -107,6 +133,19 @@ public class SecurityApi {
 		List<Group> groups = groupService.list();
 		List<ReadableGroup> readableGroups = new ArrayList<ReadableGroup>();
 		for (Group group : groups) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 23:12:25.150066):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 			ReadableGroup readableGroup = new ReadableGroup();
 			readableGroup.setName(group.getGroupName());
 			readableGroup.setId(group.getId().longValue());
