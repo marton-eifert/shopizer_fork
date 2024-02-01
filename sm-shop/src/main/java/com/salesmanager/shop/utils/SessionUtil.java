@@ -31,7 +31,9 @@ public class SessionUtil
  * CAST-Finding START #1 (2024-02-01 23:45:21.143378):
  * TITLE: Using stateful session (Servlet)
  * DESCRIPTION: 
- * STATUS: OPEN
+ * OUTLINE: The code line `return (T) request.getSession().getAttribute( key );` is most likely affected.  - Reasoning: It performs a type cast without any type checking or validation, which can lead to potential ClassCastException at runtime if the actual type of the attribute does not match the expected type `T`.  - Proposed solution: Add type checking or validation before performing the type cast. This can be done by checking the type of the attribute using `instanceof` operator or by using a generic type constraint to ensure that the expected type `T` is compatible with the actual type of the attribute. This will help prevent potential ClassCastException at runtime.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
