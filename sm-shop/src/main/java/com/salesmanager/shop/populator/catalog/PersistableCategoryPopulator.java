@@ -114,7 +114,9 @@ public class PersistableCategoryPopulator extends
  * CAST-Finding START #1 (2024-02-01 22:30:56.459764):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `Category persistCategory = this.populate(cat, new Category(), store, language);` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which can be a performance bottleneck. - Proposed solution: Move the object instantiation `new Category()` outside of the loop and reuse the same instance in each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -134,13 +136,15 @@ public class PersistableCategoryPopulator extends
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:30:56.459764):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
- * STATUS: OPEN
+ * OUTLINE: The code line `if(!CollectionUtils.isEmpty(source.getDescriptions())) {` is most likely affected.  - Reasoning: This code line is checking if the `source` object has non-empty `descriptions`, which is related to the finding of avoiding nested loops.  - Proposed solution: To address the finding, consider redesigning the data structure or using specialized high-level APIs to avoid nested loops.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
@@ -148,13 +152,15 @@ public class PersistableCategoryPopulator extends
     			        if(StringUtils.isBlank(d.getLanguage())) {
 
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 22:30:56.459764):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `for(CategoryDescription d : source.getDescriptions()) {` is most likely affected. - Reasoning: This line is the start of a loop that iterates over a collection of `CategoryDescription` objects. The finding suggests avoiding instantiations inside loops, and this line could potentially instantiate a new `CategoryDescription` object at each iteration. - Proposed solution: Optimize by moving the instantiation of `CategoryDescription` objects outside the loop, if possible. This way, the objects are created once and reused in each iteration, reducing memory allocation and improving performance.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
@@ -172,13 +178,15 @@ public class PersistableCategoryPopulator extends
 			} else {
 			  for(CategoryDescription d : source.getDescriptions()) {
 
-
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 22:30:56.459764):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `description = buildDescription(d, description);` is most likely affected. - Reasoning: It is inside the loop and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the instantiation of `description` outside the loop and update its value inside the loop instead of creating a new object on each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: OPEN
  * CAST-Finding END #4
  **********************************/
