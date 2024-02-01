@@ -214,6 +214,32 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 
 		for (ProductAvailability availability : availabilities) {
 			if (availability.getProductQuantity() == null || availability.getProductQuantity().intValue() == 0) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 				throw new Exception("Item with id " + product.getId() + " is not available");
 			}
 		}
@@ -239,6 +265,19 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 				ProductAttribute productAttribute = productAttributeService.getById(attribute.getAttributeId());
 				if (productAttribute != null
 						&& productAttribute.getProduct().getId().longValue() == product.getId().longValue()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 					com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attributeItem = new com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem(
 							item, productAttribute);
 
@@ -299,6 +338,32 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 		//todo filter sku and store
 		for (ProductAvailability availability : availabilities) {
 			if (availability.getProductQuantity() == null || availability.getProductQuantity().intValue() == 0) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
 				throw new Exception("Product with id " + product.getId() + " is not available");
 			}
 		}
@@ -330,6 +395,19 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 
 				if (productAttribute != null
 						&& productAttribute.getProduct().getId().longValue() == product.getId().longValue()) {
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
 
 					com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attributeItem = new com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem(
 							item, productAttribute);
@@ -374,6 +452,19 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 			if (!oShoppingCartItem.isPresent()) {
 				// Should never happen if not something is updated in realtime or user has item
 				// in local storage and add it long time after to cart!
+
+
+
+
+/**********************************
+ * CAST-Finding START #7 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #7
+ **********************************/
+
+
 				LOG.warn("Missing shoppingCartItem for product " + p.getSku() + " ( " + p.getId() + " )");
 				continue;
 			}
@@ -386,21 +477,151 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 			 * available <= now
 			 */
 			if (shoppingCartItem.getQuantity() > 0 && !p.isAvailable()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #8 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #8
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #9 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #9
+ **********************************/
+
+
 				throw new Exception("Item with id " + p.getId() + " is not available");
 			}
 
 			Set<ProductAvailability> availabilities = p.getAvailabilities();
 			if (availabilities == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #10 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #10
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #11 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #11
+ **********************************/
+
+
 				throw new Exception("Item with id " + p.getId() + " is not properly configured");
 			}
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #12 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #12
+ **********************************/
+
+
 			for (ProductAvailability availability : availabilities) {
 				if (shoppingCartItem.getQuantity() > 0 && availability.getProductQuantity() == null || availability.getProductQuantity().intValue() == 0) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #13 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #13
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #14 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #14
+ **********************************/
+
+
 					throw new Exception("Item with id " + p.getId() + " is not available");
 				}
 			}
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #15 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #15
+ **********************************/
+
+
 			if (!DateUtil.dateBeforeEqualsDate(p.getDateAvailable(), new Date())) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #16 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #16
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #17 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #17
+ **********************************/
+
+
 				throw new Exception("Item with id " + p.getId() + " is not available");
 			}
 			// end qty & availablility checks
@@ -409,12 +630,38 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 			List<com.salesmanager.shop.model.catalog.product.attribute.ProductAttribute> attributes = shoppingCartItem
 					.getAttributes();
 			if (!CollectionUtils.isEmpty(attributes)) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #18 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #18
+ **********************************/
+
+
 				for (com.salesmanager.shop.model.catalog.product.attribute.ProductAttribute attribute : attributes) {
 
 					ProductAttribute productAttribute = productAttributeService.getById(attribute.getId());
 
 					if (productAttribute != null
 							&& productAttribute.getProduct().getId().longValue() == p.getId().longValue()) {
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #19 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #19
+ **********************************/
+
 
 						com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attributeItem = new com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem(
 								item, productAttribute);
@@ -462,6 +709,19 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 			for (com.salesmanager.core.model.shoppingcart.ShoppingCartItem shoppingCartItem : cartModel
 					.getLineItems()) {
 				if (shoppingCartItem.getId().longValue() == entryId) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #20 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #20
+ **********************************/
+
+
 					LOG.info("Found line item  for given entry id: " + entryId);
 					return shoppingCartItem;
 
@@ -630,6 +890,19 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 		for (ShoppingCartItem item : shoppingCartItems) {
 
 			if (item.getQuantity() < 1) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #21 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #21
+ **********************************/
+
+
 				throw new CartModificationException("Quantity must not be less than one");
 			}
 
@@ -641,13 +914,52 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 					cartModel);
 
 			if (entryToUpdate == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #22 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #22
+ **********************************/
+
+
 				throw new CartModificationException("Unknown entry number.");
 			}
 
 			entryToUpdate.getProduct();
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #23 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #23
+ **********************************/
+
+
 			LOG.info("Updating cart entry quantity to" + item.getQuantity());
 			entryToUpdate.setQuantity((int) item.getQuantity());
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #24 (2024-02-01 23:23:00.681057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #24
+ **********************************/
+
 
 			List<ProductAttribute> productAttributes = new ArrayList<ProductAttribute>();
 			productAttributes.addAll(entryToUpdate.getProduct().getAttributes());
