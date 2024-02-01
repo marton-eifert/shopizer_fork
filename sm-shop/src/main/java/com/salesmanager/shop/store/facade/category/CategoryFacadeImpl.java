@@ -239,7 +239,9 @@ public class CategoryFacadeImpl implements CategoryFacade {
  * CAST-Finding START #1 (2024-02-01 23:31:49.422057):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
- * STATUS: OPEN
+ * OUTLINE: The code line `categoryService.saveOrUpdate(category);` is most likely affected.  - Reasoning: It is the line immediately before the 'CAST-Finding' comment block, and the finding suggests avoiding nested loops, which may indicate a performance improvement opportunity.  - Proposed solution: Refactor the code to avoid nested loops, if applicable.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -407,13 +409,15 @@ public class CategoryFacadeImpl implements CategoryFacade {
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:31:49.422057):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `Map<String, List<com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue>> rawFacet = new HashMap<String, List<com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue>>();` is most likely affected.  - Reasoning: It involves instantiating a new HashMap inside a loop, which can be memory-intensive and impact performance.  - Proposed solution: Move the instantiation of `rawFacet` outside the loop to avoid creating a new HashMap at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
@@ -427,13 +431,15 @@ public class CategoryFacadeImpl implements CategoryFacade {
 					
 
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:31:49.422057):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `values = new ArrayList<com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue>();` is most likely affected. - Reasoning: Object instantiation inside a loop is a resource-intensive operation. - Proposed solution: Move the object instantiation outside the loop and reuse the same object in each iteration.  The code line `com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue val = new com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue();` is most likely affected. - Reasoning: Object instantiation inside a loop is a resource-intensive operation. - Proposed solution: Move the object instantiation outside the loop and reuse the same object in each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
@@ -454,13 +460,15 @@ public class CategoryFacadeImpl implements CategoryFacade {
 			// for each reference set Option
 			Iterator<Entry<String, ProductOption>> it = references.entrySet().iterator();
 
-
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 23:31:49.422057):
  * TITLE: Avoid calling a function in a condition loop
  * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+ * OUTLINE: The code line `val.setName(attr.getProductOption().getCode());` is most likely affected.  - Reasoning: It calls the `getCode()` function in a loop condition, which is a function call that will be evaluated at each iteration.  - Proposed solution: Optimize by storing the result of `attr.getProductOption().getCode()` in a variable before the loop and using that variable in the loop condition instead of calling the function at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: OPEN
  * CAST-Finding END #4
  **********************************/
@@ -472,13 +480,15 @@ public class CategoryFacadeImpl implements CategoryFacade {
 				ProductOption option = (ProductOption) pair.getValue();
 				List<com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue> values = rawFacet.get(option.getCode());
 
-
-
-
-
 /**********************************
  * CAST-Finding START #5 (2024-02-01 23:31:49.422057):
  * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `ProductOption option = (ProductOption) pair.getValue();` is most likely affected. - Reasoning: The casting of `pair.getValue()` to `ProductOption` may result in unnecessary memory allocation if done at each iteration. - Proposed solution: Move the casting outside the loop and assign the value to `option` once.  The code line `ReadableProductVariant productVariant = new ReadableProductVariant();` is most likely affected. - Reasoning: The instantiation of a new `ReadableProductVariant` object at each iteration can be avoided to improve performance. - Proposed solution: Move the instantiation outside the loop and reuse the same object at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #5
+ **********************************/
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * STATUS: OPEN
  * CAST-Finding END #5
@@ -490,39 +500,45 @@ public class CategoryFacadeImpl implements CategoryFacade {
 				if(optionDescription.isPresent()) {
 					productVariant.setName(optionDescription.get().getName());
 					productVariant.setId(optionDescription.get().getId());
-					productVariant.setCode(optionDescription.get().getProductOption().getCode());
-
-
-
-
 /**********************************
  * CAST-Finding START #6 (2024-02-01 23:31:49.422057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `ReadableProductVariant productVariant = new ReadableProductVariant();` is most likely affected. - Reasoning: It is an object instantiation inside a loop, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `ReadableProductVariant` outside the loop to avoid unnecessary object creation at each iteration.  The code line `List<ReadableProductVariantValue> optionValues = new ArrayList<ReadableProductVariantValue>();` is most likely affected. - Reasoning: It is an object instantiation inside a loop, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `ArrayList<ReadableProductVariantValue>` outside the loop to avoid unnecessary object creation at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #6
+ **********************************/
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * STATUS: OPEN
  * CAST-Finding END #6
  **********************************/
 
-
-					List<ReadableProductVariantValue> optionValues = new ArrayList<ReadableProductVariantValue>();
-
-
-
-
 /**********************************
+ * CAST-Finding START #7 (2024-02-01 23:31:49.422057):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * OUTLINE: The code line `List<ReadableProductVariantValue> optionValues = new ArrayList<ReadableProductVariantValue>();` is most likely affected. - Reasoning: It instantiates a new `ArrayList` object inside a loop, which can lead to unnecessary memory allocation and decreased performance. - Proposed solution: Move the instantiation of the `ArrayList` outside of the loop to avoid unnecessary object creation.  The code line `for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue value : values) {` is most likely affected. - Reasoning: It is inside a loop and may perform operations that could be optimized. - Proposed solution: Depending on the specific operations performed inside the loop, consider optimizing the operations or redesigning the loop for improved efficiency.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #7
+ **********************************/
  * CAST-Finding START #7 (2024-02-01 23:31:49.422057):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
  * STATUS: OPEN
  * CAST-Finding END #7
  **********************************/
-
-
-					for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue value : values) {
-
-
-
-
+/**********************************
+ * CAST-Finding START #8 (2024-02-01 23:31:49.422057):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code lines `for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValue value : values) {`, `ReadableProductVariantValue v = new ReadableProductVariantValue();`, `v.setCode(value.getCode());`, `v.setName(value.getName());`, `v.setDescription(value.getName());`, `v.setOption(option.getId());`, `v.setValue(value.getId());`, `v.setOrder(option.getProductOptionSortOrder());`, and `optionValues.add(v);` are most likely affected.  Reasoning: These code lines are inside a loop where the instantiation of `ReadableProductVariantValue` objects is happening, which is mentioned in the finding as a potential issue.  Proposed solution: Move the instantiation of `ReadableProductVariantValue` object outside the loop and reuse the same object for each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #8
+ **********************************/
 /**********************************
  * CAST-Finding START #8 (2024-02-01 23:31:49.422057):
  * TITLE: Avoid instantiations inside loops
