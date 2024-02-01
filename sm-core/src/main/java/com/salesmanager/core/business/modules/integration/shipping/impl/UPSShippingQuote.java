@@ -347,8 +347,8 @@ public class UPSShippingQuote implements ShippingQuoteModule {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code lines `xmldatabuffer.append("<PackageWeight>");`, `xmldatabuffer.append("<UnitOfMeasurement>");`, `xmldatabuffer.append("<Code>");`, `xmldatabuffer.append(weightCode);`, `xmldatabuffer.append("</Code>");`, `xmldatabuffer.append("</UnitOfMeasurement>");`, `xmldatabuffer.append("<Weight>");`, `xmldatabuffer.append(new BigDecimal(packageDetail.getShippingWeight()).setScale(1, BigDecimal.ROUND_HALF_UP));`, `xmldatabuffer.append("</Weight>");`, `xmldatabuffer.append("</PackageWeight>");`, `xmldatabuffer.append("<Dimensions>");`, and `xmldatabuffer.append("<UnitOfMeasurement>");` are most likely affected.  Reasoning: These code lines are part of the code section above the 'CAST-Finding' comment block, which suggests that they may be affected by the finding.  Proposed solution: NOT APPLICABLE. No code obviously affected.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -368,15 +368,15 @@ public class UPSShippingQuote implements ShippingQuoteModule {
 				xmldatabuffer.append("<Length>");
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 21:15:38.726213):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code lines `xmldatabuffer.append("<Dimensions>");`, `xmldatabuffer.append("<UnitOfMeasurement>");`, `xmldatabuffer.append("<Code>");`, `xmldatabuffer.append(measureCode);`, `xmldatabuffer.append("</Code>");`, `xmldatabuffer.append("</UnitOfMeasurement>");`, `xmldatabuffer.append("<Length>");`, `xmldatabuffer.append(new BigDecimal(packageDetail.getShippingLength()).setScale(2, BigDecimal.ROUND_HALF_UP));`, `xmldatabuffer.append("</Length>");`, and `xmldatabuffer.append("<Width>");` are most likely affected.  Reasoning: These code lines are part of the code section above the 'CAST-Finding' comment block, which suggests that they may be affected by the finding.  Proposed solution: Move the instantiation of the `BigDecimal` object outside the loop to avoid unnecessary object creation at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -385,15 +385,15 @@ public class UPSShippingQuote implements ShippingQuoteModule {
 						.setScale(2, BigDecimal.ROUND_HALF_UP));
 				xmldatabuffer.append("</Length>");
 				xmldatabuffer.append("<Width>");
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 21:15:38.726213):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `xmldatabuffer.append(new BigDecimal(packageDetail.getShippingLength()).setScale(2, BigDecimal.ROUND_HALF_UP));` is most likely affected. - Reasoning: It instantiates a new `BigDecimal` object inside a loop, which is a memory-intensive operation. - Proposed solution: Move the instantiation of the `BigDecimal` objects outside the loop and reuse them for each iteration. This will avoid unnecessary memory allocation and improve performance.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -402,15 +402,15 @@ public class UPSShippingQuote implements ShippingQuoteModule {
 
 				xmldatabuffer.append(new BigDecimal(packageDetail.getShippingWidth())
 						.setScale(2, BigDecimal.ROUND_HALF_UP));
-				xmldatabuffer.append("</Width>");
-				xmldatabuffer.append("<Height>");
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 21:15:38.726213):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `xmldatabuffer.append(new BigDecimal(packageDetail.getShippingWidth()).setScale(2, BigDecimal.ROUND_HALF_UP));` is most likely affected. - Reasoning: It instantiates a new `BigDecimal` object inside a loop, which can be memory-intensive and impact performance. - Proposed solution: Move the instantiation of the `BigDecimal` objects outside the loop and reuse them for each iteration. This will avoid unnecessary memory allocation and improve performance.
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
