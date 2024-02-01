@@ -358,6 +358,32 @@ public class BeanStreamPayment implements PaymentModule {
 				is = new BufferedReader(new InputStreamReader(conn
 						.getInputStream()));
 				String _line = null;
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 20:55:14.764785):
+ * TITLE: Prefer comparison-to-0 in loop conditions
+ * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 20:55:14.764785):
+ * TITLE: Avoid calling a function in a condition loop
+ * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 				while (((_line = is.readLine()) != null)) {
 					respText = respText + _line;
 				}
@@ -672,7 +698,33 @@ public class BeanStreamPayment implements PaymentModule {
 	private Map<String,String> formatUrlResponse(String payload) throws Exception {
 		HashMap<String,String> nvp = new HashMap<String,String> ();
 		StringTokenizer stTok = new StringTokenizer(payload, "&");
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 20:55:14.764785):
+ * TITLE: Avoid calling a function in a condition loop
+ * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 		while (stTok.hasMoreTokens()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-01 20:55:14.765704):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 			StringTokenizer stInternalTokenizer = new StringTokenizer(stTok
 					.nextToken(), "=");
 			if (stInternalTokenizer.countTokens() == 2) {
