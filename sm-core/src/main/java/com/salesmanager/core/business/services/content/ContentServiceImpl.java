@@ -274,6 +274,19 @@ public class ContentServiceImpl extends SalesManagerEntityServiceImpl<Long, Cont
 		try {
 			for (InputContentFile file : contentFilesList) {
 				if (file.getFile() != null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 21:22:10.079792):
+ * TITLE: Avoid OPEN/CLOSE for file or stream inside loops
+ * DESCRIPTION: Opening and closing file(s) many times is bound to be slow. This practice occurs a bad performance level which could be avoided.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 					file.getFile().close();
 				}
 			}
