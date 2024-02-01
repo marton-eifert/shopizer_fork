@@ -180,8 +180,8 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `paymentDetails.setPaymentAction(urn.ebay.apis.eBLBaseComponents.PaymentActionCodeType.AUTHORIZATION);` is most likely affected. - Reasoning: It sets the payment action for `paymentDetails` object, and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the instantiation of `PaymentActionCodeType.AUTHORIZATION` outside the loop and reuse it for each iteration.  The code line `PaymentDetailsItemType item = new PaymentDetailsItemType();` is most likely affected. - Reasoning: It creates a new payment details item object inside the loop, and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the instantiation of `PaymentDetailsItemType` outside the loop and reuse it for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -189,15 +189,15 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 				PaymentDetailsItemType item = new PaymentDetailsItemType();
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 20:58:21.217034):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `PaymentDetailsItemType item = new PaymentDetailsItemType();` is most likely affected. - Reasoning: It instantiates a new object inside the loop, which can be avoided by creating it once outside the loop and changing its value at each iteration. - Proposed solution: Move the instantiation of `PaymentDetailsItemType` outside the loop and change its value at each iteration.  The code line `BasicAmountType amt = new BasicAmountType();` is most likely affected. - Reasoning: It instantiates a new object inside the loop, which can be avoided by creating it once outside the loop and changing its value at each iteration. - Proposed solution: Move the instantiation of `BasicAmountType` outside the loop and change its value at each iteration.  The code line `amt.setValue(pricingService.getStringAmount(cartItem.getFinalPrice().getFinalPrice(), store));` is most likely affected. - Reasoning: It calls a method that may involve memory allocation inside the loop. It can be optimized by creating the `String` value outside the loop and reusing it at each iteration. - Proposed solution: Create the `String` value for `amt.setValue()` outside the loop and reuse it at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -221,15 +221,15 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 			for(OrderTotal total : orderTotals) {
 				
 				if(total.getModule().equals(Constants.OT_SHIPPING_MODULE_CODE)) {
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 20:58:21.217034):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `List<OrderTotal> orderTotals = summary.getTotals();` is most likely affected.  - Reasoning: It is inside the loop where the finding is located.  - Proposed solution: Move the instantiation of `BasicAmountType shipping = new BasicAmountType();` outside the loop and reuse the same object for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -242,15 +242,15 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 					//System.out.println(pricingService.getStringAmount(total.getValue(), store));
 					paymentDetails.setShippingTotal(shipping);
 				}
-				
-				if(total.getModule().equals(Constants.OT_HANDLING_MODULE_CODE)) {
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 20:58:21.217034):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `shipping.setValue(pricingService.getStringAmount(total.getValue(), store));` is most likely affected. - Reasoning: The line sets the value for the shipping amount, which may need to be optimized according to the finding. - Proposed solution: Optimize the calculation of the shipping value by avoiding instantiations inside loops. Create the `BasicAmountType` object once outside the loop and change its value at each iteration.  The code line `handling.setValue(pricingService.getStringAmount(total.getValue(), store));` is most likely affected. - Reasoning: The line sets the value for the handling amount, which may need to be optimized according to the finding. - Proposed solution: Optimize the calculation of the handling value by avoiding instantiations inside loops. Create the `BasicAmountType` object once outside the loop and change its value at each iteration.
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
@@ -264,14 +264,15 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 					handling.setValue(pricingService.getStringAmount(total.getValue(), store));
 					//System.out.println(pricingService.getStringAmount(total.getValue(), store));
 					paymentDetails.setHandlingTotal(handling);
-				}
-				
-				if(total.getModule().equals(Constants.OT_TAX_MODULE_CODE)) {
-					if(tax==null) {
 /**********************************
  * CAST-Finding START #5 (2024-02-01 20:58:21.217034):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `handling.setCurrencyID(urn.ebay.apis.eBLBaseComponents.CurrencyCodeType.fromValue(store.getCurrency().getCode()));` is most likely affected. - Reasoning: It is inside the loop and could potentially be instantiated multiple times unnecessarily. - Proposed solution: Move the instantiation of `handling` outside the loop and update its value inside the loop.  The code line `if(tax==null) {` is most likely affected. - Reasoning: It is inside the loop and unnecessarily instantiates a new `BigDecimal` object multiple times. - Proposed solution: Move the instantiation of `tax` outside the loop and update its value inside the loop.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #5
+ **********************************/
  * OUTLINE: The code line `handling.setCurrencyID(urn.ebay.apis.eBLBaseComponents.CurrencyCodeType.fromValue(store.getCurrency().getCode()));` is most likely affected. - Reasoning: It is inside the loop and could potentially be instantiated multiple times unnecessarily. - Proposed solution: Move the instantiation of `handling` outside the loop and update its value inside the loop.  The code line `if(tax==null) {` is most likely affected. - Reasoning: It is inside the loop and unnecessarily instantiates a new `BigDecimal` object multiple times. - Proposed solution: Move the instantiation of `tax` outside the loop and update its value inside the loop.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
