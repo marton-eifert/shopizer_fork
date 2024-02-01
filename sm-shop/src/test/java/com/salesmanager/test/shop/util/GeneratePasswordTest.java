@@ -45,8 +45,8 @@ public class GeneratePasswordTest extends ServicesTestSupport {
  * TITLE: Use of an unsecured data string
  * DESCRIPTION: 
  * OUTLINE: The code line `String encoded = passwordEncoder.encode(password);` is most likely affected.  - Reasoning: It is using the `passwordEncoder` to encode the password, which might be related to the finding of using an unsecured data string.  - Proposed solution: Consider using a more secure method for encoding passwords, such as using a salt or a stronger encryption algorithm.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
