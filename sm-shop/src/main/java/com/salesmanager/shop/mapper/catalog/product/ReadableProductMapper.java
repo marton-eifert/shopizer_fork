@@ -179,8 +179,8 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadableProductAttributeValue attrValue = new ReadableProductAttributeValue();` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which is a resource-intensive operation. - Proposed solution: Move the instantiation outside the loop and reuse the same object for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -196,29 +196,29 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:20:08.211471):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ProductOptionValue optionValue = attribute.getProductOptionValue();` is most likely affected. - Reasoning: It is inside the code section where the finding is located. - Proposed solution: Move the instantiation of `optionValue` outside the loop if possible, to avoid unnecessary instantiations.  The code line `ReadableProductOption readableOption = new ReadableProductOption();` is most likely affected. - Reasoning: It is inside the code section where the finding is located. - Proposed solution: Move the instantiation of `readableOption` outside the loop if possible, to avoid unnecessary instantiations.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
 
 						ReadableProductOption readableOption = new ReadableProductOption(); // that is the property
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 22:20:08.211471):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadableProductOption readableOption = new ReadableProductOption();` is most likely affected. - Reasoning: It instantiates a new object inside a loop, which can lead to unnecessary memory allocation and decreased performance. - Proposed solution: Move the instantiation of `ReadableProductOption` outside the loop and reuse the same object.  The code line `ReadableProductPropertyValue readableOptionValue = new ReadableProductPropertyValue();` is most likely affected. - Reasoning: It instantiates a new object inside a loop, which can lead to unnecessary memory allocation and decreased performance. - Proposed solution: Move the instantiation of `ReadableProductPropertyValue` outside the loop and reuse the same object.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -230,15 +230,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 						readableOption.setCode(attribute.getProductOption().getCode());
 						readableOption.setId(attribute.getProductOption().getId());
 
-						Set<ProductOptionDescription> podescriptions = attribute.getProductOption().getDescriptions();
-						if (podescriptions != null && podescriptions.size() > 0) {
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 22:20:08.211471):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
  * OUTLINE: The code line `if (podescriptions != null && podescriptions.size() > 0) {` is most likely affected.  - Reasoning: This line checks if the `podescriptions` set is not null and has elements, which indicates that there is a nested loop inside the if block.  - Proposed solution: To address the finding, you can optimize the loop by using the enhanced for loop instead of the traditional for loop. This can improve readability and reduce the chance of introducing bugs. For example:    ```java    for (ProductOptionDescription optionDescription : podescriptions) {        if (optionDescription.getLanguage().getCode().equals(language.getCode())) {            readableOption.setName(optionDescription.getName());        }    }    ```    can be rewritten as:    ```java    podescriptions.stream()        .filter(optionDescription -> optionDescription.getLanguage().getCode().equals(language.getCode()))        .findFirst()        .ifPresent(optionDescription -> readableOption.setName(optionDescription.getName())); 
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
@@ -257,14 +257,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 						property.setProperty(readableOption);
 
 						Set<ProductOptionValueDescription> povdescriptions = attribute.getProductOptionValue()
-								.getDescriptions();
-						readableOptionValue.setId(attribute.getProductOptionValue().getId());
-						readableOptionValue.setCode(optionValue.getCode());
-						if (povdescriptions != null && povdescriptions.size() > 0) {
 /**********************************
  * CAST-Finding START #5 (2024-02-01 22:20:08.211471):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * OUTLINE: The code line `if (povdescriptions != null && povdescriptions.size() > 0) {` is most likely affected. - Reasoning: This line checks if `povdescriptions` is not null and has a size greater than 0, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.  The code line `for (ProductOptionValueDescription optionValueDescription : povdescriptions) {` is most likely affected. - Reasoning: This line iterates over `povdescriptions`, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.  The code line `if (optionValueDescription.getLanguage().getCode().equals(language.getCode())) {` is most likely affected. - Reasoning: This line checks if the language code of `optionValueDescription` is equal to the language code of `language`, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.  The code line `readableOptionValue.setName(optionValueDescription.getName());` is most likely affected. - Reasoning: This line sets the name of `readableOptionValue` based on the name of `optionValueDescription`, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #5
+ **********************************/
  * OUTLINE: The code line `if (povdescriptions != null && povdescriptions.size() > 0) {` is most likely affected. - Reasoning: This line checks if `povdescriptions` is not null and has a size greater than 0, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.  The code line `for (ProductOptionValueDescription optionValueDescription : povdescriptions) {` is most likely affected. - Reasoning: This line iterates over `povdescriptions`, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.  The code line `if (optionValueDescription.getLanguage().getCode().equals(language.getCode())) {` is most likely affected. - Reasoning: This line checks if the language code of `optionValueDescription` is equal to the language code of `language`, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.  The code line `readableOptionValue.setName(optionValueDescription.getName());` is most likely affected. - Reasoning: This line sets the name of `readableOptionValue` based on the name of `optionValueDescription`, which is related to the finding of avoiding nested loops. - Proposed solution: Restructure the code to avoid nested loops by using a hashmap or specialized high-level API.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
@@ -290,14 +291,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 
 						/**
 						 * Returns a list of ReadableProductOptions
-						 * 
-						 * name lang type code List ReadableProductOptionValueEntity name description
-						 * image order default
-						 */
-
 /**********************************
  * CAST-Finding START #6 (2024-02-01 22:20:08.211471):
  * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `if (selectableOptions == null) {` is most likely affected. - Reasoning: This line initializes the `selectableOptions` variable, which is mentioned in the CAST-Finding comment block. - Proposed solution: Move the instantiation of `selectableOptions` outside of the loop to avoid unnecessary object instantiations.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #6
+ **********************************/
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `if (selectableOptions == null) {` is most likely affected. - Reasoning: This line initializes the `selectableOptions` variable, which is mentioned in the CAST-Finding comment block. - Proposed solution: Move the instantiation of `selectableOptions` outside of the loop to avoid unnecessary object instantiations.
  * INSTRUCTION: {instruction}
@@ -313,14 +315,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 
 							selectableOptions = new TreeMap<Long, ReadableProductOption>();
 						}
-						opt = selectableOptions.get(attribute.getProductOption().getId());
-						if (opt == null) {
-							opt = createOption(attribute.getProductOption(), language);
-						}
-						if (opt != null) {
-							selectableOptions.put(attribute.getProductOption().getId(), opt);
 /**********************************
  * CAST-Finding START #7 (2024-02-01 22:20:08.211471):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `if (opt == null) {` is most likely affected. - Reasoning: This line checks if the value retrieved from the map is null and then proceeds to create a new option if it is null. This instantiation inside the loop can be avoided as per the finding. - Proposed solution: Move the instantiation of `opt` outside the loop and change its value inside the loop instead of creating a new instance at each iteration. This will avoid unnecessary instantiations and improve performance.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #7
+ **********************************/
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `if (opt == null) {` is most likely affected. - Reasoning: This line checks if the value retrieved from the map is null and then proceeds to create a new option if it is null. This instantiation inside the loop can be avoided as per the finding. - Proposed solution: Move the instantiation of `opt` outside the loop and change its value inside the loop instead of creating a new instance at each iteration. This will avoid unnecessary instantiations and improve performance.
@@ -333,14 +336,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * STATUS: OPEN
  * CAST-Finding END #7
- **********************************/
-
-
-						ReadableProductOptionValue optValue = new ReadableProductOptionValue();
-
-						optValue.setDefaultValue(attribute.getAttributeDefault());
-						// optValue.setId(attribute.getProductOptionValue().getId());
 /**********************************
+ * CAST-Finding START #8 (2024-02-01 22:20:08.211471):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `optValue.setId(attribute.getId());` is most likely affected. - Reasoning: The ID of `optValue` is set based on `attribute.getId()`. If `attribute.getId()` is changed inside the loop, it may result in unnecessary instantiations. - Proposed solution: Move the instantiation of `optValue` outside the loop and update its ID inside the loop instead of creating a new instance at each iteration.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #8
+ **********************************/
  * CAST-Finding START #8 (2024-02-01 22:20:08.211471):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
@@ -357,14 +361,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
  * CAST-Finding END #8
  **********************************/
 
-
-						com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription valueDescription = new com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription();
-						valueDescription.setLanguage(language.getCode());
-						// optValue.setLang(language.getCode());
-						if (attribute.getProductAttributePrice() != null
-								&& attribute.getProductAttributePrice().doubleValue() > 0) {
-							String formatedPrice = null;
-							try {
+/**********************************
+ * CAST-Finding START #9 (2024-02-01 22:20:08.211471):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `if (attribute.getProductAttributePrice() != null && attribute.getProductAttributePrice().doubleValue() > 0) {` is most likely affected.  - Reasoning: It is inside the code block where the CAST-Finding is located.  - Proposed solution: Move the instantiation of `String formatedPrice = null;` outside the if statement to avoid instantiating it at each iteration. Move the method call `pricingService.getDisplayAmount(attribute.getProductAttributePrice(), store);` outside the if statement and store the result in a variable before setting it to `optValue.setPrice(formatedPrice);`.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #9
+ **********************************/
 /**********************************
  * CAST-Finding START #9 (2024-02-01 22:20:08.211471):
  * TITLE: Avoid instantiations inside loops
@@ -389,14 +394,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 							}
 						}
 
-						if (!StringUtils.isBlank(attribute.getProductOptionValue().getProductOptionValueImage())) {
-							optValue.setImage(imageUtils.buildProductPropertyImageUtils(store,
-									attribute.getProductOptionValue().getProductOptionValueImage()));
-						}
-						optValue.setSortOrder(0);
-						if (attribute.getProductOptionSortOrder() != null) {
-							optValue.setSortOrder(attribute.getProductOptionSortOrder().intValue());
-						}
+/**********************************
+ * CAST-Finding START #10 (2024-02-01 22:20:08.211471):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * OUTLINE: The code line `optValue.setSortOrder(attribute.getProductOptionSortOrder().intValue());` is most likely affected.  - Reasoning: This line sets the sort order of `optValue` based on the `ProductOptionSortOrder` attribute of `attribute`.  - Proposed solution: No solution proposed.  NOT APPLICABLE. No code obviously affected.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #10
+ **********************************/
 
 /**********************************
  * CAST-Finding START #10 (2024-02-01 22:20:08.211471):
@@ -668,14 +674,15 @@ public class ReadableProductMapper implements Mapper<Product, ReadableProduct> {
 
 		if (description.getLanguage() != null) {
 			tragetDescription.setLanguage(description.getLanguage().getCode());
-		}
-		return tragetDescription;
-	}
-
-	private ReadableProductProperty createProperty(ProductAttribute productAttribute, Language language) {
-
-		ReadableProductProperty attr = new ReadableProductProperty();
-		attr.setId(productAttribute.getProductOption().getId());// attribute of the option
+/**********************************
+ * CAST-Finding START #11 (2024-02-01 22:20:08.211471):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `List<ProductOptionDescription> descriptions = productAttribute.getProductOption().getDescriptionsSettoList();` is most likely affected. - Reasoning: The line instantiates a new `List` object inside the loop, which is a memory-intensive operation and can impact performance. - Proposed solution: Move the instantiation of the `List` object outside the loop to avoid unnecessary object creation.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #11
+ **********************************/
 		attr.setType(productAttribute.getProductOption().getProductOptionType());
 
 /**********************************
