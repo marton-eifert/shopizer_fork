@@ -36,7 +36,9 @@ public class RestErrorHandler {
  * CAST-Finding START #1 (2024-02-01 23:05:27.950680):
  * TITLE: Avoid calling a function in a condition loop
  * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
- * STATUS: OPEN
+ * OUTLINE: The code line `log.error(exception.getMessage(), exception);` is most likely affected. - Reasoning: It is part of the error handling logic, which is the focus of the finding. - Proposed solution: Replace `log.error(exception.getMessage(), exception);` with a more efficient logging mechanism that avoids calling a function in a condition loop.  The code line `while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {` is most likely affected. - Reasoning: It checks if the root cause of the exception is not null and not equal to itself, which is part of the finding's recommendation to avoid calling a function in a condition loop. - Proposed solution: No proposed solution as it already follows the recommendation of avoiding calling a function in a condition loop.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -62,13 +64,15 @@ public class RestErrorHandler {
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:05:27.950680):
  * TITLE: Avoid calling a function in a condition loop
  * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
- * STATUS: OPEN
+ * OUTLINE: The code line `log.error(exception.getErrorMessage(), exception);` is most likely affected. - Reasoning: It is part of the exception handling logic, which is the focus of the finding. - Proposed solution: No specific solution proposed.  The code line `Throwable rootCause = exception.getCause();` is most likely affected. - Reasoning: It retrieves the root cause of the exception, which is relevant to the finding. - Proposed solution: No specific solution proposed.  The code line `while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {` is most likely affected. - Reasoning: It checks if there is a nested cause in the exception, which is relevant to the finding. - Proposed solution: No specific solution proposed.  The code line `rootCause = rootCause.getCause();` is most likely affected. - Reasoning: It updates the root cause to the nested cause, which is relevant to the finding. - Proposed solution: No specific solution proposed.  The code line `ErrorEntity errorEntity = createErrorEntity(exception.getErrorCode()!=null?exception.getErrorCode():"500", exception.getErrorMessage(), rootCause.getMessage());` is most likely affected. - Reasoning: It creates an error entity using the root cause message, which is relevant to the finding. - Proposed solution: No specific solution proposed.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
