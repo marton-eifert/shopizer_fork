@@ -67,6 +67,19 @@ public class ProductPriceUtils {
 		for (ProductAvailability availability : availabilities) {
 
 			Set<ProductPrice> prices = availability.getPrices();
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 			for (ProductPrice price : prices) {
 
 				if (price.isDefaultPrice()) {
@@ -100,6 +113,19 @@ public class ProductPriceUtils {
 				if (attribute.getProductAttributePrice() != null
 						&& attribute.getProductAttributePrice().doubleValue() > 0) {
 					if (attributePrice == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 						attributePrice = new BigDecimal(0);
 					}
 					attributePrice = attributePrice.add(attribute.getProductAttributePrice());
@@ -150,6 +176,19 @@ public class ProductPriceUtils {
 					if (attribute.getProductAttributePrice() != null
 							&& attribute.getProductAttributePrice().doubleValue() > 0) {
 						if (attributePrice == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 							attributePrice = new BigDecimal(0);
 						}
 						attributePrice = attributePrice.add(attribute.getProductAttributePrice());
@@ -190,6 +229,19 @@ public class ProductPriceUtils {
 			if (!StringUtils.isEmpty(availability.getRegion())
 					&& availability.getRegion().equals(Constants.ALL_REGIONS)) {// TODO REL 2.1 accept a region
 				Set<ProductPrice> prices = availability.getPrices();
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 				for (ProductPrice price : prices) {
 
 					FinalPrice p = finalPrice(price);
@@ -197,6 +249,19 @@ public class ProductPriceUtils {
 						finalPrice = p;
 					} else {
 						if (otherPrices == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
 							otherPrices = new ArrayList<FinalPrice>();
 						}
 						otherPrices.add(p);
@@ -434,6 +499,32 @@ public class ProductPriceUtils {
 		 * Should be able to parse to Integer
 		 */
 		StringBuilder newAmount = new StringBuilder();
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid calling a function in a condition loop
+ * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #7 (2024-02-01 21:50:28.148906):
+ * TITLE: Prefer comparison-to-0 in loop conditions
+ * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
+ * STATUS: OPEN
+ * CAST-Finding END #7
+ **********************************/
+
+
 		for (int i = 0; i < amount.length(); i++) {
 			if (amount.charAt(i) != DECIMALPOINT && amount.charAt(i) != THOUSANDPOINT) {
 				newAmount.append(amount.charAt(i));
@@ -579,6 +670,19 @@ public class ProductPriceUtils {
 			if (!StringUtils.isEmpty(availability.getRegion())
 					&& availability.getRegion().equals(Constants.ALL_REGIONS)) {// TODO REL 2.1 accept a region
 				Set<ProductPrice> prices = availability.getPrices();
+
+
+
+
+/**********************************
+ * CAST-Finding START #8 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #8
+ **********************************/
+
+
 				for (ProductPrice price : prices) {
 
 					FinalPrice p = finalPrice(price);
@@ -586,6 +690,19 @@ public class ProductPriceUtils {
 						finalPrice = p;
 					} else {
 						if (otherPrices == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #9 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #9
+ **********************************/
+
+
 							otherPrices = new ArrayList<FinalPrice>();
 						}
 						otherPrices.add(p);
@@ -624,6 +741,19 @@ public class ProductPriceUtils {
 				finalPrice = p;
 			} else {
 				if (otherPrices == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #10 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #10
+ **********************************/
+
+
 					otherPrices = new ArrayList<FinalPrice>();
 				}
 				otherPrices.add(p);
@@ -710,6 +840,19 @@ public class ProductPriceUtils {
 		double arith = finalPrice.getProductPrice().getProductPriceSpecialAmount().doubleValue()
 				/ finalPrice.getProductPrice().getProductPriceAmount().doubleValue();
 		double fsdiscount = 100 - (arith * 100);
+
+
+
+
+/**********************************
+ * CAST-Finding START #11 (2024-02-01 21:50:28.148906):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #11
+ **********************************/
+
+
 		Float percentagediscount = new Float(fsdiscount);
 		int percent = percentagediscount.intValue();
 		finalPrice.setDiscountPercent(percent);
