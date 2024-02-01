@@ -58,7 +58,9 @@ public class BeanUtils
  * CAST-Finding START #1 (2024-02-01 22:02:43.654908):
  * TITLE: Prefer comparison-to-0 in loop conditions
  * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
- * STATUS: OPEN
+ * OUTLINE: The code line `for ( int i = 0; i < propertyDescriptors.length; i++ )` is most likely affected.  - Reasoning: The loop condition `i < propertyDescriptors.length` involves a comparison to zero, which can be less efficient than comparing against other numbers.  - Proposed solution: Replace the loop condition `i < propertyDescriptors.length` with `i != propertyDescriptors.length` to avoid the unnecessary comparison to zero.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
