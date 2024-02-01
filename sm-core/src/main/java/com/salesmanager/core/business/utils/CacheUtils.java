@@ -70,6 +70,19 @@ public class CacheUtils {
 					}
 
 				} catch (Exception e) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 21:49:44.699152):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 					LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
 				}  
 		  }
@@ -102,6 +115,19 @@ public class CacheUtils {
 					}
 
 				} catch (Exception e) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 21:49:44.699152):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 					LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
 				}  
 		  }
