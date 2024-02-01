@@ -101,7 +101,9 @@ public class S3ProductContentFileManager
  * CAST-Finding START #1 (2024-02-01 20:50:03.476086):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `List<S3ObjectSummary> objects = results.getObjectSummaries();` is most likely affected. - Reasoning: The code retrieves the object summaries from the listObjectsResult at each iteration of the loop, which can be optimized by storing them in a local variable outside the loop. - Proposed solution: Move the line `List<S3ObjectSummary> objects = results.getObjectSummaries();` outside the loop to store the object summaries in a local variable before the loop.  The code line `files = new ArrayList<OutputContentFile>();` is most likely affected. - Reasoning: The code instantiates a new ArrayList at each iteration of the loop, which can be optimized by moving the instantiation outside the loop. - Proposed solution: Move the line `files = new ArrayList<OutputContentFile>();` outside the loop to instantiate the ArrayList only once.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -115,13 +117,15 @@ public class S3ProductContentFileManager
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 20:50:03.476086):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `files = new ArrayList<OutputContentFile>();` is most likely affected. - Reasoning: It is inside the loop and creates a new ArrayList at each iteration, which is unnecessary and can be moved outside the loop. - Proposed solution: Move the line `files = new ArrayList<OutputContentFile>();` outside the loop to avoid unnecessary instantiation at each iteration.  The code line `ByteArrayOutputStream baos = new ByteArrayOutputStream(byteArray.length);` is most likely affected. - Reasoning: It creates a new `ByteArrayOutputStream` at each iteration, which is unnecessary and can be moved outside the loop. - Proposed solution: Move the line `ByteArrayOutputStream baos = new ByteArrayOutputStream(byteArray.length);` outside the loop to avoid unnecessary instantiation at each iteration.  The code line `baos.write(byteArray, 0, byteArray.length);` is most likely affected. - Reasoning: It is inside the loop and writes to the `ByteArrayOutputStream` at each iteration, which can be avoided by moving it outside the loop. - Proposed solution: Move the line `baos.write(byteArray, 0, byteArray.length);` outside the loop to avoid unnecessary writes to the `ByteArrayOutputStream` at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
@@ -129,13 +133,15 @@ public class S3ProductContentFileManager
           baos.write(byteArray, 0, byteArray.length);
 
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 20:50:03.476086):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `ByteArrayOutputStream baos = new ByteArrayOutputStream(byteArray.length);` is most likely affected.  - Reasoning: Instantiating a new `ByteArrayOutputStream` object inside a loop can be a performance issue as object instantiation is a greedy operation.  - Proposed solution: Move the instantiation of `ByteArrayOutputStream` outside the loop and reuse the same object at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
