@@ -605,7 +605,9 @@ public class UserFacadeImpl implements UserFacade {
  * CAST-Finding START #1 (2024-02-01 23:40:54.708652):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `throw new UnauthorizedException("Superadmin group not allowed");` is most likely affected. - Reasoning: It is inside the 'CAST-Finding' comment block and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the instantiation of `UnauthorizedException` outside of the loop and reuse the same instance for each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
