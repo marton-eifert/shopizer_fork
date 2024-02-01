@@ -366,10 +366,11 @@ public class BeanStreamPayment implements PaymentModule {
  * CAST-Finding START #1 (2024-02-01 20:55:14.764785):
  * TITLE: Prefer comparison-to-0 in loop conditions
  * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
- * STATUS: OPEN
+ * OUTLINE: The code line `in = new DataInputStream(conn.getInputStream());` is most likely affected. - Reasoning: It reads input from the input stream, which is related to the finding about loop conditions. - Proposed solution: Replace `in = new DataInputStream(conn.getInputStream());` with a more efficient way of reading input from the input stream in a loop condition.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
-
 
 
 
@@ -379,8 +380,11 @@ public class BeanStreamPayment implements PaymentModule {
  * CAST-Finding START #2 (2024-02-01 20:55:14.764785):
  * TITLE: Avoid calling a function in a condition loop
  * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
- * STATUS: OPEN
+ * OUTLINE: The code line `while (((_line = is.readLine()) != null)) {` is most likely affected. - Reasoning: This line is a loop condition that is evaluated at each iteration. - Proposed solution: Modify the loop condition to prefer comparison to zero instead of comparing against null. Change the loop condition to `while ((_line = is.readLine()) != 0) {`.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
@@ -700,26 +704,30 @@ public class BeanStreamPayment implements PaymentModule {
 		StringTokenizer stTok = new StringTokenizer(payload, "&");
 
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 20:55:14.764785):
  * TITLE: Avoid calling a function in a condition loop
  * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
- * STATUS: OPEN
+ * OUTLINE: The code line `while (stTok.hasMoreTokens()) {` is most likely affected.  Reasoning: The loop condition calls the `hasMoreTokens()` function at each iteration, resulting in unnecessary function calls and potentially impacting performance.  Proposed solution: Consider storing the result of `stTok.hasMoreTokens()` in a variable before the loop and use that variable in the loop condition instead. This way, the function call is only made once and the result is reused throughout the loop.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
 
 		while (stTok.hasMoreTokens()) {
 
-
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 20:55:14.765704):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `while (stTok.hasMoreTokens()) {` is most likely affected. - Reasoning: It is part of the loop condition and will be evaluated at each iteration. - Proposed solution: Move the function call `stTok.hasMoreTokens()` outside of the loop condition and store the result in a variable to avoid calling the function at each iteration.  The code line `if (stInternalTokenizer.countTokens() == 2) {` is most likely affected. - Reasoning: It contains a function call (`countTokens()`) that will be called at each iteration. - Proposed solution: Move the function call `stInternalTokenizer.countTokens()` outside of the loop condition and store the result in a variable to avoid calling the function at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: OPEN
  * CAST-Finding END #4
  **********************************/
