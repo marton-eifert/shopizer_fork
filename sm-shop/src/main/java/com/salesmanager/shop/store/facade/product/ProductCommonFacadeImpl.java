@@ -345,8 +345,8 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `List<ProductReview> reviews = productReviewService.getByProduct(product);` is most likely affected. - Reasoning: It retrieves a list of product reviews, which could potentially be a large collection of objects. - Proposed solution: No specific solution proposed.  The code line `ReadableProductReview readableReview = new ReadableProductReview();` is most likely affected. - Reasoning: It instantiates a new readable product review object for each iteration of the loop. - Proposed solution: Move the instantiation of `ReadableProductReview readableReview = new ReadableProductReview();` outside of the loop to avoid instantiating it at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -374,15 +374,15 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
 				// set default price
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:37:47.928000):
  * TITLE: Avoid nested loops
  * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
- * OUTLINE: The code line `modified.setAvailable(product.isAvailable());` is most likely affected.  - Reasoning: It updates the availability of a product, which could be related to the finding about avoiding nested loops. The finding suggests using a hashmap to reduce the complexity of nested loops.  - Proposed solution: Consider redesigning the data structure with a hashmap to optimize the interaction between elements and potentially reduce the complexity.  The code line `price.setProductPriceAmount(pricingService.getAmount(product.getPrice()));` is most likely affected.  - Reasoning: It sets the product price amount using a pricing service, which could be related to the finding about avoiding nested loops. The finding suggests using a hashmap to optimize the interaction between elements and potentially reduce the complexity.  - Proposed solution: Consider redesigning the data structure with a hashmap to optimize the interaction between elements and potentially reduce the complexity.  (Note: The other code lines are not obviously affected by the finding.)
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * * OUTLINE: NOT APPLICABLE (WITHDRAWN).
+ * INSTRUCTION: NOT APPLICABLE.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -392,15 +392,15 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
 						try {
 							price.setProductPriceAmount(pricingService.getAmount(product.getPrice()));
 						} catch (ServiceException e) {
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:37:47.928000):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `price.setProductPriceAmount(pricingService.getAmount(product.getPrice()));` is most likely affected. - Reasoning: It is inside a loop that iterates over `availability.getPrices()`, which is mentioned in the finding as a potential performance issue. - Proposed solution: Move the instantiation of `ProductPrice` outside the loop and reuse the same object for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -509,15 +509,15 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
 			for (ProductPrice price : availability.getPrices()) {
 				if (price.isDefaultPrice()) {
 					try {
-						price.setProductPriceAmount(pricingService.getAmount(product.getPrice()));
-					} catch (ServiceException e) {
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 23:37:47.928000):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `availability.setProductQuantity(product.getQuantity());` is most likely affected. - Reasoning: It sets the product quantity based on the `product.getQuantity()` method, which could potentially be affected by the finding. - Proposed solution: Move the instantiation of `availability` outside of the loop if it's not necessary to instantiate it at each iteration.  The code line `throw new ServiceRuntimeException("Invalid product price format");` is most likely affected. - Reasoning: It throws a `ServiceRuntimeException` with a message, which involves the instantiation of the exception object. - Proposed solution: Move the instantiation of the `ServiceRuntimeException` outside of the loop if it's not necessary to instantiate it at each iteration.
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
