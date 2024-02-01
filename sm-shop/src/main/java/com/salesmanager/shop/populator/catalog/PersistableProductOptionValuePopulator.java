@@ -63,7 +63,9 @@ public class PersistableProductOptionValuePopulator extends
  * CAST-Finding START #1 (2024-02-01 22:33:22.511675):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `Set<com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription> descriptions = new HashSet<com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription>();` is most likely affected. - Reasoning: The line instantiates a new `HashSet` object inside a loop, which can lead to unnecessary memory allocation and impact performance. - Proposed solution: Replace the line with `Set<com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription> descriptions = new HashSet<com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription>(source.getDescriptions());` to avoid unnecessary instantiation of a new `HashSet` object inside the loop. This way, the `HashSet` is created once outside the loop and filled with data inside the loop.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -74,16 +76,16 @@ public class PersistableProductOptionValuePopulator extends
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:33:22.511675):
  * TITLE: Avoid string concatenation in loops
  * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
+ * OUTLINE: The code line `com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription description = new com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription();` is most likely affected. - Reasoning: It instantiates a new object inside the code block, which is mentioned in the finding as a potential performance issue. - Proposed solution: Move the instantiation outside the code block if the instantiated object is not modified within the block.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
  **********************************/
-
-
+ **********************************/
 
 
 
@@ -92,7 +94,11 @@ public class PersistableProductOptionValuePopulator extends
  * CAST-Finding START #3 (2024-02-01 22:33:22.511675):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `throw new ConversionException("Language is null for code " + description.getLanguage() + " use language ISO code [en, fr ...]");` is most likely affected.  - Reasoning: It performs string concatenation inside a loop, which is discouraged by the finding.  - Proposed solution: Modify the code to avoid string concatenation inside the loop. Instead, each substring should be added to a list and joined after the loop terminates.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
