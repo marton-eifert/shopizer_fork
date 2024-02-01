@@ -59,8 +59,8 @@ public class CustomerOptionSet extends SalesManagerEntity<Long, CustomerOptionSe
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `private Integer sortOrder = new Integer(0);` is most likely affected.  - Reasoning: The line unnecessarily instantiates a new Integer object, leading to resource waste.  - Proposed solution: Replace `private Integer sortOrder = new Integer(0);` with `private int sortOrder = 0;` to avoid unnecessary instantiation of Integer object.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
