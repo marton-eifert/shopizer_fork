@@ -140,7 +140,9 @@ public class OrderShippingApi {
  * CAST-Finding START #1 (2024-02-01 23:08:31.766969):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `populator.populate(summary, shippingSummary, merchantStore, language);` is most likely affected. - Reasoning: It is inside the code section where the CAST-Finding is located. - Proposed solution: Move the line outside the loop if possible to avoid instantiations inside loops.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -153,13 +155,15 @@ public class OrderShippingApi {
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:08:31.766969):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `StringBuilder moduleName = new StringBuilder();` is most likely affected. - Reasoning: This line is the starting point of the code section and the finding suggests avoiding instantiations inside loops. - Proposed solution: Move the `StringBuilder moduleName = new StringBuilder();` line outside of the loop to avoid instantiating it at each iteration.  The code line `shipOption.setDescription(carrier);` is most likely affected. - Reasoning: This line sets the `carrier` value to the `shipOption` object, which is likely inside a loop. - Proposed solution: Move the `shipOption.setDescription(carrier);` line outside of the loop if possible, to avoid setting the `carrier` value at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
@@ -175,13 +179,15 @@ public class OrderShippingApi {
             // try to get the translate
 
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:08:31.766969):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `String note = messages.getMessage(moduleName.append(".note").toString(), locale, "");` is most likely affected. - Reasoning: It instantiates a new `String` object inside a loop, which can be memory-intensive and impact performance. - Proposed solution: Move the instantiation of the `String` object outside the loop and reuse it for each iteration to avoid unnecessary memory allocation.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
 
@@ -196,13 +202,15 @@ public class OrderShippingApi {
               shipOption.setOptionName(optionName);
             } catch (Exception e) { // label not found
 
-
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 23:08:31.766969):
  * TITLE: Avoid string concatenation in loops
  * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * OUTLINE: The code line `optionCodeBuilder.append("module.shipping.").append(shipOption.getShippingModuleCode());` is most likely affected. - Reasoning: It performs string concatenation inside a loop, which can result in quadratic running time and unnecessary temporary objects. - Proposed solution: Instead of performing string concatenation inside the loop, consider adding each substring to a list and join the list after the loop terminates.  The code line `LOGGER.warn("No shipping code found for " + optionCodeBuilder.toString());` is most likely affected. - Reasoning: It performs string concatenation inside a logging statement. - Proposed solution: Consider using parameterized logging to avoid string concatenation.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: OPEN
  * CAST-Finding END #4
  **********************************/
@@ -296,13 +304,15 @@ public class OrderShippingApi {
 
         for (ShippingOption shipOption : options) {
 
-
-
-
-
 /**********************************
  * CAST-Finding START #5 (2024-02-01 23:08:31.766969):
  * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `populator.populate(summary, shippingSummary, merchantStore, language);` is most likely affected.  - Reasoning: It is inside the code section where the CAST-Finding comment block is located.  - Proposed solution: Move the instantiation of `moduleName` outside the loop and change its value at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #5
+ **********************************/
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * STATUS: OPEN
  * CAST-Finding END #5
@@ -313,13 +323,15 @@ public class OrderShippingApi {
           moduleName.append("module.shipping.").append(shipOption.getShippingModuleCode());
 
           String carrier =
-              messages.getMessage(
-
-
-
-
 /**********************************
  * CAST-Finding START #6 (2024-02-01 23:08:31.766969):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `StringBuilder moduleName = new StringBuilder();` is most likely affected. - Reasoning: It instantiates a new `StringBuilder` object inside a loop, which can be memory-intensive and impact performance. - Proposed solution: Move the `StringBuilder moduleName = new StringBuilder();` line outside of the loop to avoid instantiating a new object at each iteration.  The code line `shipOption.setDescription(carrier);` is most likely affected. - Reasoning: It sets the `carrier` value to the `shipOption` object, which is likely inside a loop. - Proposed solution: Move the `shipOption.setDescription(carrier);` line outside of the loop if possible, or consider using a mutable class instead of a string to avoid creating a new object at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #6
+ **********************************/
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * STATUS: OPEN
@@ -335,13 +347,15 @@ public class OrderShippingApi {
           shipOption.setNote(note);
 
           // option name
-          if (!StringUtils.isBlank(shipOption.getOptionCode())) {
-            // try to get the translate
-
-
-
-
 /**********************************
+ * CAST-Finding START #7 (2024-02-01 23:08:31.766969):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `shipOption.setDescription(carrier);` is most likely affected. - Reasoning: Setting the description of a `shipOption` object inside a loop can result in unnecessary object instantiations and memory allocations if the loop iterates frequently. - Proposed solution: Move the instantiation of the `shipOption` object outside the loop and update its description inside the loop.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #7
+ **********************************/
  * CAST-Finding START #7 (2024-02-01 23:08:31.766969):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
@@ -353,13 +367,15 @@ public class OrderShippingApi {
             StringBuilder optionCodeBuilder = new StringBuilder();
             try {
 
-              optionCodeBuilder
-                  .append("module.shipping.")
-                  .append(shipOption.getShippingModuleCode());
-
-
-
-
+/**********************************
+ * CAST-Finding START #8 (2024-02-01 23:08:31.766969):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `optionCodeBuilder.append("module.shipping.").append(shipOption.getShippingModuleCode());` is most likely affected. - Reasoning: It is inside the code section where the finding is located. - Proposed solution: Move the instantiation of `optionCodeBuilder` outside the loop to avoid instantiating it at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #8
+ **********************************/
 /**********************************
  * CAST-Finding START #8 (2024-02-01 23:08:31.766969):
  * TITLE: Avoid instantiations inside loops
@@ -368,13 +384,15 @@ public class OrderShippingApi {
  * CAST-Finding END #8
  **********************************/
 
-
-              String optionName = messages.getMessage(optionCodeBuilder.toString(), new String[]{merchantStore.getStorename()},locale);
-              shipOption.setOptionName(optionName);
-            } catch (Exception e) { // label not found
-
-
-
+/**********************************
+ * CAST-Finding START #9 (2024-02-01 23:08:31.766969):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * OUTLINE: The code line `String optionName = messages.getMessage(optionCodeBuilder.toString(), new String[]{merchantStore.getStorename()},locale);` is most likely affected. - Reasoning: It involves string concatenation inside a loop, which can result in quadratic running time and unnecessary temporary objects. - Proposed solution: Instead of concatenating the strings inside the loop, consider adding each substring to a list and joining the list after the loop terminates.  The code line `LOGGER.warn("No shipping code found for " + optionCodeBuilder.toString());` is most likely affected. - Reasoning: It involves string concatenation. - Proposed solution: Consider using a `StringBuilder` or `String.format` to concatenate the strings efficiently.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
+ * CAST-Finding END #9
+ **********************************/
 
 /**********************************
  * CAST-Finding START #9 (2024-02-01 23:08:31.766969):
