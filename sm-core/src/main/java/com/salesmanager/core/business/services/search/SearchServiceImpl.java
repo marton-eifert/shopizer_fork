@@ -525,7 +525,9 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
  * CAST-Finding START #1 (2024-02-01 21:35:50.608248):
  * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
  * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
- * STATUS: OPEN
+ * OUTLINE: The code line `return new BufferedReader(...)` is most likely affected.  - Reasoning: It creates a BufferedReader without explicitly closing it, which can lead to resource leakage.  - Proposed solution: The BufferedReader should be closed explicitly after it is no longer needed. This can be done by adding a try-finally block or by using the try-with-resources statement to automatically close the BufferedReader.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
