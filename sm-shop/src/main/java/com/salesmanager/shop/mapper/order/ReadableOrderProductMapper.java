@@ -92,9 +92,9 @@ public class ReadableOrderProductMapper implements Mapper<OrderProduct, Readable
  * CAST-Finding START #1 (2024-02-01 22:29:34.684151):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * OUTLINE: The code line `target.setSubTotal(subTotalPrice);` is most likely affected. - Reasoning: It is inside the code block where the CAST-Finding is located. - Proposed solution: No specific solution proposed.  The code line `List<ReadableOrderProductAttribute> attributes = new ArrayList<ReadableOrderProductAttribute>();` is most likely affected. - Reasoning: It is inside the code block where the CAST-Finding is located. - Proposed solution: No specific solution proposed.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * * OUTLINE: NOT APPLICABLE (WITHDRAWN).
+ * INSTRUCTION: NOT APPLICABLE.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -106,15 +106,15 @@ public class ReadableOrderProductMapper implements Mapper<OrderProduct, Readable
 				} catch (ServiceException e) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:29:34.684151):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadableOrderProductAttribute readableAttribute = new ReadableOrderProductAttribute();` is most likely affected.  - Reasoning: It is the instantiation of an object inside a loop, which is a resource-intensive operation.  - Proposed solution: Move the instantiation of `ReadableOrderProductAttribute` outside of the loop to avoid unnecessary object creation.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
