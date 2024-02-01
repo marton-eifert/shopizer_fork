@@ -23,6 +23,19 @@ public class SessionUtil
         request.getSession().removeAttribute( key );
     }
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 23:45:21.143378):
+ * TITLE: Using stateful session (Servlet)
+ * DESCRIPTION: 
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
     public static void setSessionAttribute(final String key, final Object value, HttpServletRequest request) {
     	request.getSession().setAttribute( key, value );
     }
