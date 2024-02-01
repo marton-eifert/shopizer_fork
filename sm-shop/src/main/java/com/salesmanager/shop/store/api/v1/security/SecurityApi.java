@@ -78,8 +78,8 @@ public class SecurityApi {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code lines `Set<Permission> permissions = g.getPermissions();`, `List<ReadablePermission> readablePermissions = new ArrayList<ReadablePermission>();`, `for (Permission permission : permissions) {`, `ReadablePermission readablePermission = new ReadablePermission();`, `readablePermission.setName(permission.getPermissionName());`, and `readablePermission.setId(permission.getId());` are most likely affected.  Reasoning: These code lines are inside the loop where the CAST-Finding suggests avoiding instantiations inside loops.  Proposed solution: Move the instantiation of `ReadablePermission` outside the loop and reuse the same object for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -106,15 +106,15 @@ public class SecurityApi {
 		for (Permission permission : permissions) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:12:25.150066):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadablePermission readablePermission = new ReadablePermission();` is most likely affected.  - Reasoning: The instantiation of `ReadablePermission` inside the loop results in unnecessary object creation at each iteration, which can impact performance.  - Proposed solution: Move the instantiation of `ReadablePermission` outside the loop to avoid unnecessary object creation.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -137,15 +137,15 @@ public class SecurityApi {
 		List<Group> groups = groupService.list();
 		List<ReadableGroup> readableGroups = new ArrayList<ReadableGroup>();
 		for (Group group : groups) {
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:12:25.150066):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `List<Group> groups = groupService.list();` is most likely affected. - Reasoning: It retrieves a list of groups, which is used in the subsequent loop to create `ReadableGroup` objects. - Proposed solution: Not applicable. No action needed.  The code line `List<ReadableGroup> readableGroups = new ArrayList<ReadableGroup>();` is most likely affected. - Reasoning: It initializes an empty list to store `ReadableGroup` objects. - Proposed solution: Not applicable. No action needed.  The code line `for (Group group : groups) {` is most likely affected. - Reasoning: It iterates over the `groups` list to create `ReadableGroup` objects. - Proposed solution: Not applicable. No action needed.  The code line `ReadableGroup readableGroup = new ReadableGroup();` is most likely affected. - Reasoning: It instantiates a new `ReadableGroup` object for each iteration of the loop. - Proposed solution: Move the instantiation of `ReadableGroup` outside the loop and reuse the same object for each iteration.  The code line `readableGroup.setName(group.getGroupName());` is most likely affected. - Reasoning: It sets the name of the `ReadableGroup` object based on the corresponding `Group` object. - Proposed solution: Not applicable. No action needed.  The code line `readableGroup.setId(group.getId().longValue());` is most likely affected. - Reasoning: It sets the ID of the `ReadableGroup` object based on the corresponding `Group` object. - Proposed solution: Not applicable. No action needed.  The code line `readableGroup.setType(group.getGroupType().name());` is most likely affected. - Reasoning: It sets the type of the `ReadableGroup` object based on the corresponding `Group` object. - Proposed solution: Not applicable. No action needed.  The code line `readableGroups.add(readableGroup
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
