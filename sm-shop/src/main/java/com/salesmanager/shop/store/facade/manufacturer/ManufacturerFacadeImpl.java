@@ -191,8 +191,8 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadableManufacturer readableManufacturer = new ReadableManufacturer();` is most likely affected. - Reasoning: The instantiation of `ReadableManufacturer` inside the loop violates the finding's recommendation to avoid instantiations inside loops. - Proposed solution: Move the instantiation of `ReadableManufacturer` outside the loop to avoid unnecessary object instantiations.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -256,15 +256,15 @@ public ReadableManufacturerList listByStore(MerchantStore store, Language langua
         for (Manufacturer mf : manufacturers) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:37:11.340165):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `readableList.setNumber(m.getContent().size());` is most likely affected. - Reasoning: The size calculation of the content is performed at each iteration of the loop, which could be resource-intensive. - Proposed solution: Store the size of the content in a variable before the loop and use that variable to set the number of manufacturers, reducing the calculation overhead.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
