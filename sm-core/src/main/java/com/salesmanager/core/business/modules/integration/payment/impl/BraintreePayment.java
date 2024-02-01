@@ -173,6 +173,19 @@ public class BraintreePayment implements PaymentModule {
         } else {
             String errorString = "";
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-01 20:56:39.658771):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
                errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
             }
             
@@ -257,6 +270,19 @@ public class BraintreePayment implements PaymentModule {
         } else {
             String errorString = "";
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-01 20:56:39.659197):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
                errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
             }
             
@@ -347,6 +373,19 @@ public class BraintreePayment implements PaymentModule {
         } else {
             String errorString = "";
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-01 20:56:39.659197):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
                errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
             }
             
@@ -431,6 +470,19 @@ public class BraintreePayment implements PaymentModule {
         } else {
             String errorString = "";
             for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-01 20:56:39.659197):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
                errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
             }
             
