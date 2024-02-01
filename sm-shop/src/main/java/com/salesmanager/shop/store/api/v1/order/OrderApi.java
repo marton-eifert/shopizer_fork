@@ -128,8 +128,8 @@ public class OrderApi {
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `Customer customer = customerService.getById(id);` is most likely affected.  - Reasoning: The finding suggests avoiding the instantiation of primitive type wrappers, and the code line involves retrieving a customer object from the customer service based on the given ID, which may involve the instantiation of wrapper objects.  - Proposed solution: To address the finding, consider refactoring the code to avoid the unnecessary instantiation of wrapper objects, if possible.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -139,15 +139,15 @@ public class OrderApi {
 		if (customer == null) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:06:57.089723):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `Customer customer = customerService.getById(id);` is most likely affected. - Reasoning: This line retrieves the customer object from the customer service, and if it is null, an error message is triggered. - Proposed solution: Modify the line to use the Optional class to handle the possibility of a null customer object. For example: `Optional<Customer> customer = Optional.ofNullable(customerService.getById(id));`  The code line `if (customer == null) {` is most likely affected. - Reasoning: This line checks if the customer object is null and triggers an error message if it is. - Proposed solution: Modify the line to use the Optional class to check if the customer object is present. For example: `if (!customer.isPresent()) {`  The code line `LOGGER.error("Customer is null for id " + id);` is most likely affected. - Reasoning: This line logs an error message if the customer object is null. - Proposed solution: Modify the line to use the Optional class to log an error message if the customer object is not present. For example: `if (!customer.isPresent()) { LOGGER.error("Customer is null for id " + id); }`  The code line `response.sendError(404, "Customer is null for id " + id);` is most likely affected. - Reasoning: This line sends a 404 error response if the customer object is null. - Proposed solution: Modify the line to use the Optional class to send a 404 error response if the customer object is not present. For example: `if (!customer.isPresent()) { response.sendError(404, "Customer is null for id " + id); }`  The code line `return null;` is most likely affected. - Reasoning: This line returns null if the customer object is null. - Proposed solution: Modify the line to use the Optional class to return an empty Optional if the customer object is not present. For example:
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -202,15 +202,15 @@ public class OrderApi {
 			@ApiIgnore Language language, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		Principal principal = request.getUserPrincipal();
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:06:57.089723):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `Principal principal = request.getUserPrincipal();` is most likely affected. - Reasoning: Accessing the user principal from the request may have performance implications. - Proposed solution: Consider caching the user principal to avoid repeated calls to `request.getUserPrincipal()`.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -218,15 +218,15 @@ public class OrderApi {
 
 
 		String userName = principal.getName();
-
-		Customer customer = customerService.getByNick(userName);
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 23:06:57.089723):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `String userName = principal.getName();` is most likely affected. - Reasoning: The assignment of `principal.getName()` to a `String` variable could potentially involve a primitive type wrapper instantiation. - Proposed solution: Replace `String userName = principal.getName();` with `String userName = principal.getName().intern();` to use the `intern()` method to ensure that the `String` value is taken from the string pool.  The code line `Customer customer = customerService.getByNick(userName);` is most likely affected. - Reasoning: The assignment of `customerService.getByNick(userName)` to a `Customer` variable could potentially involve a primitive type wrapper instantiation. - Proposed solution: Replace `Customer customer = customerService.getByNick(userName);` with `Customer customer = customerService.getByNick(userName.intern());` to use the `intern()` method to ensure that the `String` value is taken from the string pool.  The code line `if (customer == null) {` is most likely affected. - Reasoning: The check for `customer == null` could potentially be a result of a primitive type wrapper instantiation. - Proposed solution: Replace `if (customer == null) {` with `if (customer == null || customer.equals("")) {` to also check if the `customer` variable is an empty string, which could indicate a primitive type wrapper instantiation.  The code line `response.sendError(401, "Error while listing orders, customer not authorized");` is most likely affected. - Reasoning: The use of `response.sendError()` with a message could potentially involve a primitive type wrapper instantiation. - Proposed solution: Replace `response.sendError(401, "Error while listing orders, customer not authorized");` with `response.sendError(401, "Error while listing orders, customer not authorized".intern());` to use the `intern()` method to ensure that the error message is taken from the string pool.  The code line `return null;
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
