@@ -89,8 +89,8 @@ public class ReadableOrderProductPopulator extends
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `target.setSubTotal(subTotalPrice);` is most likely affected. - Reasoning: It is inside the code block where the CAST-Finding comment is located. - Proposed solution: Not affected - The code line is already efficient and does not require any modification.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -102,15 +102,15 @@ public class ReadableOrderProductPopulator extends
 				} catch (ServiceException e) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:54:32.279021):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `String price = pricingService.getDisplayAmount(attr.getProductAttributePrice(), store);` is most likely affected. - Reasoning: It is inside the try block where the ServiceException is caught, which is related to the finding of avoiding instantiations inside loops. - Proposed solution: Move the instantiation of the `ReadableOrderProductAttribute` object outside the loop to avoid unnecessary instantiations inside the loop.  The code line `throw new ConversionException("Cannot format price",e);` is most likely affected. - Reasoning: It throws a ConversionException, which is related to the finding of avoiding instantiations inside loops. - Proposed solution: Move the instantiation of the `ReadableOrderProductAttribute` object outside the loop to avoid unnecessary instantiations inside the loop.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
