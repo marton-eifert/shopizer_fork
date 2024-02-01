@@ -388,8 +388,8 @@ public class CustomerFacadeImpl implements CustomerFacade {
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `if (StringUtils.isBlank(customerModel.getPassword()) && !StringUtils.isBlank(customer.getPassword())) {` is most likely affected.  - Reasoning: This line checks if the `customerModel` password is blank and the `customer` password is not blank, which is related to the finding about avoiding primitive type wrapper instantiation.  - Proposed solution: To address the finding, the code can be modified to avoid the instantiation of a new object for `customerModel.getPassword()` by directly assigning `customer.getPassword()` to `customerModel.setPassword()`. This can be done by replacing `customerModel.setPassword(customer.getPassword());` with `customerModel.setPassword(customer.getPassword());`.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -461,15 +461,15 @@ public class CustomerFacadeImpl implements CustomerFacade {
         for (Permission permission : permissions) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:13:52.186099):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `if (groups != null) {` is most likely affected. - Reasoning: The check for `groups` being null suggests a concern about the performance impact of instantiating objects inside the loop. - Proposed solution: Move the instantiation of the `groupsId` collection outside the loop and reuse it for each iteration.  The code line `if (groupsId != null && groupsId.size() > 0) {` is most likely affected. - Reasoning: The check for `groupsId` being not null and not empty suggests a concern about the performance impact of instantiating objects inside the loop. - Proposed solution: Move the instantiation of the `permissions` collection outside the loop and reuse it for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -646,15 +646,15 @@ public class CustomerFacadeImpl implements CustomerFacade {
 
   }
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:13:52.186099):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `customerService.save(customerToPopulate);` is most likely affected.  - Reasoning: It is the line immediately before the 'CAST-Finding' comment block.  - Proposed solution: Consider avoiding the instantiation of a new object for `customerToPopulate` if possible, as it may lead to resource waste.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -717,15 +717,15 @@ public class CustomerFacadeImpl implements CustomerFacade {
 
 	    if (customer.getId() == null || customer.getId() == 0) {
 	      throw new ServiceRuntimeException("Can't update a customer with null id");
-	    }
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 23:13:52.186099):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `if (customer.getId() == null || customer.getId() == 0) {` is most likely affected. - Reasoning: This line checks if the customer ID is null or 0, which is related to the finding of avoiding primitive type wrapper instantiation. - Proposed solution: To address the finding, the code can be modified to use primitive types instead of wrapper types for the customer ID comparison. For example, `if (customer.getId() == 0) {`.  The code line `throw new ServiceRuntimeException("Can't update a customer with null id");` is most likely affected. - Reasoning: This line throws an exception when the customer ID is null, which is related to the finding of avoiding primitive type wrapper instantiation. - Proposed solution: To address the finding, the code can be modified to use primitive types instead of wrapper types for the customer ID comparison. For example, `if (customer.getId() == 0) {`.  The code line `Customer cust = customerService.getById(customer.getId());` is most likely affected. - Reasoning: This line retrieves the customer object using the customer ID, which is related to the finding of avoiding primitive type wrapper instantiation. - Proposed solution: To address the finding, the code can be modified to use primitive types instead of wrapper types for the customer ID retrieval. For example, `Customer cust = customerService.getById(customer.getId().intValue());`.  The code line `customerPopulator.populate(customer, cust, store, store.getDefaultLanguage());` is most likely affected. - Reasoning: This line populates the customer object using the retrieved customer object, which is related to the finding of avoiding primitive type wrapper instantiation. - Proposed solution: To address the finding, no specific solution is needed for this line.  The code line `saveCustomer(cust);` is most likely affected. - Reasoning: This line saves the customer object, which is related to the finding of avoiding primitive type wrapper instantiation. - Proposed solution
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
@@ -880,14 +880,15 @@ public class CustomerFacadeImpl implements CustomerFacade {
     } else {
       customerOptin = new com.salesmanager.core.model.system.optin.CustomerOptin();
       customerOptin.setEmail(optin.getEmail());
-      customerOptin.setFirstName(optin.getFirstName());
-      customerOptin.setLastName(optin.getLastName());
-      customerOptin.setOptinDate(new Date());
-      customerOptin.setOptin(optinDef);
 /**********************************
  * CAST-Finding START #5 (2024-02-01 23:13:52.186099):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * OUTLINE: The code line `customerOptin.setLastName(optin.getLastName());` is most likely affected.  - Reasoning: It directly sets the last name of the `customerOptin` object, which is mentioned in the finding's description as a potential area of improvement.  - Proposed solution: Refactor the code to avoid unnecessary instantiation of the `CustomerOptin` object and consider using primitive types instead of wrapper types to optimize resource usage.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #5
+ **********************************/
  * OUTLINE: The code line `customerOptin.setLastName(optin.getLastName());` is most likely affected.  - Reasoning: It directly sets the last name of the `customerOptin` object, which is mentioned in the finding's description as a potential area of improvement.  - Proposed solution: Refactor the code to avoid unnecessary instantiation of the `CustomerOptin` object and consider using primitive types instead of wrapper types to optimize resource usage.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
