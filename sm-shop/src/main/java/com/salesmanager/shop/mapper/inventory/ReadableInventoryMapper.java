@@ -130,7 +130,9 @@ public class ReadableInventoryMapper implements Mapper<ProductAvailability, Read
  * CAST-Finding START #1 (2024-02-01 22:29:09.445076):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `populator = new ReadableProductPricePopulator();` is most likely affected. - Reasoning: The finding suggests avoiding instantiations inside loops, and this line instantiates a new `ReadableProductPricePopulator` object inside a loop. - Proposed solution: Move the instantiation of `ReadableProductPricePopulator` outside the loop and reuse the same object for each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
@@ -140,13 +142,15 @@ public class ReadableInventoryMapper implements Mapper<ProductAvailability, Read
 
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:29:09.445076):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
+ * OUTLINE: The code line `populator = new ReadableProductPricePopulator();` is most likely affected.  - Reasoning: It instantiates a new object inside the loop, which can hamper performance and increase resource usage.  - Proposed solution: Move the instantiation of the `ReadableProductPricePopulator` object outside the loop and reuse it at each iteration.  The code line `ReadableProductPrice p = populator.populate(price, new ReadableProductPrice(), store, language);` is most likely affected.  - Reasoning: It instantiates a new `ReadableProductPrice` object inside the loop, which can hamper performance and increase resource usage.  - Proposed solution: Move the instantiation of the `ReadableProductPrice` object outside the loop and reuse it at each iteration.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #2
+ **********************************/
  **********************************/
 
 
