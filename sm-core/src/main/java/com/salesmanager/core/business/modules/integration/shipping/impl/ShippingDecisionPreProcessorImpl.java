@@ -104,8 +104,8 @@ public class ShippingDecisionPreProcessorImpl implements ShippingQuotePrePostPro
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `weight = weight + pack.getShippingWeight();` is most likely affected.  - Reasoning: It performs an addition operation inside a loop, which can potentially lead to performance issues if the loop is executed a large number of times.  - Proposed solution: Move the instantiation of the `Double weight = 0.0;` outside the loop to avoid unnecessary object creation at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
