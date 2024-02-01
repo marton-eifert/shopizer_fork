@@ -121,8 +121,8 @@ public class ReadableCustomerMapper implements Mapper<Customer, ReadableCustomer
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `target.setDelivery(address);` is most likely affected. - Reasoning: It involves a method call that could potentially have performance implications. - Proposed solution: Consider moving the `address` assignment outside the loop if possible to avoid unnecessary method calls.  The code line `ReadableCustomerAttribute readableAttribute = new ReadableCustomerAttribute();` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which can be a performance issue. - Proposed solution: Consider moving the object instantiation outside the loop if possible to avoid unnecessary memory allocation.  The code line `readableAttribute.setId(attribute.getId());` is most likely affected. - Reasoning: It involves setting the ID of the `readableAttribute` object inside a loop, which can be a performance issue. - Proposed solution: Consider creating a mutable `ReadableCustomerAttribute` object outside the loop and updating its values inside the loop to avoid unnecessary object instantiations.  The code line `readableAttribute.setTextValue(attribute.getTextValue());` is most likely affected. - Reasoning: It involves setting the text value of the `readableAttribute` object inside a loop, which can be a performance issue. - Proposed solution: Consider creating a mutable `ReadableCustomerAttribute` object outside the loop and updating its values inside the loop to avoid unnecessary object instantiations.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -132,15 +132,15 @@ public class ReadableCustomerMapper implements Mapper<Customer, ReadableCustomer
 				readableAttribute.setTextValue(attribute.getTextValue());
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 22:24:33.257529):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadableCustomerAttribute readableAttribute = new ReadableCustomerAttribute();` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which can be a performance issue. - Proposed solution: Move the instantiation of `ReadableCustomerAttribute` outside the loop and reuse the same object for each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -149,15 +149,15 @@ public class ReadableCustomerMapper implements Mapper<Customer, ReadableCustomer
 				option.setId(attribute.getCustomerOption().getId());
 				option.setCode(attribute.getCustomerOption().getCode());
 
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 22:24:33.257529):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadableCustomerOption option = new ReadableCustomerOption();` is most likely affected. - Reasoning: It instantiates a new object inside a loop, which can be memory-intensive and impact performance. - Proposed solution: Move the instantiation of `ReadableCustomerOption` outside the loop to avoid unnecessary object creation at each iteration.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
@@ -169,29 +169,30 @@ public class ReadableCustomerMapper implements Mapper<Customer, ReadableCustomer
 				d.setName(attribute.getCustomerOption().getDescriptionsSettoList().get(0).getName());
 				option.setDescription(d);
 
-				readableAttribute.setCustomerOption(option);
-
-
 /**********************************
  * CAST-Finding START #4 (2024-02-01 22:24:33.257529):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `CustomerOptionDescription d = new CustomerOptionDescription();` is most likely affected. - Reasoning: It involves object instantiation inside a loop, which is a resource-intensive operation. - Proposed solution: Move the instantiation of `CustomerOptionDescription` outside of the loop and reuse the same instance for each iteration.
- * INSTRUCTION: {instruction}
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #4
+ **********************************/
  * STATUS: IN_PROGRESS
  * CAST-Finding END #4
  **********************************/
  * STATUS: OPEN
  * CAST-Finding END #4
  **********************************/
-
-
-				ReadableCustomerOptionValue optionValue = new ReadableCustomerOptionValue();
-				optionValue.setId(attribute.getCustomerOptionValue().getId());
 /**********************************
  * CAST-Finding START #5 (2024-02-01 22:24:33.257529):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `ReadableCustomerOptionValue optionValue = new ReadableCustomerOptionValue();` is most likely affected. - Reasoning: It instantiates a new object inside the loop, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `ReadableCustomerOptionValue` outside the loop and reuse the same object for each iteration.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #5
+ **********************************/
  * OUTLINE: The code line `ReadableCustomerOptionValue optionValue = new ReadableCustomerOptionValue();` is most likely affected. - Reasoning: It instantiates a new object inside the loop, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `ReadableCustomerOptionValue` outside the loop and reuse the same object for each iteration.
  * INSTRUCTION: {instruction}
  * STATUS: IN_PROGRESS
@@ -210,14 +211,15 @@ public class ReadableCustomerMapper implements Mapper<Customer, ReadableCustomer
 				optionValue.setDescription(vd);
 
 
-				readableAttribute.setCustomerOptionValue(optionValue);
-				target.getAttributes().add(readableAttribute);
-			}
-
-			if(source.getGroups() != null) {
 /**********************************
  * CAST-Finding START #6 (2024-02-01 22:24:33.257529):
  * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * OUTLINE: The code line `readableAttribute.setCustomerOptionValue(optionValue);` is most likely affected. - Reasoning: It is inside the loop and may be instantiated at each iteration, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `readableAttribute` outside the loop and change its value at each iteration.
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #6
+ **********************************/
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `readableAttribute.setCustomerOptionValue(optionValue);` is most likely affected. - Reasoning: It is inside the loop and may be instantiated at each iteration, which can hamper performance and increase resource usage. - Proposed solution: Move the instantiation of `readableAttribute` outside the loop and change its value at each iteration.
  * INSTRUCTION: {instruction}
