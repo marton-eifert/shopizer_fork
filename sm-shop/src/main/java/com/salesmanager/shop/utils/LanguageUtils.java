@@ -95,8 +95,8 @@ public class LanguageUtils {
  * TITLE: Using stateful session (Servlet)
  * DESCRIPTION: 
  * OUTLINE: The code line `language = store.getDefaultLanguage();` is most likely affected.  - Reasoning: It is the line immediately before the 'CAST-Finding' comment block.  - Proposed solution: No proposed solution as it is already correctly implemented.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
 
@@ -108,15 +108,15 @@ public class LanguageUtils {
           if (language == null) {
 
 
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:42:48.888441):
  * TITLE: Using stateful session (Servlet)
  * DESCRIPTION: 
  * OUTLINE: The code line `request.getSession().setAttribute(Constants.LANGUAGE, language);` is most likely affected.  - Reasoning: It sets the value of the `LANGUAGE` attribute in the session, which is referenced in the CAST-Finding comment block.  - Proposed solution: Add a check before setting the `LANGUAGE` attribute in the session to ensure that it is not already set. This can prevent unnecessary attribute setting and potential resource waste.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
@@ -156,15 +156,15 @@ public class LanguageUtils {
     if (localeResolver != null) {
       localeResolver.setLocale(request, response, locale);
     }
-
-
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:42:48.888441):
  * TITLE: Using stateful session (Servlet)
  * DESCRIPTION: 
  * OUTLINE: The code line `language = languageService.toLanguage(locale);` is most likely affected.  - Reasoning: This line directly relates to the setting of the `language` variable, which is mentioned in the CAST-Finding comment block.  - Proposed solution: Not affected - The code line `language = languageService.toLanguage(locale);` is already setting the `language` variable correctly based on the `locale`.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
+ * CAST-Finding END #3
+ **********************************/
  * CAST-Finding END #3
  **********************************/
  * CAST-Finding END #3
