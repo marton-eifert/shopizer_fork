@@ -117,11 +117,10 @@ public class ProductVariantGroupFacadeImpl implements ProductVariantGroupFacade 
  * TITLE: Avoid string concatenation in loops
  * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
  * OUTLINE: The code line `for(ProductVariant instance : group.getProductVariants()) {` is most likely affected. - Reasoning: It is a loop that instantiates the loop variable `instance` at each iteration, which aligns with the finding's suggestion to avoid instantiations inside loops. - Proposed solution: Move the instantiation of the loop variable `instance` outside the loop if possible.  NOT APPLICABLE. No code obviously affected.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #1
  **********************************/
-
 
 
 
@@ -131,9 +130,10 @@ public class ProductVariantGroupFacadeImpl implements ProductVariantGroupFacade 
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `throw new ResourceNotFoundException("Product instance [" + instance.getId() + " not found for store [" + store.getCode() + "]");` is most likely affected.  - Reasoning: It involves string concatenation inside a loop, which is discouraged by the finding.  - Proposed solution: Replace the string concatenation with a list to store each substring and join the list after the loop terminates.
- * INSTRUCTION: {instruction}
- * STATUS: IN_PROGRESS
+ * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
+ * STATUS: REVIEWED
  * CAST-Finding END #2
+ **********************************/
  **********************************/
  **********************************/
 
