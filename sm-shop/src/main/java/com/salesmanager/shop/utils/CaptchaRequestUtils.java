@@ -88,7 +88,9 @@ public class CaptchaRequestUtils {
  * CAST-Finding START #1 (2024-02-01 23:42:22.198426):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
- * STATUS: OPEN
+ * OUTLINE: The code lines `HttpEntity entity = httpResponse.getEntity();`, `byte[] responseBody =EntityUtils.toByteArray(entity);`, `String json = new String(responseBody);`, `Map<String,String> map = new HashMap<String,String>();`, `ObjectMapper mapper = new ObjectMapper();`, `map = mapper.readValue(json, new TypeReference<HashMap<String,String>>(){});`, and `String successInd = map.get(SUCCESS_INDICATOR);` are most likely affected.  Reasoning: These code lines involve handling the HTTP response entity, converting byte arrays to strings, deserializing JSON, and retrieving values from a map, which could potentially be inefficient or lead to resource waste.  Proposed solution: To address the finding, you can consider using more efficient alternatives for handling binary data, such as using streams instead of byte arrays. Additionally, you can optimize the creation of the ObjectMapper instance by reusing it instead of creating a new instance every time.
+ * INSTRUCTION: {instruction}
+ * STATUS: IN_PROGRESS
  * CAST-Finding END #1
  **********************************/
 
