@@ -512,28 +512,34 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 			
 	}
 
-	
+
+	/**********************************
+	 * CAST-Finding START #1 (2024-02-02 12:30:50.381664):
+	 * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+	 * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+	 * STATUS: RESOLVED
+	 * CAST-Finding END #1
+	 **********************************/
+
+	// follow the best practice of explicitly closing resources: use the try-with-resources statement
+	private String resourceAsText(Resource resource) throws Exception {
+		try (
+			InputStream mappingstream = resource.getInputStream();
+		 	BufferedReader reader = new BufferedReader(new InputStreamReader(mappingstream, StandardCharsets.UTF_8))
+		) {
+			return reader.lines().collect(Collectors.joining("\n"));
+		}
+	}		
+	/*
 	private String resourceAsText(Resource resource) throws Exception {
 		InputStream mappingstream = resource.getInputStream();
 		
 	    return new BufferedReader(
-
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:50.381664):
- * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
- * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
 	    	      new InputStreamReader(mappingstream, StandardCharsets.UTF_8))
 	    	        .lines()
 	    	        .collect(Collectors.joining("\n"));
 	}
+	*/
 	
 	private Resource loadSearchConfig(String file) {
 	    return resourceLoader.getResource(
