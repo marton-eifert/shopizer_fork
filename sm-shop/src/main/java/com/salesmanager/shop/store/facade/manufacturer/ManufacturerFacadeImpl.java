@@ -179,9 +179,9 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
 
       
       ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator();
-      List<ReadableManufacturer> returnList = new ArrayList<ReadableManufacturer>();
+	// Pre-allocate with the correct size avoids dynamic resizing during the loop
+      List<ReadableManufacturer> returnList = new ArrayList<ReadableManufacturer>(manufacturers.size());
   
-      for (Manufacturer m : manufacturers) {
 
 
 
@@ -192,13 +192,15 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `ReadableManufacturer readableManufacturer = new ReadableManufacturer();` is most likely affected. - Reasoning: The instantiation of `ReadableManufacturer` inside the loop violates the finding's recommendation to avoid instantiations inside loops. - Proposed solution: Move the instantiation of `ReadableManufacturer` outside the loop to avoid unnecessary object instantiations.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: WITHDRAWN
  * CAST-Finding END #1
  **********************************/
 
-
+      for (Manufacturer m : manufacturers) {
+	// Instantiation inside loop is valid
         ReadableManufacturer readableManufacturer = new ReadableManufacturer();
         populator.populate(m, readableManufacturer, store, language);
+	// List with pre-allocated size (see above)
         returnList.add(readableManufacturer);
       }
 
