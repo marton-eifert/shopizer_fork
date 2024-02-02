@@ -121,47 +121,39 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 		populator.setimageUtils(imageUtils);
 		
 		
-		ReadableProductList productList = new ReadableProductList();
-		for(Product product : products.getProducts()) {
-
-			//create new proxy product
-
-
 /**********************************
  * CAST-Finding START #2 (2024-02-01 23:35:41.435105):
  * TITLE: Avoid instantiations inside loops
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `for(Product product : products.getProducts()) {` is most likely affected. - Reasoning: This line starts a loop that iterates over the `products` list. Depending on what happens inside the loop, there could be potential resource waste or inefficiency. - Proposed solution: Consider moving any heavy instantiation or resource usage outside of the loop. If possible, create the necessary objects once outside the loop and reuse them inside the loop to avoid unnecessary memory allocation and resource usage.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: WITHDRAWN
  * CAST-Finding END #2
  **********************************/
- **********************************/
- **********************************/
 
+		ReadableProductList productList = new ReadableProductList();
+		for(Product product : products.getProducts()) {
 
+			//create new proxy product
+
+			// Instantiation inside loop is valid here
 			ReadableProduct readProduct = populator.populate(product, new ReadableProduct(), store, language);
+			productList.getProducts().add(readProduct);
+			
+		}
+		
+		productList.setNumber(Math.toIntExact(products.getTotalCount()));
 /**********************************
  * CAST-Finding START #3 (2024-02-01 23:35:41.435105):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `ReadableProduct readProduct = populator.populate(product, new ReadableProduct(), store, language);` is most likely affected. - Reasoning: It instantiates a new `ReadableProduct` object inside a loop, leading to unnecessary memory allocation. - Proposed solution: Move the instantiation of `ReadableProduct` outside the loop and reuse the same object for each iteration.  NOT APPLICABLE. No code obviously affected.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: SOLVED
  * CAST-Finding END #3
  **********************************/
- * CAST-Finding END #3
- **********************************/
- * CAST-Finding END #3
- **********************************/
-
-
-			productList.getProducts().add(readProduct);
-			
-		}
-		
-		productList.setNumber(Math.toIntExact(products.getTotalCount()));
-		productList.setRecordsTotal(new Long(products.getTotalCount()));
+		// Primitive type wrapper instantiation can be avoided
+		productList.setRecordsTotal(products.getTotalCount());
 
 		return productList;
 	}
