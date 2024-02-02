@@ -171,30 +171,36 @@ public class BraintreePayment implements PaymentModule {
         	com.braintreegateway.Transaction transaction = result.getTransaction();
         	authorizationId = transaction.getAuthorizedTransactionId();
         } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+		// QECI Fix: Use StringBuilder
+		StringBuilder errorMsg = new StringBuilder();
+            	// String errorString = "";
+		
+		errorMsg.append("Can't process Braintree authorization ");
+            	for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
 
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:42.222626):
- * TITLE: Avoid string concatenation in loops
- * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
-            
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree authorization " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+			/**********************************
+			 * CAST-Finding START #1 (2024-02-02 12:30:42.222626):
+			 * TITLE: Avoid string concatenation in loops
+			 * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #1
+			 **********************************/
+			// QECI Fix: Use StringBuilder
+			errorMsg.append("Error: ")
+				.append(error.getCode())
+				.append(": ")
+				.append(error.getMessage())
+				.append("\n");
+               		// errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+            	}
+		// QECI Fix: Use StringBuilder
+		String errorString = errorMsg.toString();
+		
+		IntegrationException te = new IntegrationException(errorString);
+		te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+		te.setMessageCode("message.payment.error");
+		te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+		throw te;
 
         }
         
@@ -268,30 +274,37 @@ public class BraintreePayment implements PaymentModule {
         	com.braintreegateway.Transaction settledTransaction = result.getTarget();
         	trxId = settledTransaction.getId();
         } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+		// QECI Fix: Use StringBuilder
+		StringBuilder errorMsg = new StringBuilder();
+            	// String errorString = "";
+		
+		errorMsg.append("Can't process Braintree refund ");
+		for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+		
+			/**********************************
+			 * CAST-Finding START #2 (2024-02-02 12:30:42.222626):
+			 * TITLE: Avoid string concatenation in loops
+			 * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #2
+			 **********************************/
 
-
-
-
-/**********************************
- * CAST-Finding START #2 (2024-02-02 12:30:42.222626):
- * TITLE: Avoid string concatenation in loops
- * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
- * CAST-Finding END #2
- **********************************/
-
-
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
+			// QECI Fix: Use StringBuilder
+			errorMsg.append("Error: ")
+				.append(error.getCode())
+				.append(": ")
+				.append(error.getMessage())
+				.append("\n");
+               		// errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+		}
+		// QECI Fix: Use StringBuilder
+		String errorString = errorMsg.toString();
             
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree refund " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+		IntegrationException te = new IntegrationException(errorString);
+		te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+		te.setMessageCode("message.payment.error");
+		te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+		throw te;
 
         }
         
@@ -371,30 +384,37 @@ public class BraintreePayment implements PaymentModule {
         	com.braintreegateway.Transaction transaction = result.getTarget();
         	trxId  = transaction.getId();
         } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+		// QECI Fix: Use StringBuilder
+		StringBuilder errorMsg = new StringBuilder();
+            	// String errorString = "";
 
+		errorMsg.append("Can't process Braintree auth + capture ")
+		for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
 
+			/**********************************
+			 * CAST-Finding START #3 (2024-02-02 12:30:42.222626):
+			 * TITLE: Avoid string concatenation in loops
+			 * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #3
+			 **********************************/
 
-
-/**********************************
- * CAST-Finding START #3 (2024-02-02 12:30:42.222626):
- * TITLE: Avoid string concatenation in loops
- * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
- * CAST-Finding END #3
- **********************************/
-
-
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
+			// QECI Fix: Use StringBuilder
+			errorMsg.append("Error: ")
+				.append(error.getCode())
+				.append(": ")
+				.append(error.getMessage())
+				.append("\n");
+               		// errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+		}
+		// QECI Fix: Use StringBuilder
+		String errorString = errorMsg.toString();
             
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree auth + capture " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+		IntegrationException te = new IntegrationException(errorString);
+		te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+		te.setMessageCode("message.payment.error");
+		te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+		throw te;
 
         }
         
