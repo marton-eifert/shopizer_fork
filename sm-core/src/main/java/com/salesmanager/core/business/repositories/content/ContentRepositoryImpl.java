@@ -48,26 +48,23 @@ public class ContentRepositoryImpl implements ContentRepositoryCustom {
 			
 			List<ContentDescription> descriptions = new ArrayList<ContentDescription>();
 			for(Content c : contents) {
-					String name = c.getDescription().getName();
-					String url = c.getDescription().getSeUrl();
+				String name = c.getDescription().getName();
+				String url = c.getDescription().getSeUrl();
 
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:45.754910):
- * TITLE: Avoid instantiations inside loops
- * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
-					ContentDescription contentDescription = new ContentDescription();
-					contentDescription.setName(name);
-					contentDescription.setSeUrl(url);
-					contentDescription.setContent(c);
-					descriptions.add(contentDescription);
+				/**********************************
+				 * CAST-Finding START #1 (2024-02-02 12:30:45.754910):
+				 * TITLE: Avoid instantiations inside loops
+				 * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+				 * STATUS: WITHDRAWN
+				 * CAST-Finding END #1
+				 **********************************/
+				
+				// Instantiation inside loop is valid here
+				ContentDescription contentDescription = new ContentDescription();
+				contentDescription.setName(name);
+				contentDescription.setSeUrl(url);
+				contentDescription.setContent(c);
+				descriptions.add(contentDescription);
 					
 			}
 			
