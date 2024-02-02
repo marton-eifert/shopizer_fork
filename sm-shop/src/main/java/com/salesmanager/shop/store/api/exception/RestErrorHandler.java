@@ -29,21 +29,25 @@ public class RestErrorHandler {
         Objects.requireNonNull(exception.getCause());
         Throwable rootCause = exception.getCause();
 
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:31:04.731239):
- * TITLE: Avoid calling a function in a condition loop
- * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
+        /**********************************
+         * CAST-Finding START #1 (2024-02-02 12:31:04.731239):
+         * TITLE: Avoid calling a function in a condition loop
+         * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+         * STATUS: RESOLVED
+         * CAST-Finding END #1
+         **********************************/
+        
+        // QECI Fix
+        Throwable cause = rootCause.getCause();
+        while (cause != null && cause != rootCause) {
+            rootCause = cause;
+            cause = rootCause.getCause();
+        }
+/*
         while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
             rootCause = rootCause.getCause();
         }
+*/
         ErrorEntity errorEntity = createErrorEntity("500", exception.getMessage(),
         		rootCause.getMessage());
         return errorEntity;
@@ -60,21 +64,25 @@ public class RestErrorHandler {
         log.error(exception.getErrorMessage(), exception);
         Throwable rootCause = exception.getCause();
 
+        /**********************************
+         * CAST-Finding START #2 (2024-02-02 12:31:04.732238):
+         * TITLE: Avoid calling a function in a condition loop
+         * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+         * STATUS: RESOLVED
+         * CAST-Finding END #2
+         **********************************/
 
-
-
-/**********************************
- * CAST-Finding START #2 (2024-02-02 12:31:04.732238):
- * TITLE: Avoid calling a function in a condition loop
- * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
- * STATUS: OPEN
- * CAST-Finding END #2
- **********************************/
-
-
+        // QECI Fix
+        Throwable cause = rootCause.getCause();
+        while (cause != null && cause != rootCause) {
+            rootCause = cause;
+            cause = rootCause.getCause();
+        }
+/*
         while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
             rootCause = rootCause.getCause();
         }
+*/
         ErrorEntity errorEntity = createErrorEntity(exception.getErrorCode()!=null?exception.getErrorCode():"500", exception.getErrorMessage(),
         		rootCause.getMessage());
         return errorEntity;
