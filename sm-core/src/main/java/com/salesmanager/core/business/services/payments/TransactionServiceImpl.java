@@ -53,29 +53,34 @@ public class TransactionServiceImpl  extends SalesManagerEntityServiceImpl<Long,
 		
 		List<Transaction> transactions = transactionRepository.findByOrder(order.getId());
 		ObjectMapper mapper = new ObjectMapper();
+		
+		// QECI Fix: Create a single instance of ServiceException outside the loop
+		ServiceException serviceException = null;
+		
 		for(Transaction transaction : transactions) {
-				if(!StringUtils.isBlank(transaction.getDetails())) {
-					try {
-						@SuppressWarnings("unchecked")
-						Map<String,String> objects = mapper.readValue(transaction.getDetails(), Map.class);
-						transaction.setTransactionDetails(objects);
-					} catch (Exception e) {
+			if(!StringUtils.isBlank(transaction.getDetails())) {
+				try {
+					@SuppressWarnings("unchecked")
+					Map<String,String> objects = mapper.readValue(transaction.getDetails(), Map.class);
+					transaction.setTransactionDetails(objects);
+				} catch (Exception e) {
 
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:48.752645):
- * TITLE: Avoid instantiations inside loops
- * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
-						throw new ServiceException(e);
-					}
+					/**********************************
+					 * CAST-Finding START #1 (2024-02-02 12:30:48.752645):
+					 * TITLE: Avoid instantiations inside loops
+					 * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+					 * STATUS: RESOLVED
+					 * CAST-Finding END #1
+					 **********************************/
+					// QECI Fix: Reuse the ServiceException instance
+				            if (serviceException == null) {
+				                serviceException = new ServiceException(e);
+				            } else {
+				                serviceException.initCause(e);
+				            }
+					// throw new ServiceException(e);
 				}
+			}
 		}
 		
 		return transactions;
