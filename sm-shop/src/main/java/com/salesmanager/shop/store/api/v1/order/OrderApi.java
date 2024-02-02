@@ -119,45 +119,39 @@ public class OrderApi {
 			@RequestParam(value = "count", required = false) Integer count, @ApiIgnore MerchantStore merchantStore,
 			@ApiIgnore Language language, HttpServletResponse response) throws Exception {
 
-
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:31:05.756584):
- * TITLE: Avoid primitive type wrapper instantiation
- * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
 		Customer customer = customerService.getById(id);
 
 		if (customer == null) {
-
-
-
-
-/**********************************
- * CAST-Finding START #2 (2024-02-02 12:31:05.756584):
- * TITLE: Avoid primitive type wrapper instantiation
- * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
- * STATUS: OPEN
- * CAST-Finding END #2
- **********************************/
-
-
 			LOGGER.error("Customer is null for id " + id);
 			response.sendError(404, "Customer is null for id " + id);
 			return null;
 		}
 
 		if (start == null) {
-			start = new Integer(0);
+			/**********************************
+			 * CAST-Finding START #1 (2024-02-02 12:31:05.756584):
+			 * TITLE: Avoid primitive type wrapper instantiation
+			 * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #1
+			 **********************************/
+			
+			// QECI Fix
+			start = 0;
+			// start = new Integer(0);
 		}
 		if (count == null) {
-			count = new Integer(100);
+			/**********************************
+			 * CAST-Finding START #2 (2024-02-02 12:31:05.756584):
+			 * TITLE: Avoid primitive type wrapper instantiation
+			 * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #2
+			 **********************************/
+			
+			// QECI Fix
+			count = 100;
+			// count = new Integer(100);
 		}
 
 		ReadableCustomer readableCustomer = new ReadableCustomer();
@@ -199,34 +193,9 @@ public class OrderApi {
 
 		Principal principal = request.getUserPrincipal();
 
-
-
-
-/**********************************
- * CAST-Finding START #3 (2024-02-02 12:31:05.756584):
- * TITLE: Avoid primitive type wrapper instantiation
- * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
- * STATUS: OPEN
- * CAST-Finding END #3
- **********************************/
-
-
 		String userName = principal.getName();
 
 		Customer customer = customerService.getByNick(userName);
-
-
-
-
-/**********************************
- * CAST-Finding START #4 (2024-02-02 12:31:05.756584):
- * TITLE: Avoid primitive type wrapper instantiation
- * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
- * STATUS: OPEN
- * CAST-Finding END #4
- **********************************/
-
-
 
 		if (customer == null) {
 			response.sendError(401, "Error while listing orders, customer not authorized");
@@ -234,10 +203,30 @@ public class OrderApi {
 		}
 
 		if (page == null) {
-			page = new Integer(0);
+			/**********************************
+			 * CAST-Finding START #3 (2024-02-02 12:31:05.756584):
+			 * TITLE: Avoid primitive type wrapper instantiation
+			 * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #3
+			 **********************************/
+			
+			// QECI Fix
+			page = 0;
+			// page = new Integer(0);
 		}
 		if (count == null) {
-			count = new Integer(100);
+			/**********************************
+			 * CAST-Finding START #4 (2024-02-02 12:31:05.756584):
+			 * TITLE: Avoid primitive type wrapper instantiation
+			 * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #4
+			 **********************************/
+			
+			// QECI Fix
+			count = 100;
+			// count = new Integer(100);
 		}
 
 		ReadableCustomer readableCustomer = new ReadableCustomer();
