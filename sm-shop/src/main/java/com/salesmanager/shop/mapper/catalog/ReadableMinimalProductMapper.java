@@ -113,39 +113,37 @@ public class ReadableMinimalProductMapper implements Mapper<Product, ReadableMin
 			List<ReadableImage> imageList = new ArrayList<ReadableImage>();
 			
 			String contextPath = imageUtils.getContextPath();
+
+			// QECI Fix: Move instantation outside loop 
+			StringBuilder imgPath = new StringBuilder();
 			
 			for(ProductImage img : images) {
 
+				/**********************************
+				 * CAST-Finding START #1 (2024-02-02 12:30:55.877188):
+				 * TITLE: Avoid instantiations inside loops
+				 * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+				 * STATUS: WITHDRAWN
+				 * CAST-Finding END #1
+				 **********************************/
 
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:55.877188):
- * TITLE: Avoid instantiations inside loops
- * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
+				// Instantiation inside loop is valid here
 				ReadableImage prdImage = new ReadableImage();
 				prdImage.setImageName(img.getProductImage());
 				prdImage.setDefaultImage(img.isDefaultImage());
+				
+				/**********************************
+				 * CAST-Finding START #2 (2024-02-02 12:30:55.877188):
+				 * TITLE: Avoid instantiations inside loops
+				 * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+				 * STATUS: RESOLVED
+				 * CAST-Finding END #2
+				 **********************************/
 
-
-
-
-
-/**********************************
- * CAST-Finding START #2 (2024-02-02 12:30:55.877188):
- * TITLE: Avoid instantiations inside loops
- * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
- * STATUS: OPEN
- * CAST-Finding END #2
- **********************************/
-
-
-				StringBuilder imgPath = new StringBuilder();
+				// QECI Fix: Reset the StringBuilder that was instantiated outside the loop only once
+				imgPath.setLength(0);
+				// StringBuilder imgPath = new StringBuilder();
+				
 				imgPath.append(contextPath).append(imageUtils.buildProductImageUtils(store, source.getSku(), img.getProductImage()));
 
 				prdImage.setImageUrl(imgPath.toString());
