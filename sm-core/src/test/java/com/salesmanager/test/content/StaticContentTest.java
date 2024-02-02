@@ -47,72 +47,115 @@ public class StaticContentTest extends com.salesmanager.test.common.AbstractSale
 	private final static String OUTPUT_FOLDER = "/Users/carlsamson/Documents/test/";
 	
 	
-    @Test
-    public void createImage()
-        throws ServiceException, FileNotFoundException, IOException
-    {
 
-        MerchantStore store = merchantService.getByCode( MerchantStore.DEFAULT_STORE );
-        final File file1 = new File( IMAGE_FILE);
-
-        if ( !file1.exists() || !file1.canRead() )
-        {
-            throw new ServiceException( "Can't read" + file1.getAbsolutePath() );
-        }
-
-
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:51.862426):
- * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
- * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
-        final byte[] is = IOUtils.toByteArray( new FileInputStream( file1 ) );
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream( is );
-        final InputContentFile cmsContentImage = new InputContentFile();
-        cmsContentImage.setFileName( file1.getName() );
-        cmsContentImage.setFile( inputStream );
-        cmsContentImage.setFileContentType(FileContentType.IMAGE);
-        
-        //Add image
-        contentService.addContentFile(store.getCode(), cmsContentImage);
-
-    
-        //get image
+	
+	/**********************************
+	 * CAST-Finding START #1 (2024-02-02 12:30:51.862426):
+	 * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+	 * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+	 * STATUS: RESOLVED
+	 * CAST-Finding END #1
+	 **********************************/
+	
+	/**********************************
+	 * CAST-Finding START #2 (2024-02-02 12:30:51.862426):
+	 * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
+	 * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
+	 * STATUS: RESOLVED
+	 * CAST-Finding END #2
+	 **********************************/
+	
+	@Test
+	public void createImage()
+	        throws ServiceException, FileNotFoundException, IOException
+	{
+	
+		MerchantStore store = merchantService.getByCode( MerchantStore.DEFAULT_STORE );
+		final File file1 = new File( IMAGE_FILE);
+		
+		if ( !file1.exists() || !file1.canRead() )
+		{
+			throw new ServiceException( "Can't read" + file1.getAbsolutePath() );
+		}
+	
+		// CAST-Finding #1
+		// QECI Fix: To address finding related to not explicitly closing files or streams, use try-with-resources statements
+		try (
+			FileInputStream fis = new FileInputStream(file1)
+		) {
+			final byte[] is = IOUtils.toByteArray(fis);
+			final ByteArrayInputStream inputStream = new ByteArrayInputStream(is);
+			final InputContentFile cmsContentImage = new InputContentFile();
+			cmsContentImage.setFileName(file1.getName());
+			cmsContentImage.setFile(inputStream);
+			cmsContentImage.setFileContentType(FileContentType.IMAGE);
+			
+			//Add image
+			contentService.addContentFile(store.getCode(), cmsContentImage);
+		}
+	
+		//get image
 		OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());
+		
+		//print image
+		
+		// CAST-Finding #2
+		// QECI Fix: To address finding related to not explicitly closing files or streams, use try-with-resources statements
+	    	try (
+			OutputStream outputStream = new FileOutputStream(OUTPUT_FOLDER + image.getFileName());
+			ByteArrayOutputStream baos = image.getFile()
+		) {
+			baos.writeTo(outputStream);
+		}
+		//remove image
+		contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());
+	}
 
-        //print image
-
-
-
-
-/**********************************
- * CAST-Finding START #2 (2024-02-02 12:30:51.862426):
- * TITLE: Avoid Programs not using explicitly OPEN and CLOSE for files or streams
- * DESCRIPTION: Not closing files explicitly into your programs can occur memory issues. Leaving files opened unnecessarily has many downsides. They may consume limited system resources such as file descriptors. Code that deals with many such objects may exhaust those resources unnecessarily if they're not returned to the system promptly after use.
- * STATUS: OPEN
- * CAST-Finding END #2
- **********************************/
-
-
-   	 	OutputStream outputStream = new FileOutputStream (OUTPUT_FOLDER + image.getFileName()); 
-
-   	 	ByteArrayOutputStream baos =  image.getFile();
-   	 	baos.writeTo(outputStream);
+	/*
+	@Test
+	public void createImage()
+	        throws ServiceException, FileNotFoundException, IOException
+	{
+	
+	        MerchantStore store = merchantService.getByCode( MerchantStore.DEFAULT_STORE );
+	        final File file1 = new File( IMAGE_FILE);
+	
+	        if ( !file1.exists() || !file1.canRead() )
+	        {
+	            throw new ServiceException( "Can't read" + file1.getAbsolutePath() );
+	        }
+		
+		// CAST-Finding #1
+	        final byte[] is = IOUtils.toByteArray( new FileInputStream( file1 ) );
+	        final ByteArrayInputStream inputStream = new ByteArrayInputStream( is );
+	        final InputContentFile cmsContentImage = new InputContentFile();
+	        cmsContentImage.setFileName( file1.getName() );
+	        cmsContentImage.setFile( inputStream );
+	        cmsContentImage.setFileContentType(FileContentType.IMAGE);
+	        
+	        //Add image
+	        contentService.addContentFile(store.getCode(), cmsContentImage);
+	
+	    
+	        //get image
+		OutputContentFile image = contentService.getContentFile(store.getCode(), FileContentType.IMAGE, file1.getName());
+	
+	        //print image
+	
+		// CAST-Finding #2
+		OutputStream outputStream = new FileOutputStream (OUTPUT_FOLDER + image.getFileName()); 
+	
+		ByteArrayOutputStream baos =  image.getFile();
+		baos.writeTo(outputStream);
 		
 		
 		//remove image
-   	 	contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());
-		
-
-
-    }
+		contentService.removeFile(store.getCode(), FileContentType.IMAGE, file1.getName());
+			
+	
+	
+	}
+	*/
 	
 
 }
