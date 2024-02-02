@@ -53,6 +53,10 @@ public class CacheUtils {
 		
 		  net.sf.ehcache.Cache cacheImpl = (net.sf.ehcache.Cache) cache.getNativeCache();
 		  List<String> returnKeys = new ArrayList<String>();
+
+		// QECI Fix: Use StringBuilder
+		StringBuilder logMsg = new StringBuilder();
+		
 		  for (Object key: cacheImpl.getKeys()) {
 		    
 			  
@@ -70,20 +74,19 @@ public class CacheUtils {
 					}
 
 				} catch (Exception e) {
+					
+					/**********************************
+					 * CAST-Finding START #1 (2024-02-02 12:30:50.836571):
+					 * TITLE: Avoid string concatenation in loops
+					 * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+					 * STATUS: RESOLVED
+					 * CAST-Finding END #1
+					 **********************************/
 
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:50.836571):
- * TITLE: Avoid string concatenation in loops
- * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
-					LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
+					// QECI Fix: Use StringBuilder
+					logMsg.append("key ").append(key).append(" cannot be converted to a String or parsed");
+					LOGGER.equals(logMsg.toString());
+					// LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
 				}  
 		  }
 
@@ -100,6 +103,10 @@ public class CacheUtils {
 	
 	public void removeAllFromCache(MerchantStore store) throws Exception {
 		  net.sf.ehcache.Cache cacheImpl = (net.sf.ehcache.Cache) cache.getNativeCache();
+		
+		// QECI Fix: Use StringBuilder
+		StringBuilder logMsg = new StringBuilder();
+		
 		  for (Object key: cacheImpl.getKeys()) {
 				try {
 					String sKey = (String)key;
@@ -116,19 +123,18 @@ public class CacheUtils {
 
 				} catch (Exception e) {
 
+					/**********************************
+					 * CAST-Finding START #2 (2024-02-02 12:30:50.836571):
+					 * TITLE: Avoid string concatenation in loops
+					 * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+					 * STATUS: RESOLVED
+					 * CAST-Finding END #2
+					 **********************************/
 
-
-
-/**********************************
- * CAST-Finding START #2 (2024-02-02 12:30:50.836571):
- * TITLE: Avoid string concatenation in loops
- * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
- * CAST-Finding END #2
- **********************************/
-
-
-					LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
+					// QECI Fix: Use StringBuilder
+					logMsg.append("key ").append(key).append(" cannot be converted to a String or parsed");
+					LOGGER.equals(logMsg.toString());
+					// LOGGER.equals("key " + key + " cannot be converted to a String or parsed");
 				}  
 		  }
 	}
