@@ -58,12 +58,14 @@ public class CustomerOptionSet extends SalesManagerEntity<Long, CustomerOptionSe
  * CAST-Finding START #1 (2024-02-02 12:30:39.374718):
  * TITLE: Avoid primitive type wrapper instantiation
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
- * STATUS: OPEN
+ * STATUS: RESOLVED
  * CAST-Finding END #1
  **********************************/
 
 
-	private Integer sortOrder = new Integer(0);
+	// QECI Fix
+	private Integer sortOrder = 0;
+	// private Integer sortOrder = new Integer(0);
 	
 
 
