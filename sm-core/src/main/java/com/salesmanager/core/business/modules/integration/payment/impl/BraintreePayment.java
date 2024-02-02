@@ -488,30 +488,39 @@ public class BraintreePayment implements PaymentModule {
         	com.braintreegateway.Transaction settledTransaction = result.getTarget();
         	trxId = settledTransaction.getId();
         } else {
-            String errorString = "";
-            for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
-
-
-
-
-/**********************************
- * CAST-Finding START #4 (2024-02-02 12:30:42.222626):
- * TITLE: Avoid string concatenation in loops
- * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
- * STATUS: OPEN
- * CAST-Finding END #4
- **********************************/
-
-
-               errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
-            }
+		// QECI Fix: Use StringBuilder
+		StringBuilder errorMsg = new StringBuilder();
+		// String errorString = "";
+		
+		errorMsg.append("Can't process Braintree refund ")
+		for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
+		
+			/**********************************
+			 * CAST-Finding START #4 (2024-02-02 12:30:42.222626):
+			 * TITLE: Avoid string concatenation in loops
+			 * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+			 * STATUS: RESOLVED
+			 * CAST-Finding END #4
+			 **********************************/
+			
+			// QECI Fix: Use StringBuilder
+			errorMsg.append("Error: ")
+				.append(error.getCode())
+				.append(": ")
+				.append(error.getMessage())
+				.append("\n");
+			// errorString += "Error: " + error.getCode() + ": " + error.getMessage() + "\n";
+		}
+		// QECI Fix: Use StringBuilder
+		String errorString = errorMsg.toString();
             
-			IntegrationException te = new IntegrationException(
-					"Can't process Braintree refund " + errorString);
-			te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
-			te.setMessageCode("message.payment.error");
-			te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
-			throw te;
+		IntegrationException te = new IntegrationException(errorString);
+            
+		//IntegrationException te = new IntegrationException("Can't process Braintree refund " + errorString);
+		te.setExceptionType(IntegrationException.TRANSACTION_EXCEPTION);
+		te.setMessageCode("message.payment.error");
+		te.setErrorCode(IntegrationException.TRANSACTION_EXCEPTION);
+		throw te;
 
         }
         
