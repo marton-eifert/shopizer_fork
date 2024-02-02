@@ -711,7 +711,33 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			int count = 0;
 			for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
 				countQ.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-02 12:30:45.101806):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 				countQ.setParameter("val" + count + attributeCriteria.getAttributeCode(),
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-02 12:30:45.101806):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 						"%" + attributeCriteria.getAttributeValue() + "%");
 				count++;
 			}
@@ -931,7 +957,33 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			int cnt = 0;
 			for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
 				q.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-02 12:30:45.101806):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 				q.setParameter("val" + cnt + attributeCriteria.getAttributeCode(),
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-02 12:30:45.101806):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 						"%" + attributeCriteria.getAttributeValue() + "%");
 				cnt++;
 			}
