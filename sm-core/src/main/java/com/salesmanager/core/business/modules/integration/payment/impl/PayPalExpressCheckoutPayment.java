@@ -171,7 +171,33 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 			
 			for(ShoppingCartItem cartItem : items) {
 			
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-02 12:30:42.733105):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 				PaymentDetailsItemType item = new PaymentDetailsItemType();
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-02 12:30:42.733105):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 				BasicAmountType amt = new BasicAmountType();
 				amt.setCurrencyID(urn.ebay.apis.eBLBaseComponents.CurrencyCodeType.fromValue(payment.getCurrency().getCode()));
 				amt.setValue(pricingService.getStringAmount(cartItem.getFinalPrice().getFinalPrice(), store));
@@ -191,6 +217,19 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 			for(OrderTotal total : orderTotals) {
 				
 				if(total.getModule().equals(Constants.OT_SHIPPING_MODULE_CODE)) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-02 12:30:42.733105):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 					BasicAmountType shipping = new BasicAmountType();
 					shipping.setCurrencyID(urn.ebay.apis.eBLBaseComponents.CurrencyCodeType.fromValue(store.getCurrency().getCode()));
 					shipping.setValue(pricingService.getStringAmount(total.getValue(), store));
@@ -199,6 +238,19 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 				}
 				
 				if(total.getModule().equals(Constants.OT_HANDLING_MODULE_CODE)) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-02 12:30:42.733105):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 					BasicAmountType handling = new BasicAmountType();
 					handling.setCurrencyID(urn.ebay.apis.eBLBaseComponents.CurrencyCodeType.fromValue(store.getCurrency().getCode()));
 					handling.setValue(pricingService.getStringAmount(total.getValue(), store));
@@ -208,6 +260,19 @@ public class PayPalExpressCheckoutPayment implements PaymentModule {
 				
 				if(total.getModule().equals(Constants.OT_TAX_MODULE_CODE)) {
 					if(tax==null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-02 12:30:42.733105):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
 						tax = new BigDecimal("0");
 					}
 					tax = tax.add(total.getValue());
