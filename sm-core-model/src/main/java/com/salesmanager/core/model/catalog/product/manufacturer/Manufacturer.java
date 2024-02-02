@@ -52,6 +52,19 @@ public class Manufacturer extends SalesManagerEntity<Long, Manufacturer> impleme
 	@Column(name = "MANUFACTURER_IMAGE")
 	private String image;
 	
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-02 12:30:38.874870):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 	@Column(name="SORT_ORDER")
 	private Integer order = new Integer(0);
 
