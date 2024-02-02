@@ -28,6 +28,19 @@ public class RestErrorHandler {
         log.error(exception.getMessage(), exception);
         Objects.requireNonNull(exception.getCause());
         Throwable rootCause = exception.getCause();
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-02 12:31:04.731239):
+ * TITLE: Avoid calling a function in a condition loop
+ * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
         while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
             rootCause = rootCause.getCause();
         }
@@ -46,6 +59,19 @@ public class RestErrorHandler {
     public @ResponseBody ErrorEntity handleServiceException(ServiceRuntimeException exception) {
         log.error(exception.getErrorMessage(), exception);
         Throwable rootCause = exception.getCause();
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-02 12:31:04.732238):
+ * TITLE: Avoid calling a function in a condition loop
+ * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
         while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
             rootCause = rootCause.getCause();
         }
