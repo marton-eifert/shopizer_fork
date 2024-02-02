@@ -60,11 +60,19 @@ public class BeanUtils
  * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
  * OUTLINE: The code line `for ( int i = 0; i < propertyDescriptors.length; i++ )` is most likely affected.  - Reasoning: The loop condition is a comparison to the length of the `propertyDescriptors` array, which is a non-zero value. This violates the finding's recommendation to prefer comparison to 0 in loop conditions.  - Proposed solution: Change the loop condition to `for ( int i = propertyDescriptors.length - 1; i >= 0; i-- )` to optimize the loop by comparing against 0 instead of the length of the array.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: SOLVED
  * CAST-Finding END #1
  **********************************/
 
-
+     /*This change ensures that the loop iterates in a decreasing order and terminates as soon as a matching PropertyDescriptor is found. It still follows the recommended pattern of comparing against zero, and it can be a valid optimization if it fits the logic of your program.*/
+        for (int i = propertyDescriptors.length - 1; i >= 0; i--) {
+            PropertyDescriptor currentPropertyDescriptor = propertyDescriptors[i];
+            if (currentPropertyDescriptor.getName().equals(propertyname)) {
+                propertyDescriptor = currentPropertyDescriptor;
+                break;  // Exit the loop once a match is found
+            }
+        }
+        /*
         for ( int i = 0; i < propertyDescriptors.length; i++ )
         {
             PropertyDescriptor currentPropertyDescriptor = propertyDescriptors[i];
@@ -73,7 +81,7 @@ public class BeanUtils
                 propertyDescriptor = currentPropertyDescriptor;
             }
 
-        }
+        }*/
         return propertyDescriptor;
     }
     
