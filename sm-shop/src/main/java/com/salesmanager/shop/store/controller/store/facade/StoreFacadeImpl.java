@@ -329,6 +329,19 @@ public class StoreFacadeImpl implements StoreFacade {
 		}
 	}
 
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-02 12:31:07.832296):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
+
 	private MerchantConfigEntity convertToMerchantConfigEntity(MerchantConfiguration config) {
 		MerchantConfigEntity configTO = new MerchantConfigEntity();
 		configTO.setId(config.getId());
