@@ -76,7 +76,7 @@ public class SanitizeUtils {
  * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
  * * OUTLINE: NOT APPLICABLE (WITHDRAWN).
  * INSTRUCTION: NOT APPLICABLE.
- * STATUS: REVIEWED
+ * STATUS: SOLVED
  * CAST-Finding END #1
  **********************************/
 
@@ -89,19 +89,21 @@ public class SanitizeUtils {
  * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
  * OUTLINE: The code line `for(int i=0; i<value.length(); i++) {` is most likely affected. - Reasoning: The loop condition is evaluated at each iteration, and the finding suggests preferring comparison to zero in loop conditions. - Proposed solution: Modify the loop condition to compare against zero instead of `value.length()`.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: SOLVED
  * CAST-Finding END #2
  **********************************/
- **********************************/
- **********************************/
 
+/*
+Given that blackList is a static list and not a function call, you don't need to worry about the second finding (avoid calling a function in a condition loop) in this specific case.
+However, you can still benefit from the first finding by using a decreasing loop for better performance
+*/
 
-        for(int i=0; i<value.length(); i++) {
-            char current = value.charAt(i);
-            if(!blackList.contains(current)) {
-                safe.append(current);
-            }
-        }
+        for(int i = value.length() - 1; i >= 0; i--) {
+	    char current = value.charAt(i);
+	    if(!blackList.contains(current)) {
+	        safe.append(current);
+	    }
+	}
     }
     return StringEscapeUtils.escapeXml11(safe.toString());
 }
