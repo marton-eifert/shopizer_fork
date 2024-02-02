@@ -218,8 +218,6 @@ public class ProductFacadeV2Impl implements ProductFacade {
 				ProductRelationshipType.RELATED_ITEM);
 		if (relatedItems != null && relatedItems.size() > 0) {
 			List<ReadableProduct> items = new ArrayList<ReadableProduct>();
-			for (ProductRelationship relationship : relatedItems) {
-				Product relatedProduct = relationship.getRelatedProduct();
 
 
 
@@ -230,11 +228,14 @@ public class ProductFacadeV2Impl implements ProductFacade {
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `List<ReadableProduct> items = new ArrayList<ReadableProduct>();` is most likely affected. - Reasoning: The instantiation of the `ArrayList` object inside the loop can be moved outside to avoid unnecessary object instantiation at each iteration. - Proposed solution: Move the instantiation of `List<ReadableProduct> items = new ArrayList<ReadableProduct>();` outside the loop.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: WITHDRAWN
  * CAST-Finding END #1
  **********************************/
 
+			for (ProductRelationship relationship : relatedItems) {
+				Product relatedProduct = relationship.getRelatedProduct();
 
+				// Instantiation inside loop is valid here
 				ReadableProduct proxyProduct = populator.populate(relatedProduct, new ReadableProduct(), store,
 						language);
 				items.add(proxyProduct);
