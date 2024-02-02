@@ -333,9 +333,8 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
 
 		ReadableProductReviewPopulator populator = new ReadableProductReviewPopulator();
 
-		List<ReadableProductReview> productReviews = new ArrayList<ReadableProductReview>();
-
-		for (ProductReview review : reviews) {
+		// Pre-allocate with the correct size avoids dynamic resizing during the loop
+		List<ReadableProductReview> productReviews = new ArrayList<ReadableProductReview>(reviews.size());
 
 
 
@@ -346,13 +345,17 @@ public class ProductCommonFacadeImpl implements ProductCommonFacade {
  * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
  * OUTLINE: The code line `List<ProductReview> reviews = productReviewService.getByProduct(product);` is most likely affected. - Reasoning: It retrieves a list of product reviews, which could potentially be a large collection of objects. - Proposed solution: No specific solution proposed.  The code line `ReadableProductReview readableReview = new ReadableProductReview();` is most likely affected. - Reasoning: It instantiates a new readable product review object for each iteration of the loop. - Proposed solution: Move the instantiation of `ReadableProductReview readableReview = new ReadableProductReview();` outside of the loop to avoid instantiating it at each iteration.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: WITHDRAWN
  * CAST-Finding END #1
  **********************************/
 
 
+		for (ProductReview review : reviews) {
+
+			// Instantiation inside loop is valid
 			ReadableProductReview readableReview = new ReadableProductReview();
 			populator.populate(review, readableReview, store, language);
+			// List with pre-allocated size (see above)
 			productReviews.add(readableReview);
 		}
 
