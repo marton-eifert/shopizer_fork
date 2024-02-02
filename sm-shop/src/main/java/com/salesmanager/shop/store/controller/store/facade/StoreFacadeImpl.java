@@ -338,7 +338,7 @@ public class StoreFacadeImpl implements StoreFacade {
  * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
  * OUTLINE: The code line `return merchantConfigurationService.listByType(configurationType, mStore);` is most likely affected.  - Reasoning: The method `listByType` may involve the instantiation of wrapper objects.  - Proposed solution: Replace the usage of wrapper types with their corresponding primitive types, if possible.
  * INSTRUCTION: Please follow the OUTLINE and conduct the proposed steps with the affected code.
- * STATUS: REVIEWED
+ * STATUS: SOLVED
  * CAST-Finding END #1
  **********************************/
 
@@ -361,7 +361,9 @@ public class StoreFacadeImpl implements StoreFacade {
 		configTO.setKey(config.getKey());
 		configTO.setMerchantConfigurationType(configurationType);
 		configTO.setValue(config.getValue());
-		configTO.setActive(new Boolean(config.isActive()));
+		// Avoid primitive type wrapper instantiation
+		//configTO.setActive(new Boolean(config.isActive()));
+		configTO.setActive(config.isActive());
 		return configTO;
 	}
 
