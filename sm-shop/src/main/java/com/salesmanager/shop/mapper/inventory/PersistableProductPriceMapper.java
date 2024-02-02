@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.jsoup.helper.Validate;
@@ -156,22 +158,43 @@ public class PersistableProductPriceMapper implements Mapper<PersistableProductP
 			return Collections.emptySet();
 		}
 		Set<ProductPriceDescription> descs = new HashSet<ProductPriceDescription>();
+
+		/**********************************
+		 * CAST-Finding START #1 (2024-02-02 12:30:57.420270):
+		 * TITLE: Avoid nested loops
+		 * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+		 * STATUS: RESOLVED
+		 * CAST-Finding END #1
+		 **********************************/
+		
+		// QECI Fix
+
+		// Create a HashMap to store the descriptions by their ID for quick lookup
+		Map<Long, ProductPriceDescription> priceDescMap = new HashMap<>();
+		for (ProductPriceDescription d : price.getDescriptions()) {
+		    priceDescMap.put(d.getId(), d);
+		}
+		
+		for (com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc : descriptions) {
+		    // Check if the description ID is positive and exists in the priceDescMap
+		    if (isPositive(desc.getId()) && priceDescMap.containsKey(desc.getId())) {
+			// Use the existing description from priceDescMap
+			ProductPriceDescription existingDescription = priceDescMap.get(desc.getId());
+			existingDescription.setId(desc.getId());
+			descs.add(existingDescription);
+		    } else {
+			// Create a new description if not found in the priceDescMap
+			ProductPriceDescription description = getDescription(desc);
+			description.setProductPrice(price);
+			descs.add(description);
+		    }
+		}
+
+
+		/*		
 		for (com.salesmanager.shop.model.catalog.product.ProductPriceDescription desc : descriptions) {
 			ProductPriceDescription description = null;
 			if (CollectionUtils.isNotEmpty(price.getDescriptions())) {
-
-
-
-
-/**********************************
- * CAST-Finding START #1 (2024-02-02 12:30:57.420270):
- * TITLE: Avoid nested loops
- * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
- * STATUS: OPEN
- * CAST-Finding END #1
- **********************************/
-
-
 				for (ProductPriceDescription d : price.getDescriptions()) {
 					if (isPositive(desc.getId()) && desc.getId().equals(d.getId())) {
 						desc.setId(d.getId());
@@ -182,6 +205,7 @@ public class PersistableProductPriceMapper implements Mapper<PersistableProductP
 			description.setProductPrice(price);
 			descs.add(description);
 		}
+		*/
 		return descs;
 	}
 
