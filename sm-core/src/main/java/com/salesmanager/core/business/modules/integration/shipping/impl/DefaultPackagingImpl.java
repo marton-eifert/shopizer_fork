@@ -104,6 +104,19 @@ public class DefaultPackagingImpl implements Packaging {
 				wd = new BigDecimal(defaultWidth);
 			}
 			if (attrs != null && attrs.size() > 0) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 				for(ProductAttribute attribute : attrs) {
 					if(attribute.getProductAttributeWeight()!=null) {
 						w = w.add(attribute.getProductAttributeWeight());
@@ -114,6 +127,32 @@ public class DefaultPackagingImpl implements Packaging {
 
 
 			if (qty > 1) {
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-05 13:39:27.226500):
+ * TITLE: Prefer comparison-to-0 in loop conditions
+ * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
 
 				for (int i = 1; i <= qty; i++) {
 					Product temp = new Product();
@@ -194,7 +233,33 @@ public class DefaultPackagingImpl implements Packaging {
 					|| p.getProductLength().doubleValue() > length) {
 				// log message to customer
 				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 						+ p.getSku()
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
 						+ " has a demension larger than the box size specified. Will use per item calculation."));
 				throw new ServiceException("Product configuration exceeds box configuraton");
 
@@ -202,7 +267,33 @@ public class DefaultPackagingImpl implements Packaging {
 
 			if (productWeight > maxweight) {
 				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
+
 						+ p.getSku()
+
+
+
+
+/**********************************
+ * CAST-Finding START #7 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #7
+ **********************************/
+
+
 						+ " has a weight larger than the box maximum weight specified. Will use per item calculation."));
 				
 				throw new ServiceException("Product configuration exceeds box configuraton");
@@ -216,7 +307,33 @@ public class DefaultPackagingImpl implements Packaging {
 			if (productVolume == 0) {
 				
 				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+
+
+
+
+/**********************************
+ * CAST-Finding START #8 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #8
+ **********************************/
+
+
 						+ p.getSku()
+
+
+
+
+/**********************************
+ * CAST-Finding START #9 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #9
+ **********************************/
+
+
 						+ " has one of the dimension set to 0 and therefore cannot calculate the volume"));
 				
 				throw new ServiceException("Product configuration exceeds box configuraton");
@@ -234,6 +351,19 @@ public class DefaultPackagingImpl implements Packaging {
 
 			// try each box
 			//Iterator boxIter = boxesList.iterator();
+
+
+
+
+/**********************************
+ * CAST-Finding START #10 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #10
+ **********************************/
+
+
 			for (PackingBox pbox : boxesList) {
 				double volumeLeft = pbox.getVolumeLeft();
 				double weightLeft = pbox.getWeightLeft();
@@ -343,6 +473,19 @@ public class DefaultPackagingImpl implements Packaging {
 				wd = new BigDecimal(defaultWidth);
 			}
 			if (attributes != null && attributes.size() > 0) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #11 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #11
+ **********************************/
+
+
 				for(ProductAttribute attribute : attributes) {
 					if(attribute.getAttributeAdditionalWeight()!=null && attribute.getProductAttributeWeight() !=null) {
 						w = w.add(attribute.getProductAttributeWeight());
@@ -371,6 +514,45 @@ public class DefaultPackagingImpl implements Packaging {
 	
 				packages.add(detail);
 			} else if (shippingProduct.getQuantity() > 1) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #12 (2024-02-05 13:39:27.226500):
+ * TITLE: Prefer comparison-to-0 in loop conditions
+ * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
+ * STATUS: OPEN
+ * CAST-Finding END #12
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #13 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid calling a function in a condition loop
+ * DESCRIPTION: As a loop condition will be evaluated at each iteration, any function call it contains will be called at each time. Each time it is possible, prefer condition expressions using only variables and literals.
+ * STATUS: OPEN
+ * CAST-Finding END #13
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #14 (2024-02-05 13:39:27.226500):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #14
+ **********************************/
+
+
 				for (int i = 0; i < shippingProduct.getQuantity(); i++) {
 					PackageDetails detail = new PackageDetails();
 					detail.setShippingHeight(h
