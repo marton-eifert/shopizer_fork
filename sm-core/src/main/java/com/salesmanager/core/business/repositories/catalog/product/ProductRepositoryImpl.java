@@ -733,8 +733,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				 **********************************/
 				
 				// QECI Fix: Use StringBuilder
-				parameterMsgA.append("val").append(count).append(attributeCriteria.getAttributeCode())
-				parameterMsgB.append("%").append(attributeCriteria.getAttributeValue()).append(%);
+				parameterMsgA.append("val").append(count).append(attributeCriteria.getAttributeCode());
+				parameterMsgB.append("%").append(attributeCriteria.getAttributeValue()).append("%");
 				countQ.setParameter(parameterMsgA.toString(), parameterMsgB.toString());
 				/*
     				countQ.setParameter("val" + count + attributeCriteria.getAttributeCode(),
