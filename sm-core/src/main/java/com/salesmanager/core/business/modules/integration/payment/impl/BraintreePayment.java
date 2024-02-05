@@ -388,7 +388,7 @@ public class BraintreePayment implements PaymentModule {
 		StringBuilder errorMsg = new StringBuilder();
             	// String errorString = "";
 
-		errorMsg.append("Can't process Braintree auth + capture ")
+		errorMsg.append("Can't process Braintree auth + capture ");
 		for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
 
 			/**********************************
@@ -492,7 +492,7 @@ public class BraintreePayment implements PaymentModule {
 		StringBuilder errorMsg = new StringBuilder();
 		// String errorString = "";
 		
-		errorMsg.append("Can't process Braintree refund ")
+		errorMsg.append("Can't process Braintree refund ");
 		for (ValidationError error : result.getErrors().getAllDeepValidationErrors()) {
 		
 			/**********************************
