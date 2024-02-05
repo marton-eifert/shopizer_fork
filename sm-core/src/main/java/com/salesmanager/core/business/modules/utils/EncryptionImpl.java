@@ -55,6 +55,19 @@ public final class EncryptionImpl implements Encryption {
 		cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
 		byte[] outText;
 		outText = cipher.doFinal(hexToBytes(value));
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-05 13:39:27.763278):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 		return new String(outText);
 		
 		
@@ -69,6 +82,19 @@ public final class EncryptionImpl implements Encryption {
 			String str = "";
 			for (byte datum : data) {
 				if ((datum & 0xFF) < 16) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-05 13:39:27.763278):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 					str = str + "0"
 							+ Integer.toHexString(datum & 0xFF);
 				} else {
@@ -88,6 +114,19 @@ public final class EncryptionImpl implements Encryption {
 		} else {
 			int len = str.length() / 2;
 			byte[] buffer = new byte[len];
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-05 13:39:27.763278):
+ * TITLE: Prefer comparison-to-0 in loop conditions
+ * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 			for (int i = 0; i < len; i++) {
 				buffer[i] = (byte) Integer.parseInt(str.substring(i * 2,
 						i * 2 + 2), 16);
