@@ -71,6 +71,19 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 		for(Product product : products.getProducts()) {
 
 			//create new proxy product
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:26:02.539758):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 			ReadableProduct readProduct = populator.populate(product, new ReadableProduct(), store, language);
 			productList.getProducts().add(readProduct);
 			
@@ -109,7 +122,33 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 		for(Product product : products.getProducts()) {
 
 			//create new proxy product
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:26:02.539758):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 			ReadableProduct readProduct = populator.populate(product, new ReadableProduct(), store, language);
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 09:26:02.539758):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 			productList.getProducts().add(readProduct);
 			
 		}
@@ -256,6 +295,19 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 		
 		for(ProductRelationship relationship : relationships) {
 			
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 09:26:02.539758):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 				ProductGroup g = new ProductGroup();
 				g.setActive(relationship.isActive());
 				g.setCode(relationship.getCode());
