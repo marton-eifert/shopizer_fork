@@ -218,6 +218,19 @@ public class OrderFacadeImpl implements OrderFacade {
 
 		List<ShoppingCartItem> items = new ArrayList<ShoppingCartItem>();
 		for (PersistableOrderProduct orderProduct : orderProducts) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 			ShoppingCartItem item = populator.populate(orderProduct, new ShoppingCartItem(), store, language);
 			items.add(item);
 		}
@@ -302,6 +315,19 @@ public class OrderFacadeImpl implements OrderFacade {
 		List<OrderTotal> totals = new ArrayList<OrderTotal>();
 		List<com.salesmanager.core.model.order.OrderTotal> orderTotals = summary.getTotals();
 		for (com.salesmanager.core.model.order.OrderTotal t : orderTotals) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 			OrderTotal total = new OrderTotal();
 			total.setCode(t.getOrderTotalCode());
 			total.setTitle(t.getTitle());
@@ -398,18 +424,70 @@ public class OrderFacadeImpl implements OrderFacade {
 
 				Product product = productService.getBySku(item.getSku(), store, language);
 				if (product == null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 					throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
 				}
 
 				LOGGER.debug("Validate inventory");
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 				for (ProductAvailability availability : product.getAvailabilities()) {
 					if (availability.getRegion().equals(Constants.ALL_REGIONS)) {
 						int qty = availability.getProductQuantity();
 						if (qty < item.getQuantity()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
 							throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
 						}
 					}
 				}
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
 
 				OrderProduct orderProduct = new OrderProduct();
 				orderProduct = orderProductPopulator.populate(item, orderProduct, store, language);
@@ -951,6 +1029,19 @@ public class OrderFacadeImpl implements OrderFacade {
 
 			List<com.salesmanager.shop.model.order.v0.ReadableOrder> readableOrders = new ArrayList<com.salesmanager.shop.model.order.v0.ReadableOrder>();
 			for (Order order : orders) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #7 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #7
+ **********************************/
+
+
 				com.salesmanager.shop.model.order.v0.ReadableOrder readableOrder = new com.salesmanager.shop.model.order.v0.ReadableOrder();
 				readableOrderPopulator.populate(order, readableOrder, null, null);
 				readableOrders.add(readableOrder);
@@ -1021,6 +1112,19 @@ public class OrderFacadeImpl implements OrderFacade {
 
 		List<com.salesmanager.shop.model.order.v0.ReadableOrder> readableOrders = new ArrayList<com.salesmanager.shop.model.order.v0.ReadableOrder>();
 		for (Order order : orders) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #8 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #8
+ **********************************/
+
+
 			com.salesmanager.shop.model.order.v0.ReadableOrder readableOrder = new com.salesmanager.shop.model.order.v0.ReadableOrder();
 			try {
 				readableOrderPopulator.populate(order, readableOrder, store, language);
@@ -1043,11 +1147,37 @@ public class OrderFacadeImpl implements OrderFacade {
 			throws ConversionException {
 		List<ReadableOrderProduct> orderProducts = new ArrayList<ReadableOrderProduct>();
 		for (OrderProduct p : order.getOrderProducts()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #9 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #9
+ **********************************/
+
+
 			ReadableOrderProductPopulator orderProductPopulator = new ReadableOrderProductPopulator();
 			orderProductPopulator.setLocale(locale);
 			orderProductPopulator.setProductService(productService);
 			orderProductPopulator.setPricingService(pricingService);
 			orderProductPopulator.setimageUtils(imageUtils);
+
+
+
+
+/**********************************
+ * CAST-Finding START #10 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #10
+ **********************************/
+
+
 			ReadableOrderProduct orderProduct = new ReadableOrderProduct();
 			orderProductPopulator.populate(p, orderProduct, store, language);
 
@@ -1081,6 +1211,19 @@ public class OrderFacadeImpl implements OrderFacade {
 
 		List<com.salesmanager.shop.model.order.v0.ReadableOrder> readableOrders = new ArrayList<com.salesmanager.shop.model.order.v0.ReadableOrder>();
 		for (Order order : orders) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #11 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #11
+ **********************************/
+
+
 			com.salesmanager.shop.model.order.v0.ReadableOrder readableOrder = new com.salesmanager.shop.model.order.v0.ReadableOrder();
 			readableOrderPopulator.populate(order, readableOrder, store, language);
 			readableOrders.add(readableOrder);
@@ -1130,10 +1273,36 @@ public class OrderFacadeImpl implements OrderFacade {
 			// order products
 			List<ReadableOrderProduct> orderProducts = new ArrayList<ReadableOrderProduct>();
 			for (OrderProduct p : modelOrder.getOrderProducts()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #12 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #12
+ **********************************/
+
+
 				ReadableOrderProductPopulator orderProductPopulator = new ReadableOrderProductPopulator();
 				orderProductPopulator.setProductService(productService);
 				orderProductPopulator.setPricingService(pricingService);
 				orderProductPopulator.setimageUtils(imageUtils);
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #13 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #13
+ **********************************/
+
 
 				ReadableOrderProduct orderProduct = new ReadableOrderProduct();
 				orderProductPopulator.populate(p, orderProduct, store, language);
@@ -1227,6 +1396,19 @@ public class OrderFacadeImpl implements OrderFacade {
 			orderProductPopulator.setProductService(productService);
 
 			for (ShoppingCartItem item : shoppingCartItems) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #14 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #14
+ **********************************/
+
+
 				OrderProduct orderProduct = new OrderProduct();
 				orderProduct = orderProductPopulator.populate(item, orderProduct, store, language);
 				orderProduct.setOrder(modelOrder);
@@ -1238,6 +1420,19 @@ public class OrderFacadeImpl implements OrderFacade {
 			if (order.getAttributes() != null && order.getAttributes().size() > 0) {
 				Set<OrderAttribute> attrs = new HashSet<OrderAttribute>();
 				for (com.salesmanager.shop.model.order.OrderAttribute attribute : order.getAttributes()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #15 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #15
+ **********************************/
+
+
 					OrderAttribute attr = new OrderAttribute();
 					attr.setKey(attribute.getKey());
 					attr.setValue(attribute.getValue());
@@ -1400,6 +1595,19 @@ public class OrderFacadeImpl implements OrderFacade {
 
 		List<com.salesmanager.shop.model.order.v0.ReadableOrder> readableOrders = new ArrayList<com.salesmanager.shop.model.order.v0.ReadableOrder>();
 		for (Order order : orders) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #16 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #16
+ **********************************/
+
+
 			com.salesmanager.shop.model.order.v0.ReadableOrder readableOrder = new com.salesmanager.shop.model.order.v0.ReadableOrder();
 			readableOrderPopulator.populate(order, readableOrder, store, language);
 			readableOrders.add(readableOrder);
@@ -1602,7 +1810,33 @@ public class OrderFacadeImpl implements OrderFacade {
 			ReadableTransactionPopulator trxPopulator = null;
 
 			for(Transaction tr : transactions) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #17 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #17
+ **********************************/
+
+
 				transaction = new ReadableTransaction();
+
+
+
+
+/**********************************
+ * CAST-Finding START #18 (2024-02-06 09:25:57.759698):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #18
+ **********************************/
+
+
 				trxPopulator = new ReadableTransactionPopulator();
 
 				trxPopulator.setOrderService(orderService);
