@@ -121,7 +121,18 @@ public class IntegrationConfiguration implements JSONAware {
  * STATUS: RESOLVED
  * CAST-Finding END #3
  **********************************/
-
+      
+      // Instantiate the interactionMap
+      Map<String, List<String>> interactionMap = new HashMap<>();
+      
+      // Populate the interactionMap
+      for (String key : keys) {
+          List<String> values = this.getIntegrationOptions().get(key);
+          if (values != null && !values.isEmpty()) {
+              interactionMap.put(key, values);
+          }
+      }
+      
       // Iterate over the interactionMap and construct the optionDataEntries
       StringBuilder optionDataEntries = new StringBuilder();
       StringBuilder optionsEntries = new StringBuilder();
