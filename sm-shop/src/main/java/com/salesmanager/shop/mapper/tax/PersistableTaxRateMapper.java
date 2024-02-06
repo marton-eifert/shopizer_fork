@@ -84,10 +84,6 @@ public class PersistableTaxRateMapper implements Mapper<PersistableTaxRate, TaxR
 		 * STATUS: RESOLVED
 		 * CAST-Finding END #1
 		 **********************************/
-
-		// QECI Fix: Use HashMaps to avoid nested loops
-		import java.util.HashMap;
-		import java.util.Map;
 		
 		// Assuming 'description' method creates a new TaxRateDescription
 		
