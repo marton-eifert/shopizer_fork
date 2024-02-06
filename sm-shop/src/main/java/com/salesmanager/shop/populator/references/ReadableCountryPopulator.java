@@ -21,6 +21,19 @@ public class ReadableCountryPopulator extends AbstractDataPopulator<Country, Rea
 		if(target==null) {
 			target = new ReadableCountry();
 		}
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 14:04:59.295891):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 		
 		target.setId(new Long(source.getId()));
 		target.setCode(source.getIsoCode());
