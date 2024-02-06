@@ -110,6 +110,19 @@ public class PaymentServiceImpl implements PaymentService {
 				if(md==null) {
 					continue;
 				}
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:25:15.359488):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 				PaymentMethod paymentMethod = new PaymentMethod();
 				
 				paymentMethod.setDefaultSelected(config.isDefaultSelected());
@@ -675,10 +688,36 @@ public class PaymentServiceImpl implements PaymentService {
 		int[] number = new int[charArray.length];
 		int total = 0;
 	
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:25:15.359488):
+ * TITLE: Prefer comparison-to-0 in loop conditions
+ * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 		for (int i = 0; i < charArray.length; i++) {
 			number[i] = Character.getNumericValue(charArray[i]);
 		}
 	
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 09:25:15.359488):
+ * TITLE: Prefer comparison-to-0 in loop conditions
+ * DESCRIPTION: The loop condition is evaluated at each iteration. The most efficient the test is, the more CPU will be saved.  Comparing against zero is often faster than comparing against other numbers. This isn't because comparison to zero is hardwire in the microprocessor. Zero is the only number where all the bits are off, and the micros are optimized to check this value.  A decreasing loop of integers in which the condition statement is a comparison to zero, will then be faster than the same increasing loop whose condition is a comparison to a non null value.  This rule searches simple conditions (without logical operators for compound conditions ) using comparison operator with two non-zero operands.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 		for (int i = number.length - 2; i > -1; i -= 2) {
 			number[i] *= 2;
 	
