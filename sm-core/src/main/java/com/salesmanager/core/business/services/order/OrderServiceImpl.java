@@ -196,11 +196,50 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
             orderProduct.getProductQuantity();
             Product p = productService.getById(orderProduct.getId());
             if(p == null)
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
                 throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
             for(ProductAvailability availability : p.getAvailabilities()) {
                 int qty = availability.getProductQuantity();
                 if(qty < orderProduct.getProductQuantity()) {
                     //throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
                 	LOGGER.error("APP-BACKEND [" + ServiceException.EXCEPTION_INVENTORY_MISMATCH + "]");
                 }
                 qty = qty - orderProduct.getProductQuantity();
@@ -234,6 +273,19 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         subTotal.setScale(2, RoundingMode.HALF_UP);
         for(ShoppingCartItem item : summary.getProducts()) {
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
             BigDecimal st = item.getItemPrice().multiply(new BigDecimal(item.getQuantity()));
             item.setSubTotal(st);
             subTotal = subTotal.add(st);
@@ -242,11 +294,37 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
             if(finalPrice!=null) {
                 List<FinalPrice> otherPrices = finalPrice.getAdditionalPrices();
                 if(otherPrices!=null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
                     for(FinalPrice price : otherPrices) {
                         if(!price.isDefaultPrice()) {
                             OrderTotal itemSubTotal = otherPricesTotals.get(price.getProductPrice().getCode());
 
                             if(itemSubTotal==null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
+
                                 itemSubTotal = new OrderTotal();
                                 itemSubTotal.setModule(Constants.OT_ITEM_PRICE_MODULE_CODE);
                                 itemSubTotal.setTitle(Constants.OT_ITEM_PRICE_MODULE_CODE);
@@ -258,6 +336,19 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 
                             BigDecimal orderTotalValue = itemSubTotal.getValue();
                             if(orderTotalValue==null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #7 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #7
+ **********************************/
+
+
                                 orderTotalValue = new BigDecimal(0);
                                 orderTotalValue.setScale(2, RoundingMode.HALF_UP);
                             }
@@ -357,6 +448,19 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         	totalTaxes.setScale(2, RoundingMode.HALF_UP);
             int taxCount = 200;
             for(TaxItem tax : taxes) {
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #8 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #8
+ **********************************/
+
 
                 OrderTotal taxLine = new OrderTotal();
                 taxLine.setModule(Constants.OT_TAX_MODULE_CODE);
@@ -624,6 +728,19 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 				if(processingTransactions.containsKey(order.getId())) {
 					listTransactions = processingTransactions.get(order.getId());
 				} else {
+
+
+
+
+/**********************************
+ * CAST-Finding START #9 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #9
+ **********************************/
+
+
 					listTransactions = new ArrayList<Transaction>();
 					processingTransactions.put(order.getId(), listTransactions);
 				}
@@ -649,6 +766,19 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 				if(CollectionUtils.isNotEmpty(trx)) {
 
 					boolean capturable = true;
+
+
+
+
+/**********************************
+ * CAST-Finding START #10 (2024-02-06 09:25:12.956079):
+ * TITLE: Avoid nested loops
+ * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+ * STATUS: OPEN
+ * CAST-Finding END #10
+ **********************************/
+
+
 					for(Transaction t : trx) {
 
 						if(TransactionType.CAPTURE.name().equals(t.getTransactionType().name())) {
