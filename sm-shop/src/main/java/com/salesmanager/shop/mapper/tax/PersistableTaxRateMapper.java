@@ -96,7 +96,7 @@ public class PersistableTaxRateMapper implements Mapper<PersistableTaxRate, TaxR
 		}
 		
 		for (TaxRateDescription desc : source.getDescriptions()) {
-		    com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage().getCode());
+		    com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage());
 		    
 		    if (description != null) {
 		        // Update existing description
