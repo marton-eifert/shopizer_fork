@@ -708,6 +708,19 @@ public class ProductPriceUtils {
 		finalPrice.setDiscounted(true);
 
 		double arith = finalPrice.getProductPrice().getProductPriceSpecialAmount().doubleValue()
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 14:04:58.762776):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 				/ finalPrice.getProductPrice().getProductPriceAmount().doubleValue();
 		double fsdiscount = 100 - (arith * 100);
 		Float percentagediscount = new Float(fsdiscount);
