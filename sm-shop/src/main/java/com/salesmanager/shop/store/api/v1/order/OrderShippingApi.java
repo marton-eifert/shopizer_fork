@@ -132,11 +132,37 @@ public class OrderShippingApi {
 
         for (ShippingOption shipOption : options) {
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
           StringBuilder moduleName = new StringBuilder();
           moduleName.append("module.shipping.").append(shipOption.getShippingModuleCode());
 
           String carrier =
               messages.getMessage(
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
                   moduleName.toString(), new String[] {merchantStore.getStorename()}, locale);
 
           String note = messages.getMessage(moduleName.append(".note").toString(), locale, "");
@@ -147,6 +173,19 @@ public class OrderShippingApi {
           // option name
           if (!StringUtils.isBlank(shipOption.getOptionCode())) {
             // try to get the translate
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
             StringBuilder optionCodeBuilder = new StringBuilder();
             try {
 
@@ -156,6 +195,19 @@ public class OrderShippingApi {
               String optionName = messages.getMessage(optionCodeBuilder.toString(), locale);
               shipOption.setOptionName(optionName);
             } catch (Exception e) { // label not found
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
               LOGGER.warn("No shipping code found for " + optionCodeBuilder.toString());
             }
           }
@@ -244,11 +296,37 @@ public class OrderShippingApi {
 
         for (ShippingOption shipOption : options) {
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
           StringBuilder moduleName = new StringBuilder();
           moduleName.append("module.shipping.").append(shipOption.getShippingModuleCode());
 
           String carrier =
               messages.getMessage(
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
+
                   moduleName.toString(), new String[] {merchantStore.getStorename()}, locale);
 
           String note = messages.getMessage(moduleName.append(".note").toString(), locale, "");
@@ -259,15 +337,54 @@ public class OrderShippingApi {
           // option name
           if (!StringUtils.isBlank(shipOption.getOptionCode())) {
             // try to get the translate
+
+
+
+
+/**********************************
+ * CAST-Finding START #7 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #7
+ **********************************/
+
+
             StringBuilder optionCodeBuilder = new StringBuilder();
             try {
 
               optionCodeBuilder
                   .append("module.shipping.")
                   .append(shipOption.getShippingModuleCode());
+
+
+
+
+/**********************************
+ * CAST-Finding START #8 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #8
+ **********************************/
+
+
               String optionName = messages.getMessage(optionCodeBuilder.toString(), new String[]{merchantStore.getStorename()},locale);
               shipOption.setOptionName(optionName);
             } catch (Exception e) { // label not found
+
+
+
+
+/**********************************
+ * CAST-Finding START #9 (2024-02-06 09:25:51.421715):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #9
+ **********************************/
+
+
               LOGGER.warn("No shipping code found for " + optionCodeBuilder.toString());
             }
           }
