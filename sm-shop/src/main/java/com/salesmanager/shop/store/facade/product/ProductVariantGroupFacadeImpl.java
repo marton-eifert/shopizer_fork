@@ -108,6 +108,32 @@ public class ProductVariantGroupFacadeImpl implements ProductVariantGroupFacade 
 			for(ProductVariant instance : group.getProductVariants()) {
 				Optional<ProductVariant> p = productVariantService.getById(instance.getId(), store);
 				if(p.isEmpty()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:26:04.439115):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:26:04.439115):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 					throw new ResourceNotFoundException("Product instance [" + instance.getId() + " not found for store [" + store.getCode() + "]");
 				}
 				instance.setProductVariantGroup(null);
