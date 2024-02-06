@@ -212,22 +212,113 @@ public class CustomerPopulator extends
 
 					CustomerOption customerOption = customerOptionService.getById(attr.getCustomerOption().getId());
 					if(customerOption==null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:25:37.357647):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:25:37.357647):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 						throw new ConversionException("Customer option id " + attr.getCustomerOption().getId() + " does not exist");
 					}
 					
 					CustomerOptionValue customerOptionValue = customerOptionValueService.getById(attr.getCustomerOptionValue().getId());
 					if(customerOptionValue==null) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 09:25:37.357647):
+ * TITLE: Avoid string concatenation in loops
+ * DESCRIPTION: Avoid string concatenation inside loops.  Since strings are immutable, concatenation is a greedy operation. This creates unnecessary temporary objects and results in quadratic rather than linear running time. In a loop, instead using concatenation, add each substring to a list and join the list after the loop terminates (or, write each substring to a byte buffer).
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 09:25:37.357647):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 						throw new ConversionException("Customer option value id " + attr.getCustomerOptionValue().getId() + " does not exist");
 					}
 					
 					if(customerOption.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-06 09:25:37.357647):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
 						throw new ConversionException("Invalid customer option id ");
 					}
 					
 					if(customerOptionValue.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #6 (2024-02-06 09:25:37.357647):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #6
+ **********************************/
+
+
 						throw new ConversionException("Invalid customer option value id ");
 					}
 					
+
+
+
+
+/**********************************
+ * CAST-Finding START #7 (2024-02-06 09:25:37.357647):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #7
+ **********************************/
+
+
 					CustomerAttribute attribute = new CustomerAttribute();
 					attribute.setCustomer(target);
 					attribute.setCustomerOption(customerOption);
