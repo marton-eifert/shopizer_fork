@@ -379,6 +379,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
     if (StringUtils.isBlank(customerModel.getPassword())
         && !StringUtils.isBlank(customer.getPassword())) {
       customerModel.setPassword(customer.getPassword());
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 09:25:56.444937):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
     }
     // set groups
     if (!StringUtils.isBlank(customerModel.getPassword())
@@ -444,6 +457,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
       if (groupsId != null && groupsId.size() > 0) {
         List<Permission> permissions = permissionService.getPermissions(groupsId);
         for (Permission permission : permissions) {
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 09:25:56.444937):
+ * TITLE: Avoid instantiations inside loops
+ * DESCRIPTION: Object instantiation uses memory allocation, that is a greedy operation. Doing an instantiation at each iteration could really hamper the performances and increase resource usage.  If the instantiated object is local to the loop, there is absolutely no need to instantiate it at each iteration : create it once outside the loop, and just change its value at each iteration. If the object is immutable, create if possible a mutable class. If the aim is to create a consolidated data structure, then, unless the need is to release the data case by case, it could be better to make a single global allocation outside the loop, and fill it with data inside the loop.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
           GrantedAuthority auth = new SimpleGrantedAuthority(permission.getPermissionName());
           authorities.add(auth);
         }
@@ -616,6 +642,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
 
   }
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 09:25:56.444937):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
   private boolean userExist(String userName) {
     return Optional.ofNullable(customerService.getByNick(userName))
         .isPresent();
@@ -673,6 +712,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
 	    if (customer.getId() == null || customer.getId() == 0) {
 	      throw new ServiceRuntimeException("Can't update a customer with null id");
 	    }
+
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 09:25:56.444937):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
 
 	    Customer cust = customerService.getById(customer.getId());
 
@@ -824,6 +876,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
       customerOptin.setLastName(optin.getLastName());
       customerOptin.setOptinDate(new Date());
       customerOptin.setOptin(optinDef);
+
+
+
+
+/**********************************
+ * CAST-Finding START #5 (2024-02-06 09:25:56.444937):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #5
+ **********************************/
+
+
       customerOptin.setMerchantStore(store);
     }
     saveCustomerOption(customerOptin);
