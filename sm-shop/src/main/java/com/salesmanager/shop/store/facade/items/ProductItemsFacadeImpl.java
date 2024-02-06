@@ -108,6 +108,19 @@ public class ProductItemsFacadeImpl implements ProductItemsFacade {
 		ReadableProductList productList = new ReadableProductList();
 		for(Product product : products.getProducts()) {
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 14:05:01.369150):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 			//create new proxy product
 			ReadableProduct readProduct = populator.populate(product, new ReadableProduct(), store, language);
 			productList.getProducts().add(readProduct);
