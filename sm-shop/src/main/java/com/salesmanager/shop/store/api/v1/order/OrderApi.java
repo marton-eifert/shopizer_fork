@@ -117,9 +117,35 @@ public class OrderApi {
 	public ReadableOrderList list(@PathVariable final Long id,
 			@RequestParam(value = "start", required = false) Integer start,
 			@RequestParam(value = "count", required = false) Integer count, @ApiIgnore MerchantStore merchantStore,
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 14:04:59.797772):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 			@ApiIgnore Language language, HttpServletResponse response) throws Exception {
 
 		Customer customer = customerService.getById(id);
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 14:04:59.797772):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
 
 		if (customer == null) {
 			LOGGER.error("Customer is null for id " + id);
@@ -171,8 +197,34 @@ public class OrderApi {
 			@RequestParam(value = "count", required = false) Integer count, @ApiIgnore MerchantStore merchantStore,
 			@ApiIgnore Language language, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 14:04:59.797772):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
+
 		Principal principal = request.getUserPrincipal();
 		String userName = principal.getName();
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 14:04:59.797772):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
 
 		Customer customer = customerService.getByNick(userName);
 
