@@ -90,13 +90,13 @@ public class PersistableTaxRateMapper implements Mapper<PersistableTaxRate, TaxR
 		// Create a hashmap for destination.getDescriptions() for efficient lookup
 		Map<String, com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptionMap = new HashMap<>();
 		for (com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
-		    if (!StringUtils.isBlank(d.getLanguage())) {
+		    if (d.getLanguage() != null && !StringUtils.isBlank(d.getLanguage().getCode())) {
 		        descriptionMap.put(d.getLanguage().getCode(), d);
 		    }
 		}
 		
 		for (TaxRateDescription desc : source.getDescriptions()) {
-		    com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage());
+		    com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage().getCode());
 		    
 		    if (description != null) {
 		        // Update existing description
