@@ -326,6 +326,19 @@ public class StoreFacadeImpl implements StoreFacade {
 			return merchantConfigurationService.listByType(configurationType, mStore);
 		} catch (ServiceException e) {
 			throw new ServiceRuntimeException("Error wile getting merchantConfigurations " + e.getMessage());
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 14:05:00.875652):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
 		}
 	}
 
