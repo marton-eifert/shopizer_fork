@@ -377,6 +377,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
     customerModel = customerPopulator.populate(customer, merchantStore, language);
     // we are creating or resetting a customer
     if (StringUtils.isBlank(customerModel.getPassword())
+
+
+
+
+/**********************************
+ * CAST-Finding START #1 (2024-02-06 14:05:00.371654):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #1
+ **********************************/
+
+
         && !StringUtils.isBlank(customer.getPassword())) {
       customerModel.setPassword(customer.getPassword());
     }
@@ -614,6 +627,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
       throw new ServiceRuntimeException(exception);
     }
 
+
+
+
+
+/**********************************
+ * CAST-Finding START #2 (2024-02-06 14:05:00.371654):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #2
+ **********************************/
+
+
   }
 
   private boolean userExist(String userName) {
@@ -672,6 +698,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
 
 	    if (customer.getId() == null || customer.getId() == 0) {
 	      throw new ServiceRuntimeException("Can't update a customer with null id");
+
+
+
+
+/**********************************
+ * CAST-Finding START #3 (2024-02-06 14:05:00.371654):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #3
+ **********************************/
+
+
 	    }
 
 	    Customer cust = customerService.getById(customer.getId());
@@ -822,6 +861,19 @@ public class CustomerFacadeImpl implements CustomerFacade {
       customerOptin.setEmail(optin.getEmail());
       customerOptin.setFirstName(optin.getFirstName());
       customerOptin.setLastName(optin.getLastName());
+
+
+
+
+/**********************************
+ * CAST-Finding START #4 (2024-02-06 14:05:00.371654):
+ * TITLE: Avoid primitive type wrapper instantiation
+ * DESCRIPTION: Literal values are built at compil time, and their value stored directly in the variable. Literal strings also benefit from an internal mechanism of string pool, to prevent useless duplication, according to the fact that literal string are immutable. On the contrary, values created through wrapper type instantiation need systematically the creation of a new object with many attributes and a life process to manage, and can lead to redondancies for identical values.
+ * STATUS: OPEN
+ * CAST-Finding END #4
+ **********************************/
+
+
       customerOptin.setOptinDate(new Date());
       customerOptin.setOptin(optinDef);
       customerOptin.setMerchantStore(store);
