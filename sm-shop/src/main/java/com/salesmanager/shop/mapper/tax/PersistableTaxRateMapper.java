@@ -1,5 +1,9 @@
 package com.salesmanager.shop.mapper.tax;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.helper.Validate;
@@ -72,6 +76,44 @@ public class PersistableTaxRateMapper implements Mapper<PersistableTaxRate, TaxR
 		//List<com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptions = new ArrayList<com.salesmanager.core.model.tax.taxrate.TaxRateDescription>();
 		
 	      if(!CollectionUtils.isEmpty(source.getDescriptions())) {
+
+		/**********************************
+		 * CAST-Finding START #1 (2024-02-02 12:30:59.299632):
+		 * TITLE: Avoid nested loops
+		 * DESCRIPTION: This rule finds all loops containing nested loops.  Nested loops can be replaced by redesigning data with hashmap, or in some contexts, by using specialized high level API...  With hashmap: The literature abounds with documentation to reduce complexity of nested loops by using hashmap.  The principle is the following : having two sets of data, and two nested loops iterating over them. The complexity of a such algorithm is O(n^2). We can replace that by this process : - create an intermediate hashmap summarizing the non-null interaction between elements of both data set. This is a O(n) operation. - execute a loop over one of the data set, inside which the hash indexation to interact with the other data set is used. This is a O(n) operation.  two O(n) algorithms chained are always more efficient than a single O(n^2) algorithm.  Note : if the interaction between the two data sets is a full matrice, the optimization will not work because the O(n^2) complexity will be transferred in the hashmap creation. But it is not the main situation.  Didactic example in Perl technology: both functions do the same job. But the one using hashmap is the most efficient.  my $a = 10000; my $b = 10000;  sub withNestedLoops() {     my $i=0;     my $res;     while ($i < $a) {         print STDERR "$i\n";         my $j=0;         while ($j < $b) {             if ($i==$j) {                 $res = $i*$j;             }             $j++;         }         $i++;     } }  sub withHashmap() {     my %hash = ();          my $j=0;     while ($j < $b) {         $hash{$j} = $i*$i;         $j++;     }          my $i = 0;     while ($i < $a) {         print STDERR "$i\n";         $res = $hash{i};         $i++;     } } # takes ~6 seconds withNestedLoops();  # takes ~1 seconds withHashmap();
+		 * STATUS: RESOLVED
+		 * CAST-Finding END #1
+		 **********************************/
+		
+		// Assuming 'description' method creates a new TaxRateDescription
+		
+		// Create a hashmap for destination.getDescriptions() for efficient lookup
+		Map<String, com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptionMap = new HashMap<>();
+		for (com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
+		    if (d.getLanguage() != null && !StringUtils.isBlank(d.getLanguage().getCode())) {
+		        descriptionMap.put(d.getLanguage().getCode(), d);
+		    }
+		}
+		
+		for (TaxRateDescription desc : source.getDescriptions()) {
+		    com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage());
+		    
+		    if (description != null) {
+		        // Update existing description
+		        description.setDescription(desc.getDescription());
+		        description.setName(desc.getName());
+		        description.setTitle(desc.getTitle());
+		    } else {
+		        // Create a new description if not found
+		        description = description(desc);
+		        description.setTaxRate(destination);
+		        destination.getDescriptions().add(description);
+		    }
+		}
+
+		      
+		      
+/*
 	          for(TaxRateDescription desc : source.getDescriptions()) {
 	        	com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = null;
 	            if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
@@ -91,6 +133,7 @@ public class PersistableTaxRateMapper implements Mapper<PersistableTaxRate, TaxR
 	  	          destination.getDescriptions().add(description);
 	            }
 	          }
+*/
 	        }
 
 	        return destination;
