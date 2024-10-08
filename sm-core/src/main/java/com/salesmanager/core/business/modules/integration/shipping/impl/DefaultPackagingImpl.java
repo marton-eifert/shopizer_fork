@@ -222,6 +222,7 @@ public class DefaultPackagingImpl implements Packaging {
 			if (productVolume == 0) {
 				
 				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+/*** [REF] FINDING-#7: Avoid string concatenation in loops (ID: 2830960d-ecd2-4607-85e9-e053a01b92d9) ***/
 						+ p.getSku()
 						+ " has one of the dimension set to 0 and therefore cannot calculate the volume"));
 				
