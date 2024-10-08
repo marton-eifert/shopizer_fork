@@ -99,6 +99,7 @@ public class IntegrationConfiguration implements JSONAware {
 
 
     if (this.getIntegrationOptions() != null && this.getIntegrationOptions().size() > 0) {
+/*** [START] FINDING-#1: Avoid nested loops (ID: bb8f9e93-cc30-4645-b1a1-9175a35af68e) ***/
 
       // JSONObject data = new JSONObject();
       StringBuilder optionDataEntries = new StringBuilder();
@@ -149,6 +150,7 @@ public class IntegrationConfiguration implements JSONAware {
       returnString.append(dataField.toString());
       returnString.append("}");
 
+/*** [END] FINDING-#1: Avoid nested loops (ID: bb8f9e93-cc30-4645-b1a1-9175a35af68e) ***/
     }
 
 
