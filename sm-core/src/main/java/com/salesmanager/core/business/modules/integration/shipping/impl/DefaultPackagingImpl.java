@@ -340,6 +340,7 @@ public class DefaultPackagingImpl implements Packaging {
 	public List<PackageDetails> getItemPackagesDetails(
 			List<ShippingProduct> products, MerchantStore store)
 			throws ServiceException {
+/*** [START] FINDING-#10: Avoid nested loops (ID: e3d9d692-4753-4cdc-a94a-f647028ba6aa) ***/
 		
 		
 		List<PackageDetails> packages = new ArrayList<PackageDetails>();
@@ -426,6 +427,7 @@ public class DefaultPackagingImpl implements Packaging {
 		
 		
 		
+/*** [END] FINDING-#10: Avoid nested loops (ID: e3d9d692-4753-4cdc-a94a-f647028ba6aa) ***/
 	}
 
 
