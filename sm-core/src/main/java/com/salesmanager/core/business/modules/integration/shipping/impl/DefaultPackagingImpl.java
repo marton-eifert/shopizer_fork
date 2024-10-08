@@ -38,6 +38,7 @@ public class DefaultPackagingImpl implements Packaging {
 	public List<PackageDetails> getBoxPackagesDetails(
 			List<ShippingProduct> products, MerchantStore store)
 			throws ServiceException {
+/*** [START] FINDING-#1: Avoid nested loops (ID: fe90918f-85db-459d-a1fd-34d32b629ee7) ***/
 
 		
 		if (products == null) {
@@ -316,6 +317,7 @@ public class DefaultPackagingImpl implements Packaging {
 
 		return boxes;
 
+/*** [END] FINDING-#1: Avoid nested loops (ID: fe90918f-85db-459d-a1fd-34d32b629ee7) ***/
 	}
 
 	@Override
