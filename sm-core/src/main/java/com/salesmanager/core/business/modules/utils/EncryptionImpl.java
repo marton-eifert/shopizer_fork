@@ -65,6 +65,7 @@ public final class EncryptionImpl implements Encryption {
 		if (data == null) {
 			return null;
 		} else {
+/*** [START] FINDING-#1: Avoid string concatenation in loops (ID: 1c2a93ae-f31f-4c12-a849-d80f4f01e76c) ***/
 			int len = data.length;
 			String str = "";
 			for (byte datum : data) {
@@ -78,6 +79,7 @@ public final class EncryptionImpl implements Encryption {
 
 			}
 			return str;
+/*** [END] FINDING-#1: Avoid string concatenation in loops (ID: 1c2a93ae-f31f-4c12-a849-d80f4f01e76c) ***/
 		}
 	}
 
