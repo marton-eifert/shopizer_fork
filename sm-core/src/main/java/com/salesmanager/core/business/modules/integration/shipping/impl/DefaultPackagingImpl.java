@@ -206,6 +206,7 @@ public class DefaultPackagingImpl implements Packaging {
 
 			if (productWeight > maxweight) {
 				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+/*** [REF] FINDING-#5: Avoid string concatenation in loops (ID: db15181d-1272-4c6e-8681-a9e32e1ec280) ***/
 						+ p.getSku()
 						+ " has a weight larger than the box maximum weight specified. Will use per item calculation."));
 				
