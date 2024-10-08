@@ -116,6 +116,7 @@ public class DefaultPackagingImpl implements Packaging {
 
 			if (qty > 1) {
 
+/*** [REF] FINDING-#2: Avoid nested loops (ID: 58726558-4026-4a20-862d-b6596228a51c) ***/
 				for (int i = 1; i <= qty; i++) {
 					Product temp = new Product();
 					temp.setProductHeight(h);
