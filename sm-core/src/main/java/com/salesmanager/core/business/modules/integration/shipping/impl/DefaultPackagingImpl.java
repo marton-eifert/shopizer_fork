@@ -325,96 +325,296 @@ public class DefaultPackagingImpl implements Packaging {
 			List<ShippingProduct> products, MerchantStore store)
 			throws ServiceException {
 /*** [START] FINDING-#12: Avoid nested loops (ID: f0dc02d0-4ef7-4251-8d2c-292a0c58cbc4) ***/
-/*** [START] FINDING-#10: Avoid nested loops (ID: e3d9d692-4753-4cdc-a94a-f647028ba6aa) ***/
-		
-		
-		List<PackageDetails> packages = new ArrayList<PackageDetails>();
-		for(ShippingProduct shippingProduct : products) {
-			Product product = shippingProduct.getProduct();
 
-			if (product.isProductVirtual()) {
-				continue;
-			}
+////////////// DEBUG CHAT HISTORY: START //////////////////////////
 
-			//BigDecimal weight = product.getProductWeight();
-			Set<ProductAttribute> attributes = product.getAttributes();
-			// set attributes values
-			BigDecimal w = product.getProductWeight();
-			BigDecimal h = product.getProductHeight();
-			BigDecimal l = product.getProductLength();
-			BigDecimal wd = product.getProductWidth();
-			if(w==null) {
-				w = new BigDecimal(defaultWeight);
-			}
-			if(h==null) {
-				h = new BigDecimal(defaultHeight);
-			}
-			if(l==null) {
-				l = new BigDecimal(defaultLength);
-			}
-			if(wd==null) {
-				wd = new BigDecimal(defaultWidth);
-			}
-			if (attributes != null && attributes.size() > 0) {
-/*** [REF] FINDING-#10: Avoid nested loops (ID: e3d9d692-4753-4cdc-a94a-f647028ba6aa) ***/
-				for(ProductAttribute attribute : attributes) {
-					if(attribute.getAttributeAdditionalWeight()!=null && attribute.getProductAttributeWeight() !=null) {
-						w = w.add(attribute.getProductAttributeWeight());
-					}
-				}
-			}
-			
-			
+/*
+ * ======
+ * [SystemMessage]
+ * ======
+ * # CONTEXT
+ * You are a software engineer expert specialized in refactoring existing `java` source code.
+ * Your focus is analysis of `java` code regarding computational complexity, resource usage, and energy efficiency.
+ * That said, you are also an expert in judging whether the given code can be improved in this regards.
+ * Every code you are presented by the user was previously analyzed by an external tool searching for inefficient coding patterns, based on a very rough pattern matching algorithm.
+ * Those findings can be identified by their comment blocks `/*** [<START|REF|END>] FINDING-#<number>: Avoid nested loops ***\`.
+ * 
+ * # TASK
+ * Please generate an improved version of the provided code chunk that addresses appropriately the green coding deficiency. 
+ * To complete your task properly, do also take the instructions below into account!
+ * 
+ * # OUTPUT STRUCTURE
+ * Further guidance is strongly enforced to complete the task properly:
+ *   - Structure your output into three sections with Markdown: 
+ *     - 1. EXPLANATION: Explanation of the affected chunk given
+ *     - 2. OUTLINE: Identify the problem and outline your solution. If the problem is not really solvable straightforward, conclude with the word UNCLEAR.
+ *     - 3. IMPROVEMENT: The improved `java` code chunk itself, bounded with triple backticks (```). No other text here!
+ *     - 4. REFLECTION: Explain the key differences and reflect whether the findings were addressed appropriately.
+ *   - Focus on the performance deficiency around the [REF] comment blocks rather than readability or maintainability!
+ *   - To give you an idea of the conversation start, a code chunk is given by the user (EXAMPLE before improvement) and you (EXAMPLE after improvement).
+ *   - Think step by step, when asked by the user to complete your task.
+ * 
+ * ======
+ * [0] [HumanMessage]
+ * ======
+ * (Placeholder) This was a *past example* of a code chunk.
+ * Please improve as told above:
+ * ```
+ * 
+ * 		for(TaxRateDescription desc : source.getDescriptions()) {
+ * 			com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = null;
+ * 			if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
+ * 			  
+ * 			  /*** [REF] Finding: <finding_title> ***\
+ * 
+ * 			  for(com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
+ * 				if(!StringUtils.isBlank(desc.getLanguage()) && desc.getLanguage().equals(d.getLanguage().getCode())) {
+ * 				  d.setDescription(desc.getDescription());
+ * 				  d.setName(desc.getName());
+ * 				  d.setTitle(desc.getTitle());
+ * 				  description = d;
+ * 				  break;
+ * 				} 
+ * 			  }
+ * 			  
+ * 			} 
+ * 			if(description == null) {
+ * 			  description = description(desc);
+ * 			  description.setTaxRate(destination);
+ * 			  destination.getDescriptions().add(description);
+ * 			}
+ * 		}
+ * ```
+ * 
+ * ======
+ * [1] [AIMessage]
+ * ======
+ * # EXPLANATION
+ * (Placeholder) This is the explanation of the code chunk given ...
+ * 
+ * # OUTLINE
+ * (Placeholder) This is the outline of my improvement ...
+ * 
+ * # IMPROVEMENT
+ * ```
+ * 
+ * 		// TODO: To be put at the top of this script
+ * 		import java.util.HashSet;
+ * 		import java.util.HashMap;
+ * 		import java.util.Map;
+ * 
+ * 		// Assuming 'description' method creates a new TaxRateDescription
+ * 
+ * 		// Create a hashmap for destination.getDescriptions() for efficient lookup
+ * 		Map<String, com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptionMap = new HashMap<>();
+ * 		for (com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
+ * 			if (!StringUtils.isBlank(d.getLanguage())) {
+ * 				descriptionMap.put(d.getLanguage().getCode(), d);
+ * 			}
+ * 		}
+ * 
+ * 		for (TaxRateDescription desc : source.getDescriptions()) {
+ * 			com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage());
+ * 
+ * 			if (description != null) {
+ * 				// Update existing description
+ * 				description.setDescription(desc.getDescription());
+ * 				description.setName(desc.getName());
+ * 				description.setTitle(desc.getTitle());
+ * 			} else {
+ * 				// Create a new description if not found
+ * 				description = description(desc);
+ * 				description.setTaxRate(destination);
+ * 				destination.getDescriptions().add(description);
+ * 			}
+ * 		}
+ * ```
+ * # REFLECTION
+ * (Placeholder) This is the reflection and reasoning on the code improvements ...
+ * 
+ * ======
+ * [2] [HumanMessage]
+ * ======
+ * This is the *actually affected* chunk now.
+ * Please improve as told above:
+ * ```
+ * 		
+ * 		
+ * 		List<PackageDetails> packages = new ArrayList<PackageDetails>();
+ * 		for(ShippingProduct shippingProduct : products) {
+ * 			Product product = shippingProduct.getProduct();
+ * 
+ * 			if (product.isProductVirtual()) {
+ * 				continue;
+ * 			}
+ * 
+ * 			//BigDecimal weight = product.getProductWeight();
+ * 			Set<ProductAttribute> attributes = product.getAttributes();
+ * 			// set attributes values
+ * 			BigDecimal w = product.getProductWeight();
+ * 			BigDecimal h = product.getProductHeight();
+ * 			BigDecimal l = product.getProductLength();
+ * 			BigDecimal wd = product.getProductWidth();
+ * 			if(w==null) {
+ * 				w = new BigDecimal(defaultWeight);
+ * 			}
+ * 			if(h==null) {
+ * 				h = new BigDecimal(defaultHeight);
+ * 			}
+ * 			if(l==null) {
+ * 				l = new BigDecimal(defaultLength);
+ * 			}
+ * 			if(wd==null) {
+ * 				wd = new BigDecimal(defaultWidth);
+ * 			}
+ * 			if (attributes != null && attributes.size() > 0) {
+ * /*** [REF] FINDING-#10: Avoid nested loops (ID: e3d9d692-4753-4cdc-a94a-f647028ba6aa) ***\
+ * 				for(ProductAttribute attribute : attributes) {
+ * 					if(attribute.getAttributeAdditionalWeight()!=null && attribute.getProductAttributeWeight() !=null) {
+ * 						w = w.add(attribute.getProductAttributeWeight());
+ * 					}
+ * 				}
+ * 			}
+ * 			
+ * 			
+ * 
+ * 			if (shippingProduct.getQuantity() == 1) {
+ * 				PackageDetails detail = new PackageDetails();
+ * 
+ * 	
+ * 				detail.setShippingHeight(h
+ * 						.doubleValue());
+ * 				detail.setShippingLength(l
+ * 						.doubleValue());
+ * 				detail.setShippingWeight(w.doubleValue());
+ * 				detail.setShippingWidth(wd.doubleValue());
+ * 				detail.setShippingQuantity(shippingProduct.getQuantity());
+ * 				String description = "item";
+ * 				if(product.getDescriptions().size()>0) {
+ * 					description = product.getDescriptions().iterator().next().getName();
+ * 				}
+ * 				detail.setItemName(description);
+ * 	
+ * 				packages.add(detail);
+ * 			} else if (shippingProduct.getQuantity() > 1) {
+ * /*** [REF] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9 ... (remaining message omitted because too long to print)
+ * 
+ * ======
+ * [3] [AIMessage]
+ * ======
+ * # EXPLANATION
+ * The code processes a list of `ShippingProduct` objects to create a list of `PackageDetails`. There are two areas flagged for inefficiency:
+ * 1. A nested loop iterating through `ProductAttribute` objects to add weights.
+ * 2. Another nested loop iterating based on the quantity of `ShippingProduct` to create multiple `PackageDetails`.
+ * 
+ * # OUTLINE
+ * 1. **Avoid nested loops (FINDING-#10)**: The nested loop iterates through `ProductAttribute` objects. We can use a stream to sum the weights.
+ * 2. **Avoid calling a function in a condition loop (FINDING-#11)**: The `product.getDescriptions().size()` call is made within the loop condition. We can call this once before the loop.
+ * 3. **Avoid nested loops (FINDING-#12)**: The nested loop iterates based on the quantity of `ShippingProduct`. We can use `Collections.nCopies` to avoid explicit looping.
+ * 
+ * # IMPROVEMENT
+ * ```
+ * 		List<PackageDetails> packages = new ArrayList<>();
+ * 		for (ShippingProduct shippingProduct : products) {
+ * 			Product product = shippingProduct.getProduct();
+ * 
+ * 			if (product.isProductVirtual()) {
+ * 				continue;
+ * 			}
+ * 
+ * 			Set<ProductAttribute> attributes = product.getAttributes();
+ * 			BigDecimal w = product.getProductWeight() != null ? product.getProductWeight() : new BigDecimal(defaultWeight);
+ * 			BigDecimal h = product.getProductHeight() != null ? product.getProductHeight() : new BigDecimal(defaultHeight);
+ * 			BigDecimal l = product.getProductLength() != null ? product.getProductLength() : new BigDecimal(defaultLength);
+ * 			BigDecimal wd = product.getProductWidth() != null ? product.getProductWidth() : new BigDecimal(defaultWidth);
+ * 
+ * 			if (attributes != null && !attributes.isEmpty()) {
+ * 				w = w.add(attributes.stream()
+ * 						.map(ProductAttribute::getProductAttributeWeight)
+ * 						.filter(Objects::nonNull)
+ * 						.reduce(BigDecimal.ZERO, BigDecimal::add));
+ * 			}
+ * 
+ * 			String description = product.getDescriptions().isEmpty() ? "item" : product.getDescriptions().iterator().next().getName();
+ * 
+ * 			if (shippingProduct.getQuantit ... (remaining message omitted because too long to print)
+ * 
+ * ======
+ * [4] [HumanMessage]
+ * ======
+ * I am not fully convinced of your proposal.
+ * Please reflect on the changes you made to the code:
+ * 1. Explain the key steps of the original code and your changed code separately in natural language.
+ * 2. Now, is there any *significant* improvement in terms of computational complexity or efficiency?
+ * ---
+ * Your answer MUST be strictly in this format (Markdown) and follow this structure:
+ * 
+ * # KEY STEPS OF THE CODE
+ * 
+ * ## ORIGINAL CODE
+ * (Placeholder) description of the original code in natural language goes here ...
+ * ## CHANGED CODE
+ * (Placeholder) description of the changed code in natural language goes here ...
+ * 
+ * # EFFECTIVENESS OF THE CHANGES
+ * 
+ * ## IS THE IMPROVEMENT *SIGNIFICANT*?
+ * Based on the previous statements, the conclusion is: (Placeholder: <'YES' or 'NO'>)
+ * ## EXPLANATION
+ * (Placeholder) reasoning for the decision ...
+ * 
+ * ======
+ * [5] [AIMessage]
+ * ======
+ * # KEY STEPS OF THE CODE
+ * 
+ * ## ORIGINAL CODE
+ * 1. Initialize an empty list `packages` to store `PackageDetails`.
+ * 2. Iterate through each `ShippingProduct` in `products`.
+ * 3. For each `ShippingProduct`, retrieve the associated `Product`.
+ * 4. If the product is virtual, skip to the next iteration.
+ * 5. Retrieve and set default dimensions and weight of the product if they are null.
+ * 6. If the product has attributes, iterate through each `ProductAttribute` to add additional weight if present.
+ * 7. Determine the product's description by checking if descriptions exist.
+ * 8. If the quantity of `ShippingProduct` is 1, create a `PackageDetails` object and add it to `packages`.
+ * 9. If the quantity of `ShippingProduct` is greater than 1, create multiple `PackageDetails` objects in a loop and add them to `packages`.
+ * 
+ * ## CHANGED CODE
+ * 1. Initialize an empty list `packages` to store `PackageDetails`.
+ * 2. Iterate through each `ShippingProduct` in `products`.
+ * 3. For each `ShippingProduct`, retrieve the associated `Product`.
+ * 4. If the product is virtual, skip to the next iteration.
+ * 5. Retrieve and set default dimensions and weight of the product if they are null.
+ * 6. If the product has attributes, use a stream to sum additional weights if present.
+ * 7. Determine the product's description by checking if descriptions exist.
+ * 8. If the quantity of `ShippingProduct` is 1, create a `PackageDetails` object and add it to `packages`.
+ * 9. If the quantity of `ShippingProduct` is greater than 1, use `Collections.nCopies` to create multiple `PackageDetails` objects and add them to `packages`.
+ * 
+ * # EFFECTIVENESS OF THE CHANGES
+ * 
+ * ## IS THE IMPROVEMENT *SIGNIFICANT*?
+ * Based on the previous statements, the conclusion is: NO
+ * 
+ * ## EXPLANATION
+ * The changes made to the code primarily focus on improving readability and slightly optimizing specific parts of the logic:
+ * 1. Using a stream to sum the weights of `ProductAttribute` objects instead of a nested loop. This change improves readability but does not significantly affect computa ... (remaining message omitted because too long to print)
+ * 
+ * ======
+ * [6] [HumanMessage]
+ * ======
+ * Please reply according to the following rule:
+ * If your previous answer to question 'IS THE IMPROVEMENT *SIGNIFICANT*?' was 'NO' (i.e. no significant improvement) => reply with 'REJECTED'.
+ * If your previous answer to question 'IS THE IMPROVEMENT *SIGNIFICANT*?' was 'YES' (i.e. significant improvement) => reply with 'RESOLVED'.
+ * 
+ * ======
+ * [7] [AIMessage]
+ * ======
+ * REJECTED
+ * 
+ */
+////////////// DEBUG CHAT HISTORY: END ////////////////////////////
 
-			if (shippingProduct.getQuantity() == 1) {
-				PackageDetails detail = new PackageDetails();
 
-	
-				detail.setShippingHeight(h
-						.doubleValue());
-				detail.setShippingLength(l
-						.doubleValue());
-				detail.setShippingWeight(w.doubleValue());
-				detail.setShippingWidth(wd.doubleValue());
-				detail.setShippingQuantity(shippingProduct.getQuantity());
-				String description = "item";
-				if(product.getDescriptions().size()>0) {
-					description = product.getDescriptions().iterator().next().getName();
-				}
-				detail.setItemName(description);
-	
-				packages.add(detail);
-			} else if (shippingProduct.getQuantity() > 1) {
-/*** [START] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9129-25394006d0c8) ***/
-/*** [REF] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9129-25394006d0c8) ***/
-/*** [REF] FINDING-#12: Avoid nested loops (ID: f0dc02d0-4ef7-4251-8d2c-292a0c58cbc4) ***/
-				for (int i = 0; i < shippingProduct.getQuantity(); i++) {
-					PackageDetails detail = new PackageDetails();
-					detail.setShippingHeight(h
-							.doubleValue());
-					detail.setShippingLength(l
-							.doubleValue());
-					detail.setShippingWeight(w.doubleValue());
-					detail.setShippingWidth(wd
-							.doubleValue());
-					detail.setShippingQuantity(1);//issue seperate shipping
-					String description = "item";
-					if(product.getDescriptions().size()>0) {
-						description = product.getDescriptions().iterator().next().getName();
-					}
-					detail.setItemName(description);
-					
-					packages.add(detail);
-				}
-/*** [END] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9129-25394006d0c8) ***/
-			}
-		}
-		
-		return packages;
-		
-		
-		
-/*** [END] FINDING-#10: Avoid nested loops (ID: e3d9d692-4753-4cdc-a94a-f647028ba6aa) ***/
 /*** [END] FINDING-#12: Avoid nested loops (ID: f0dc02d0-4ef7-4251-8d2c-292a0c58cbc4) ***/
 	}
 
