@@ -242,6 +242,7 @@ public class DefaultPackagingImpl implements Packaging {
 
 			// try each box
 			//Iterator boxIter = boxesList.iterator();
+/*** [REF] FINDING-#9: Avoid nested loops (ID: 0d7231c3-b3da-4063-a79c-40c1d87da0ae) ***/
 			for (PackingBox pbox : boxesList) {
 				double volumeLeft = pbox.getVolumeLeft();
 				double weightLeft = pbox.getWeightLeft();
