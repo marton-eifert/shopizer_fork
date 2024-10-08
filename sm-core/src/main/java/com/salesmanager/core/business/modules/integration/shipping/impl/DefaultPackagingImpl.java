@@ -400,6 +400,7 @@ public class DefaultPackagingImpl implements Packaging {
 	
 				packages.add(detail);
 			} else if (shippingProduct.getQuantity() > 1) {
+/*** [START] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9129-25394006d0c8) ***/
 /*** [REF] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9129-25394006d0c8) ***/
 /*** [REF] FINDING-#12: Avoid nested loops (ID: f0dc02d0-4ef7-4251-8d2c-292a0c58cbc4) ***/
 				for (int i = 0; i < shippingProduct.getQuantity(); i++) {
@@ -420,6 +421,7 @@ public class DefaultPackagingImpl implements Packaging {
 					
 					packages.add(detail);
 				}
+/*** [END] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9129-25394006d0c8) ***/
 			}
 		}
 		
