@@ -123,6 +123,7 @@ public class IntegrationConfiguration implements JSONAware {
         StringBuilder dataEntries = new StringBuilder();
 
         int count = 0;
+/*** [REF] FINDING-#1: Avoid nested loops (ID: bb8f9e93-cc30-4645-b1a1-9175a35af68e) ***/
         for (String value : values) {
 
           dataEntries.append("\"").append(value).append("\"");
