@@ -38,6 +38,7 @@ public class DefaultPackagingImpl implements Packaging {
 	public List<PackageDetails> getBoxPackagesDetails(
 			List<ShippingProduct> products, MerchantStore store)
 			throws ServiceException {
+/*** [START] FINDING-#3: Avoid string concatenation in loops (ID: 90be7ed7-01b5-47e5-a3df-696ed8f08222) ***/
 /*** [START] FINDING-#2: Avoid nested loops (ID: 58726558-4026-4a20-862d-b6596228a51c) ***/
 /*** [START] FINDING-#1: Avoid nested loops (ID: fe90918f-85db-459d-a1fd-34d32b629ee7) ***/
 
@@ -320,6 +321,7 @@ public class DefaultPackagingImpl implements Packaging {
 
 /*** [END] FINDING-#1: Avoid nested loops (ID: fe90918f-85db-459d-a1fd-34d32b629ee7) ***/
 /*** [END] FINDING-#2: Avoid nested loops (ID: 58726558-4026-4a20-862d-b6596228a51c) ***/
+/*** [END] FINDING-#3: Avoid string concatenation in loops (ID: 90be7ed7-01b5-47e5-a3df-696ed8f08222) ***/
 	}
 
 	@Override
