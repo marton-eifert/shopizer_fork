@@ -381,6 +381,7 @@ public class DefaultPackagingImpl implements Packaging {
 	
 				packages.add(detail);
 			} else if (shippingProduct.getQuantity() > 1) {
+/*** [REF] FINDING-#11: Avoid calling a function in a condition loop (ID: e6b28d2d-a9b9-4994-9129-25394006d0c8) ***/
 				for (int i = 0; i < shippingProduct.getQuantity(); i++) {
 					PackageDetails detail = new PackageDetails();
 					detail.setShippingHeight(h
