@@ -352,6 +352,7 @@ public class DefaultPackagingImpl implements Packaging {
 				wd = new BigDecimal(defaultWidth);
 			}
 			if (attributes != null && attributes.size() > 0) {
+/*** [REF] FINDING-#10: Avoid nested loops (ID: e3d9d692-4753-4cdc-a94a-f647028ba6aa) ***/
 				for(ProductAttribute attribute : attributes) {
 					if(attribute.getAttributeAdditionalWeight()!=null && attribute.getProductAttributeWeight() !=null) {
 						w = w.add(attribute.getProductAttributeWeight());
