@@ -39,308 +39,283 @@ public class DefaultPackagingImpl implements Packaging {
 			List<ShippingProduct> products, MerchantStore store)
 			throws ServiceException {
 
-////////////// DEBUG CHAT HISTORY: START //////////////////////////
 
-/*
- * ======
- * [SystemMessage]
- * ======
- * # CONTEXT
- * You are a software engineer expert specialized in refactoring existing `java` source code.
- * Your focus is analysis of `java` code regarding computational complexity, resource usage, and energy efficiency.
- * That said, you are also an expert in judging whether the given code can be improved in this regards.
- * Every code you are presented by the user was previously analyzed by an external tool searching for inefficient coding patterns, based on a very rough pattern matching algorithm.
- * Those findings can be identified by their comment blocks `/*** [<START|REF|END>] FINDING-#<number>: Avoid nested loops ***\`.
- * 
- * # TASK
- * Please generate an improved version of the provided code chunk that addresses appropriately the green coding deficiency. 
- * To complete your task properly, do also take the instructions below into account!
- * 
- * # OUTPUT STRUCTURE
- * Further guidance is strongly enforced to complete the task properly:
- *   - Structure your output into three sections with Markdown: 
- *     - 1. EXPLANATION: Explanation of the affected chunk given
- *     - 2. OUTLINE: Identify the problem and outline your solution. If the problem is not really solvable straightforward, conclude with the word UNCLEAR.
- *     - 3. IMPROVEMENT: The improved `java` code chunk itself, bounded with triple backticks (```). No other text here!
- *     - 4. REFLECTION: Explain the key differences and reflect whether the findings were addressed appropriately.
- *   - Focus on the performance deficiency around the [REF] comment blocks rather than readability or maintainability!
- *   - To give you an idea of the conversation start, a code chunk is given by the user (EXAMPLE before improvement) and you (EXAMPLE after improvement).
- *   - Think step by step, when asked by the user to complete your task.
- * 
- * ======
- * [0] [HumanMessage]
- * ======
- * (Placeholder) This was a *past example* of a code chunk.
- * Please improve as told above:
- * ```
- * 
- * 		for(TaxRateDescription desc : source.getDescriptions()) {
- * 			com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = null;
- * 			if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
- * 			  
- * 			  /*** [REF] Finding: <finding_title> ***\
- * 
- * 			  for(com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
- * 				if(!StringUtils.isBlank(desc.getLanguage()) && desc.getLanguage().equals(d.getLanguage().getCode())) {
- * 				  d.setDescription(desc.getDescription());
- * 				  d.setName(desc.getName());
- * 				  d.setTitle(desc.getTitle());
- * 				  description = d;
- * 				  break;
- * 				} 
- * 			  }
- * 			  
- * 			} 
- * 			if(description == null) {
- * 			  description = description(desc);
- * 			  description.setTaxRate(destination);
- * 			  destination.getDescriptions().add(description);
- * 			}
- * 		}
- * ```
- * 
- * ======
- * [1] [AIMessage]
- * ======
- * # EXPLANATION
- * (Placeholder) This is the explanation of the code chunk given ...
- * 
- * # OUTLINE
- * (Placeholder) This is the outline of my improvement ...
- * 
- * # IMPROVEMENT
- * ```
- * 
- * 		// TODO: To be put at the top of this script
- * 		import java.util.HashSet;
- * 		import java.util.HashMap;
- * 		import java.util.Map;
- * 
- * 		// Assuming 'description' method creates a new TaxRateDescription
- * 
- * 		// Create a hashmap for destination.getDescriptions() for efficient lookup
- * 		Map<String, com.salesmanager.core.model.tax.taxrate.TaxRateDescription> descriptionMap = new HashMap<>();
- * 		for (com.salesmanager.core.model.tax.taxrate.TaxRateDescription d : destination.getDescriptions()) {
- * 			if (!StringUtils.isBlank(d.getLanguage())) {
- * 				descriptionMap.put(d.getLanguage().getCode(), d);
- * 			}
- * 		}
- * 
- * 		for (TaxRateDescription desc : source.getDescriptions()) {
- * 			com.salesmanager.core.model.tax.taxrate.TaxRateDescription description = descriptionMap.get(desc.getLanguage());
- * 
- * 			if (description != null) {
- * 				// Update existing description
- * 				description.setDescription(desc.getDescription());
- * 				description.setName(desc.getName());
- * 				description.setTitle(desc.getTitle());
- * 			} else {
- * 				// Create a new description if not found
- * 				description = description(desc);
- * 				description.setTaxRate(destination);
- * 				destination.getDescriptions().add(description);
- * 			}
- * 		}
- * ```
- * # REFLECTION
- * (Placeholder) This is the reflection and reasoning on the code improvements ...
- * 
- * ======
- * [2] [HumanMessage]
- * ======
- * This is the *actually affected* chunk now.
- * Please improve as told above:
- * ```
- * 
- * 		
- * 		if (products == null) {
- * 			throw new ServiceException("Product list cannot be null !!");
- * 		}
- * 
- * 		double width = 0;
- * 		double length = 0;
- * 		double height = 0;
- * 		double weight = 0;
- * 		double maxweight = 0;
- * 
- * 		//int treshold = 0;
- * 		
- * 		
- * 		ShippingConfiguration shippingConfiguration = shippingService.getShippingConfiguration(store);
- * 		if(shippingConfiguration==null) {
- * 			throw new ServiceException("ShippingConfiguration not found for merchant " + store.getCode());
- * 		}
- * 		
- * 		width = (double) shippingConfiguration.getBoxWidth();
- * 		length = (double) shippingConfiguration.getBoxLength();
- * 		height = (double) shippingConfiguration.getBoxHeight();
- * 		weight = shippingConfiguration.getBoxWeight();
- * 		maxweight = shippingConfiguration.getMaxWeight();
- * 		
- * 
- * 
- * 		List<PackageDetails> boxes = new ArrayList<PackageDetails>();
- * 
- * 		// maximum number of boxes
- * 		int maxBox = 100;
- * 		int iterCount = 0;
- * 
- * 		List<Product> individualProducts = new ArrayList<Product>();
- * 
- * 		// need to put items individually
- * 		for(ShippingProduct shippingProduct : products){
- * 
- * 			Product product = shippingProduct.getProduct();
- * 			if (product.isProductVirtual()) {
- * 				continue;
- * 			}
- * 
- * 			int qty = shippingProduct.getQuantity();
- * 
- * 			Set<ProductAttribute> attrs = shippingProduct.getProduct().getAttributes();
- * 
- * 			// set attributes values
- * 			BigDecimal w = product.getProductWeight();
- * 			BigDecimal h = product.getProductHeight();
- * 			BigDecimal l = product.getProductLength();
- * 			BigDecimal wd = product.getProductWidth();
- * 			if(w==null) {
- * 				w = new BigDecimal(defaultWeight);
- * 			}
- * 			if(h==null) {
- * 				h = new BigDecimal(defaultHeight);
- * 			}
- * 			if(l==null) {
- * 				l = new BigDecimal(defaultLength);
- * 			}
- * 			if(wd==null) {
- * 				wd = new BigDecimal(defaultWidth);
- * 			}
- * 			if (attrs != null && attrs.size() > 0) {
- * /*** [REF] FINDING-#1: Avoid nested loops (ID: fe90918f-85db-459d-a1fd-34d32b629ee7) ***\
- * 				for(ProductAttribute attribute : attrs) {
- * 					if(attri ... (remaining message omitted because too long to print)
- * 
- * ======
- * [3] [AIMessage]
- * ======
- * # EXPLANATION
- * The provided code chunk is part of a shipping service that calculates the packing details for a list of products. It involves iterating through products, calculating their dimensions and weight, and assigning them to boxes based on their volume and weight constraints. The code contains several nested loops and string concatenations within loops, which can be optimized for better performance.
- * 
- * # OUTLINE
- * 1. **FINDING-#1:** Avoid nested loops when updating product attributes.
- *    - **Solution:** Use Java Streams to sum up attribute weights.
- * 2. **FINDING-#2:** Avoid nested loops when creating multiple instances of a product.
- *    - **Solution:** Use `Collections.nCopies` to create copies and add them all at once.
- * 3. **FINDING-#3 to FINDING-#8:** Avoid string concatenation in loops.
- *    - **Solution:** Use `StringBuilder` for more efficient string concatenation.
- * 4. **FINDING-#9:** Avoid nested loops when trying to fit products into boxes.
- *    - **Solution:** This is complex to optimize without changing the logic significantly. We can try to minimize the iterations by breaking early when conditions are met.
- * 
- * # IMPROVEMENT
- * ```
- * if (products == null) {
- * 	throw new ServiceException("Product list cannot be null !!");
- * }
- * 
- * double width = 0;
- * double length = 0;
- * double height = 0;
- * double weight = 0;
- * double maxweight = 0;
- * 
- * ShippingConfiguration shippingConfiguration = shippingService.getShippingConfiguration(store);
- * if (shippingConfiguration == null) {
- * 	throw new ServiceException("ShippingConfiguration not found for merchant " + store.getCode());
- * }
- * 
- * width = (double) shippingConfiguration.getBoxWidth();
- * length = (double) shippingConfiguration.getBoxLength();
- * height = (double) shippingConfiguration.getBoxHeight();
- * weight = shippingConfiguration.getBoxWeight();
- * maxweight = shippingConfiguration.getMaxWeight();
- * 
- * List<PackageDetails> boxes = new ArrayList<PackageDetails>();
- * 
- * int maxBox = 100;
- * int iterCount = 0;
- * 
- * List<Product> individualProducts = new ArrayList<Product>();
- * 
- * for (Sh ... (remaining message omitted because too long to print)
- * 
- * ======
- * [4] [HumanMessage]
- * ======
- * I am not fully convinced of your proposal.
- * Please reflect on the changes you made to the code:
- * 1. Explain the key steps of the original code and your changed code separately in natural language.
- * 2. Now, is there any *significant* improvement in terms of computational complexity or efficiency?
- * ---
- * Your answer MUST be strictly in this format (Markdown) and follow this structure:
- * 
- * # KEY STEPS OF THE CODE
- * 
- * ## ORIGINAL CODE
- * (Placeholder) description of the original code in natural language goes here ...
- * ## CHANGED CODE
- * (Placeholder) description of the changed code in natural language goes here ...
- * 
- * # EFFECTIVENESS OF THE CHANGES
- * 
- * ## IS THE IMPROVEMENT *SIGNIFICANT*?
- * Based on the previous statements, the conclusion is: (Placeholder: <'YES' or 'NO'>)
- * ## EXPLANATION
- * (Placeholder) reasoning for the decision ...
- * 
- * ======
- * [5] [AIMessage]
- * ======
- * # KEY STEPS OF THE CODE
- * 
- * ## ORIGINAL CODE
- * 1. **Initialization:** The code initializes various dimensions and weight variables for the shipping box.
- * 2. **Shipping Configuration:** Retrieves the shipping configuration for the store.
- * 3. **Product Iteration:** Iterates over the list of `ShippingProduct` to process each product.
- * 4. **Attribute Weight Calculation:** For each product, it iterates over its attributes to sum up the attribute weights.
- * 5. **Product Duplication:** If the product quantity is greater than one, it duplicates the product for the given quantity.
- * 6. **Box Assignment:** Iterates over the individual products and tries to fit them into the existing list of boxes. If a product doesn't fit, it creates a new box.
- * 7. **Logging:** Logs messages if product dimensions or weight exceed the box constraints.
- * 8. **Final Packaging:** Creates `PackageDetails` for each box and returns the list of boxes.
- * 
- * ## CHANGED CODE
- * 1. **Initialization:** The code initializes various dimensions and weight variables for the shipping box.
- * 2. **Shipping Configuration:** Retrieves the shipping configuration for the store.
- * 3. **Product Iteration:** Iterates over the list of `ShippingProduct` to process each product.
- * 4. **Attribute Weight Calculation:** Uses Java Streams to sum up the attribute weights for each product.
- * 5. **Product Duplication:** Uses `Collections.nCopies` to duplicate the product for the given quantity.
- * 6. **Box Assignment:** Iterates over the individual products and tries to fit them into the existing list of boxes. If a product doesn't fit, it creates a new box.
- * 7. **Logging:** Uses `StringBuilder` for logging messages if product dimensions or weight exceed the box constraints.
- * 8. **Final Packaging:** Creates `PackageDetails` for each box and returns the list of boxes.
- * 
- * # EFFECTIVENESS OF THE CHANGES
- * 
- * ## IS THE IMPROVEMENT *SIGNIFICANT*?
- * Based on the previous statements, the conclusion is: **NO**
- * 
- * ## EXPLANATION
- * The changes made to the code include:
- * 1. Using Java S ... (remaining message omitted because too long to print)
- * 
- * ======
- * [6] [HumanMessage]
- * ======
- * Please reply according to the following rule:
- * If your previous answer to question 'IS THE IMPROVEMENT *SIGNIFICANT*?' was 'NO' (i.e. no significant improvement) => reply with 'REJECTED'.
- * If your previous answer to question 'IS THE IMPROVEMENT *SIGNIFICANT*?' was 'YES' (i.e. significant improvement) => reply with 'RESOLVED'.
- * 
- * ======
- * [7] [AIMessage]
- * ======
- * REJECTED
- * 
- */
-////////////// DEBUG CHAT HISTORY: END ////////////////////////////
+		
+		if (products == null) {
+			throw new ServiceException("Product list cannot be null !!");
+		}
+
+		double width = 0;
+		double length = 0;
+		double height = 0;
+		double weight = 0;
+		double maxweight = 0;
+
+		//int treshold = 0;
+		
+		
+		ShippingConfiguration shippingConfiguration = shippingService.getShippingConfiguration(store);
+		if(shippingConfiguration==null) {
+			throw new ServiceException("ShippingConfiguration not found for merchant " + store.getCode());
+		}
+		
+		width = (double) shippingConfiguration.getBoxWidth();
+		length = (double) shippingConfiguration.getBoxLength();
+		height = (double) shippingConfiguration.getBoxHeight();
+		weight = shippingConfiguration.getBoxWeight();
+		maxweight = shippingConfiguration.getMaxWeight();
+		
+
+
+		List<PackageDetails> boxes = new ArrayList<PackageDetails>();
+
+		// maximum number of boxes
+		int maxBox = 100;
+		int iterCount = 0;
+
+		List<Product> individualProducts = new ArrayList<Product>();
+
+		// need to put items individually
+		for(ShippingProduct shippingProduct : products){
+
+			Product product = shippingProduct.getProduct();
+			if (product.isProductVirtual()) {
+				continue;
+			}
+
+			int qty = shippingProduct.getQuantity();
+
+			Set<ProductAttribute> attrs = shippingProduct.getProduct().getAttributes();
+
+			// set attributes values
+			BigDecimal w = product.getProductWeight();
+			BigDecimal h = product.getProductHeight();
+			BigDecimal l = product.getProductLength();
+			BigDecimal wd = product.getProductWidth();
+			if(w==null) {
+				w = new BigDecimal(defaultWeight);
+			}
+			if(h==null) {
+				h = new BigDecimal(defaultHeight);
+			}
+			if(l==null) {
+				l = new BigDecimal(defaultLength);
+			}
+			if(wd==null) {
+				wd = new BigDecimal(defaultWidth);
+			}
+			if (attrs != null && attrs.size() > 0) {
+/*** [REJECTED] FINDING-#1: Avoid nested loops (ID: fe90918f-85db-459d-a1fd-34d32b629ee7) ***/
+				for(ProductAttribute attribute : attrs) {
+					if(attribute.getProductAttributeWeight()!=null) {
+						w = w.add(attribute.getProductAttributeWeight());
+					}
+				}
+			}
+			
+
+
+			if (qty > 1) {
+
+/*** [REJECTED] FINDING-#2: Avoid nested loops (ID: 58726558-4026-4a20-862d-b6596228a51c) ***/
+				for (int i = 1; i <= qty; i++) {
+					Product temp = new Product();
+					temp.setProductHeight(h);
+					temp.setProductLength(l);
+					temp.setProductWidth(wd);
+					temp.setProductWeight(w);
+					temp.setAttributes(product.getAttributes());
+					temp.setDescriptions(product.getDescriptions());
+					individualProducts.add(temp);
+				}
+			} else {
+				Product temp = new Product();
+				temp.setProductHeight(h);
+				temp.setProductLength(l);
+				temp.setProductWidth(wd);
+				temp.setProductWeight(w);
+				temp.setAttributes(product.getAttributes());
+				temp.setDescriptions(product.getDescriptions());
+				individualProducts.add(temp);
+			}
+			iterCount++;
+		}
+
+		if (iterCount == 0) {
+			return null;
+		}
+
+		int productCount = individualProducts.size();
+
+		List<PackingBox> boxesList = new ArrayList<PackingBox>();
+
+		//start the creation of boxes
+		PackingBox box = new PackingBox();
+		// set box max volume
+		double maxVolume = width * length * height;
+
+		if (maxVolume == 0 || maxweight == 0) {
+			
+			merchantLogService.save(new MerchantLog(store,"shipping","Check shipping box configuration, it has a volume of "
+							+ maxVolume + " and a maximum weight of "
+							+ maxweight
+							+ ". Those values must be greater than 0."));
+			
+			throw new ServiceException("Product configuration exceeds box configuraton");
+			
+
+		}
+		
+		
+		box.setVolumeLeft(maxVolume);
+		box.setWeightLeft(maxweight);
+
+		boxesList.add(box);//assign first box
+
+		//int boxCount = 1;
+		List<Product> assignedProducts = new ArrayList<Product>();
+
+		// calculate the volume for the next object
+		if (assignedProducts.size() > 0) {
+			individualProducts.removeAll(assignedProducts);
+			assignedProducts = new ArrayList<Product>();
+		}
+
+		boolean productAssigned = false;
+
+		for(Product p : individualProducts) {
+
+			//Set<ProductAttribute> attributes = p.getAttributes();
+			productAssigned = false;
+
+			double productWeight = p.getProductWeight().doubleValue();
+
+
+			// validate if product fits in the box
+			if (p.getProductWidth().doubleValue() > width
+					|| p.getProductHeight().doubleValue() > height
+					|| p.getProductLength().doubleValue() > length) {
+				// log message to customer
+				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+/*** [REJECTED] FINDING-#3: Avoid string concatenation in loops (ID: 90be7ed7-01b5-47e5-a3df-696ed8f08222) ***/
+						+ p.getSku()
+/*** [REJECTED] FINDING-#4: Avoid string concatenation in loops (ID: a71fd561-b186-44e3-80a4-44dd3b9d5eb2) ***/
+						+ " has a demension larger than the box size specified. Will use per item calculation."));
+				throw new ServiceException("Product configuration exceeds box configuraton");
+
+			}
+
+			if (productWeight > maxweight) {
+				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+/*** [REJECTED] FINDING-#5: Avoid string concatenation in loops (ID: db15181d-1272-4c6e-8681-a9e32e1ec280) ***/
+						+ p.getSku()
+/*** [REJECTED] FINDING-#6: Avoid string concatenation in loops (ID: 2a9551b6-116e-4ecf-a030-2ffef5cce85b) ***/
+						+ " has a weight larger than the box maximum weight specified. Will use per item calculation."));
+				
+				throw new ServiceException("Product configuration exceeds box configuraton");
+
+			}
+
+			double productVolume = (p.getProductWidth().doubleValue()
+					* p.getProductHeight().doubleValue() * p
+					.getProductLength().doubleValue());
+
+			if (productVolume == 0) {
+				
+				merchantLogService.save(new MerchantLog(store,"shipping","Product "
+/*** [REJECTED] FINDING-#7: Avoid string concatenation in loops (ID: 2830960d-ecd2-4607-85e9-e053a01b92d9) ***/
+						+ p.getSku()
+/*** [REJECTED] FINDING-#8: Avoid string concatenation in loops (ID: 8ad3836e-e45f-4e15-9bac-8435e11578f5) ***/
+						+ " has one of the dimension set to 0 and therefore cannot calculate the volume"));
+				
+				throw new ServiceException("Product configuration exceeds box configuraton");
+				
+
+			}
+			
+			if (productVolume > maxVolume) {
+				
+				throw new ServiceException("Product configuration exceeds box configuraton");
+				
+			}
+
+			//List boxesList = boxesList;
+
+			// try each box
+			//Iterator boxIter = boxesList.iterator();
+/*** [REJECTED] FINDING-#9: Avoid nested loops (ID: 0d7231c3-b3da-4063-a79c-40c1d87da0ae) ***/
+			for (PackingBox pbox : boxesList) {
+				double volumeLeft = pbox.getVolumeLeft();
+				double weightLeft = pbox.getWeightLeft();
+
+				if ((volumeLeft * .75) >= productVolume
+						&& pbox.getWeightLeft() >= productWeight) {// fit the item
+																	// in this
+																	// box
+					// fit in the current box
+					volumeLeft = volumeLeft - productVolume;
+					pbox.setVolumeLeft(volumeLeft);
+					weightLeft = weightLeft - productWeight;
+					pbox.setWeightLeft(weightLeft);
+
+					assignedProducts.add(p);
+					productCount--;
+
+					double w = pbox.getWeight();
+					w = w + productWeight;
+					pbox.setWeight(w);
+					productAssigned = true;
+					maxBox--;
+					break;
+
+				}
+
+			}
+
+			if (!productAssigned) {// create a new box
+
+				box = new PackingBox();
+				// set box max volume
+				box.setVolumeLeft(maxVolume);
+				box.setWeightLeft(maxweight);
+
+				boxesList.add(box);
+
+				double volumeLeft = box.getVolumeLeft() - productVolume;
+				box.setVolumeLeft(volumeLeft);
+				double weightLeft = box.getWeightLeft() - productWeight;
+				box.setWeightLeft(weightLeft);
+				assignedProducts.add(p);
+				productCount--;
+				double w = box.getWeight();
+				w = w + productWeight;
+				box.setWeight(w);
+				maxBox--;
+			}
+
+		}
+
+		// now prepare the shipping info
+
+		// number of boxes
+
+		//Iterator ubIt = usedBoxesList.iterator();
+
+		System.out.println("###################################");
+		System.out.println("Number of boxes " + boxesList.size());
+		System.out.println("###################################");
+
+		for(PackingBox pb : boxesList) {
+			PackageDetails details = new PackageDetails();
+			details.setShippingHeight(height);
+			details.setShippingLength(length);
+			details.setShippingWeight(weight + box.getWeight());
+			details.setShippingWidth(width);
+			details.setItemName(store.getCode());
+			boxes.add(details);
+		}
+
+		return boxes;
 
 
 	}
