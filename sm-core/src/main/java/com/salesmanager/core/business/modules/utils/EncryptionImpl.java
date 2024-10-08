@@ -69,6 +69,7 @@ public final class EncryptionImpl implements Encryption {
 			String str = "";
 			for (byte datum : data) {
 				if ((datum & 0xFF) < 16) {
+/*** [REF] FINDING-#1: Avoid string concatenation in loops (ID: 1c2a93ae-f31f-4c12-a849-d80f4f01e76c) ***/
 					str = str + "0"
 							+ Integer.toHexString(datum & 0xFF);
 				} else {
