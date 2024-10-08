@@ -38,6 +38,7 @@ public class DefaultPackagingImpl implements Packaging {
 	public List<PackageDetails> getBoxPackagesDetails(
 			List<ShippingProduct> products, MerchantStore store)
 			throws ServiceException {
+/*** [START] FINDING-#6: Avoid string concatenation in loops (ID: 2a9551b6-116e-4ecf-a030-2ffef5cce85b) ***/
 /*** [START] FINDING-#5: Avoid string concatenation in loops (ID: db15181d-1272-4c6e-8681-a9e32e1ec280) ***/
 /*** [START] FINDING-#4: Avoid string concatenation in loops (ID: a71fd561-b186-44e3-80a4-44dd3b9d5eb2) ***/
 /*** [START] FINDING-#3: Avoid string concatenation in loops (ID: 90be7ed7-01b5-47e5-a3df-696ed8f08222) ***/
@@ -326,6 +327,7 @@ public class DefaultPackagingImpl implements Packaging {
 /*** [END] FINDING-#3: Avoid string concatenation in loops (ID: 90be7ed7-01b5-47e5-a3df-696ed8f08222) ***/
 /*** [END] FINDING-#4: Avoid string concatenation in loops (ID: a71fd561-b186-44e3-80a4-44dd3b9d5eb2) ***/
 /*** [END] FINDING-#5: Avoid string concatenation in loops (ID: db15181d-1272-4c6e-8681-a9e32e1ec280) ***/
+/*** [END] FINDING-#6: Avoid string concatenation in loops (ID: 2a9551b6-116e-4ecf-a030-2ffef5cce85b) ***/
 	}
 
 	@Override
