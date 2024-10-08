@@ -198,6 +198,7 @@ public class DefaultPackagingImpl implements Packaging {
 				merchantLogService.save(new MerchantLog(store,"shipping","Product "
 /*** [REF] FINDING-#3: Avoid string concatenation in loops (ID: 90be7ed7-01b5-47e5-a3df-696ed8f08222) ***/
 						+ p.getSku()
+/*** [REF] FINDING-#4: Avoid string concatenation in loops (ID: a71fd561-b186-44e3-80a4-44dd3b9d5eb2) ***/
 						+ " has a demension larger than the box size specified. Will use per item calculation."));
 				throw new ServiceException("Product configuration exceeds box configuraton");
 
